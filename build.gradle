@@ -1,0 +1,42 @@
+task wrapper(type: Wrapper) {
+    gradleVersion = '1.8'
+}
+
+
+buildscript {
+    repositories {
+        maven { url 'http://repo1.maven.org/maven2' }        
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:0.5.+'
+    }
+}
+
+apply plugin: 'android'
+
+android {
+	compileSdkVersion 17
+	buildToolsVersion "17"
+    
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['src']
+            assets.srcDirs = ['assets']
+            res.srcDirs = ['res']
+        }
+    }	
+	defaultConfig {
+        minSdkVersion 11
+        targetSdkVersion 18
+    }
+}
+
+repositories {
+    maven { url 'http://repo1.maven.org/maven2' }
+}
+
+dependencies {
+    compile 'com.actionbarsherlock:actionbarsherlock:4.4.0@aar'
+	compile 'com.android.support:support-v4:18.0.+'
+}
