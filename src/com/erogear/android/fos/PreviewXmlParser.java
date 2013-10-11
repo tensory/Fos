@@ -14,7 +14,6 @@ import android.util.Log;
 public class PreviewXmlParser {
 	private static final String PREVIEW_TAG = "preview";
 	private static final String NAME_ATTR = "name";
-	
 	private static final String ns = null;
 	private Context context;
 	
@@ -36,7 +35,11 @@ public class PreviewXmlParser {
 	            if (event == XmlPullParser.START_TAG) {
 	            	if (parser.getName().equals(PreviewXmlParser.PREVIEW_TAG)) {
 	            		p = new Preview();
-	            		p.setName(getStringResourceValue(parser.getAttributeValue(ns, NAME_ATTR)));
+	            		try {
+	            			p.setName(getStringResourceValue(parser.getAttributeValue(ns, NAME_ATTR)));
+	            		} catch (Exception e) {
+	            			p.setName(parser.getAttributeValue(ns, NAME_ATTR));
+	            		}
 	            	}
 	            	/*
 	            	if (parser.getName().equals("filename")) {
@@ -59,23 +62,25 @@ public class PreviewXmlParser {
 		return previews;
 	}
 	
+	/**
+	 * Given a string that resembles a resource name
+	 * such as "@string/unique_identifier",
+	 * return only the unique identifier.
+	 */
 	private static String getUniqueId(String in) {
-		/**
-		 * Given a string that resembles a resource name
-		 * such as "@string/unique_identifier",
-		 * return only the unique identifier.
-		 */
 		if (in.contains("/")) {
 			return in.substring(in.indexOf("/") + 1);
 		} 
 		return in;
 	}
 	
-	private String getStringResourceValue(String identifier) {
-		/** 
-		 * Given a string resource name, return its compiled value
-		 */
+	/** 
+	 * Given a string resource name, return its compiled value
+	 */
+	private String getStringResourceValue(String identifier) throws Exception {
 		int id = context.getResources().getIdentifier(PreviewXmlParser.getUniqueId(identifier), "string", context.getPackageName());
+		if (id == 0) throw new Exception("Invalid string resource");
+
 		return context.getResources().getString(id);
 	}
 }
