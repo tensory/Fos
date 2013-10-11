@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.xmlpull.v1.XmlPullParser;
 
+import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.os.Bundle;
 import android.util.Log;
@@ -31,16 +32,22 @@ public class MainActivity extends SherlockActivity {
 			String TAG_PREVIEW = "preview";
 			
 			while (event != XmlPullParser.END_DOCUMENT) {
-				// et the type of the event  
+				// get the type of the event  
 	            event = parser.getEventType();
 	       
 	            if (event == XmlPullParser.START_TAG) {
 	            	if (parser.getName().equals(TAG_PREVIEW)) {
 	            		p = new Preview();
+	            		String element = parser.getAttributeValue(null, "name");
+	            		
+	            		int id = getResources().getIdentifier("txtAnimName_Heartbeat", "string", getPackageName());
+	            		p.setName(getResources().getString(id));
 	            	}
-	            	if (parser.getName().equals("name")) {
-	            		p.setName(parser.getText());
+	            	/*
+	            	if (parser.getName().equals("filename")) {
+	            		p.setFilename(parser.getText());
 	            	}
+	            	*/
 	            	
 	            } else if (event == XmlPullParser.END_TAG) {
 	            	if (parser.getName().equals(TAG_PREVIEW)) {
@@ -54,11 +61,23 @@ public class MainActivity extends SherlockActivity {
 		} finally {
 			parser.close();
 		}
-		Log.d("PREVIEWS_CONTENTS", previews.toString());
+		
+		for (Preview prev : previews) {
+			Log.d("PREVIEWS_CONTENTS", prev.toString());			
+		}
+
 /*
 		PreviewAdapter prevAdapter = PreviewAdapter.getInstance();
 		prevAdapter.loadAll();
 		lvAnimations.setAdapter(prevAdapter);
 		*/
+	}
+	
+	/* stick this onto the xml parser */
+	public static String getStringName(String in) throws Exception {
+		if (in.contains("/")) {
+			return in.substring(in.indexOf("/") + 1);
+		} 
+		return in;
 	}
 }

@@ -28,4 +28,9 @@ public class Preview {
 		}
 		return prevs;
 	}
+	
+	@Override
+	public String toString() {
+		return this.name;
+	}
 }
