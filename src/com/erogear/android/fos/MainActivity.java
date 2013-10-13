@@ -1,24 +1,19 @@
 package com.erogear.android.fos;
 
-import java.util.ArrayList;
 import android.os.Bundle;
-import android.widget.ListView;
 
-import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.erogear.android.fos.fragments.PreviewFragment;
 
-public class MainActivity extends SherlockActivity {
-	ListView lv;
+public class MainActivity extends SherlockFragmentActivity {
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		setupViews();
-	}
-	
-	protected void setupViews() {
-		lv = (ListView) findViewById(R.id.lvAnimations);
-		ArrayList<Preview> previews = Preview.getAll(getApplicationContext(), getResources().getXml(R.xml.previews));
-		PreviewAdapter animAdapter = new PreviewAdapter(getApplicationContext(), previews);
-		lv.setAdapter(animAdapter);
+		
+		PreviewFragment list = new PreviewFragment();
+        getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, list).commit();
+
 	}
 }
