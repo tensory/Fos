@@ -4,6 +4,9 @@ import java.util.ArrayList;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.ListView;
 
 import com.actionbarsherlock.app.SherlockListFragment;
 import com.erogear.android.fos.Preview;
@@ -20,4 +23,9 @@ public class PreviewFragment extends SherlockListFragment {
 		ArrayList<Preview> previews = Preview.getAll(activity, activity.getResources().getXml(R.xml.previews));
 		setListAdapter(new PreviewAdapter(getActivity(), previews));
 	}
+	
+	@Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        Log.i("FragmentList", "Item clicked: " + id);
+    }
 }
