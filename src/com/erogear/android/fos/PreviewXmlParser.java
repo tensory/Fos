@@ -35,17 +35,16 @@ public class PreviewXmlParser {
 	            if (event == XmlPullParser.START_TAG) {
 	            	if (parser.getName().equals(PreviewXmlParser.PREVIEW_TAG)) {
 	            		p = new Preview();
+	            		String n;
+	            		
 	            		try {
-	            			p.setName(getStringResourceValue(parser.getAttributeValue(ns, NAME_ATTR)));
+	            			n = getStringResourceValue(parser.getAttributeValue(ns, NAME_ATTR));
 	            		} catch (Exception e) {
-	            			p.setName(parser.getAttributeValue(ns, NAME_ATTR));
+	            			n = parser.getAttributeValue(ns, NAME_ATTR);
 	            		}
+            			p.setName(n);
+            			p.setResourceName(n);
 	            	}
-	            	/*
-	            	if (parser.getName().equals("filename")) {
-	            		p.setFilename(parser.getText());
-	            	}
-	            	*/
 	            	
 	            } else if (event == XmlPullParser.END_TAG) {
 	            	if (parser.getName().equals(PreviewXmlParser.PREVIEW_TAG)) {

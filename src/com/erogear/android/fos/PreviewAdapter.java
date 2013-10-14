@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import com.erogear.android.fos.views.PreviewListItemView;
+
 public class PreviewAdapter extends ArrayAdapter<Preview> {
 	Context context;
 	
@@ -18,15 +20,15 @@ public class PreviewAdapter extends ArrayAdapter<Preview> {
 	
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		View view = convertView;
+		PreviewListItemView view = (PreviewListItemView) convertView;
 		if (view == null) {
 			LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-	    	view = inflater.inflate(R.layout.preview_item, null);
+	    	view = (PreviewListItemView) inflater.inflate(R.layout.preview_list_item, null);
 		}
-		Preview p = getItem(position);
 		
-		TextView tvAnimationName = (TextView) view.findViewById(R.id.tvAnimationName);
-		tvAnimationName.setText(p.getName());
+		Preview p = getItem(position);
+		TextView title = (TextView) view.findViewById(R.id.tvAnimTitle);
+		title.setText(p.getName());
 		
 		return view;
 	}	
