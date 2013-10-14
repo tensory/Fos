@@ -9,8 +9,6 @@ import android.widget.RelativeLayout;
 import com.erogear.android.fos.R;
 
 public class PreviewListItemView extends RelativeLayout {
-	private boolean isRunning = false;
-	
 	public PreviewListItemView(Context context) {
 		super(context);
 	}
@@ -26,12 +24,21 @@ public class PreviewListItemView extends RelativeLayout {
 	public void toggleAnimation() {
 		ImageView iv = (ImageView) findViewById(R.id.ivPreview);
 		AnimationDrawable animation = (AnimationDrawable) iv.getBackground();
-		if (!isRunning) {
+		if (!animation.isRunning()) {
 			animation.start();
 		} else {
-			animation.stop();
-			animation.selectDrawable(0);
+			stopAndReset(animation);
 		}
-		isRunning = !isRunning;
+	}
+	
+	public void stopAnimation() {
+		ImageView iv = (ImageView) findViewById(R.id.ivPreview);
+		AnimationDrawable animation = (AnimationDrawable) iv.getBackground();
+		stopAndReset(animation);
+	}
+	
+	private void stopAndReset(AnimationDrawable d) {
+		d.stop();
+		d.selectDrawable(0);
 	}
 }

@@ -1,9 +1,7 @@
 package com.erogear.android.fos;
-import java.lang.reflect.Field;
 import java.util.List;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,13 +31,8 @@ public class PreviewAdapter extends ArrayAdapter<Preview> {
 		TextView title = (TextView) view.findViewById(R.id.tvAnimTitle);
 		title.setText(p.getName());
 		ImageView previewImage = (ImageView) view.findViewById(R.id.ivPreview);
-		Log.d("RES", String.valueOf(R.drawable.heartbeat));
-		Log.d("RES", String.valueOf(p.getDrawableResourceId()));
-		
 		previewImage.setBackgroundResource(p.getDrawableResourceId());
 		
 		return view;
 	}
-	
-	
 }
