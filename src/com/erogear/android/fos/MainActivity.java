@@ -1,5 +1,6 @@
 package com.erogear.android.fos;
 
+import net.tensory.android.util.VideoExtractor;
 import android.os.Bundle;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
@@ -11,9 +12,10 @@ public class MainActivity extends SherlockFragmentActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		
+		/*
 		PreviewFragment list = new PreviewFragment();
         getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, list).commit();
-
+        */
+        VideoExtractor.getInstance(this.getApplicationContext()).main();
 	}
 }
