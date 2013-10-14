@@ -26,8 +26,8 @@ public class PreviewFragment extends SherlockListFragment {
 	}
 	
 	@Override
-    public void onListItemClick(ListView l, View v, int position, long id) {
-		PreviewListItemView pvView = (PreviewListItemView) v;
+    public void onListItemClick(ListView l, View view, int position, long id) {
+		PreviewListItemView pvView = (PreviewListItemView) view;
 		pvView.runAnimation();
 		Preview current = (Preview) getListAdapter().getItem(position);
         Log.i("FragmentList", "Item clicked: " + current.getName());

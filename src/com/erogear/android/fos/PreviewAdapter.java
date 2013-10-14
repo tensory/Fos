@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.erogear.android.fos.views.PreviewListItemView;
@@ -29,6 +30,8 @@ public class PreviewAdapter extends ArrayAdapter<Preview> {
 		Preview p = getItem(position);
 		TextView title = (TextView) view.findViewById(R.id.tvAnimTitle);
 		title.setText(p.getName());
+		ImageView previewImage = (ImageView) view.findViewById(R.id.ivPreview);
+		previewImage.setBackgroundResource(R.drawable.heartbeat);
 		
 		return view;
 	}	
