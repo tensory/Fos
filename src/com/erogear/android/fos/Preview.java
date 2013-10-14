@@ -1,5 +1,6 @@
 package com.erogear.android.fos;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -34,13 +35,30 @@ public class Preview {
 	 * to locate images and animation XML files.
 	 * @param name
 	 */
-	public void setResourceName(String name) {
-		this.resName = name.toLowerCase(Locale.US);
+	public void setResourceName(String filename) {
+		String truncated = filename.substring(0, filename.lastIndexOf('.'));
+		this.resName = truncated.toLowerCase(Locale.US);
 	}
 
 	public String getResourceName() {
 		return this.resName;
 	}
+	
+	/**
+	 * Get the resource ID of the animation XML file in /res/drawable
+	 * From http://daniel-codes.blogspot.com/2009/12/dynamically-retrieving-resources-in.html
+	 * 
+	 * @return int
+	 */
+	public int getDrawableResourceId() {
+		try {
+			Class res = R.drawable.class;
+			Field field = res.getField(this.resName);
+			return field.getInt(null);
+		} catch (Exception e) {
+			return 0;
+		}
+	} 
 	
 	public static ArrayList<Preview> getAll(Context context, XmlResourceParser parser) {
 		ArrayList<Preview> prevs = new ArrayList<Preview>();

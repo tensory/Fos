@@ -51,7 +51,7 @@ public class PreviewXmlParser {
 	            		if (parser.getEventType() == XmlPullParser.TEXT) {
 		            		String filename = parser.getText();
 		            		preview.setFilename(filename);
-		            		preview.setResourceName(PreviewXmlParser.getResourceName(filename));
+		            		preview.setResourceName(filename);
 	            		}
 	            	}
 	            	
@@ -94,18 +94,5 @@ public class PreviewXmlParser {
 		if (id == 0) throw new Exception("Invalid string resource");
 
 		return context.getResources().getString(id);
-	}
-	
-	/**
-	 * Derives a resource name for Drawables and related media
-	 * from a filename.
-	 * 
-	 * Drawables pertaining to a file must match its name.
-	 * 
-	 * @param fn
-	 * @return String
-	 */
-	private static String getResourceName(String filename) {
-		return filename.substring(filename.lastIndexOf('.'), filename.length());
 	}
 }
