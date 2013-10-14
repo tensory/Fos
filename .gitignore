@@ -12,6 +12,9 @@
 bin/
 gen/
 
+# Should this be in VCS or not?
+build/
+
 # Local configuration file (sdk path, etc)
 local.properties
 
