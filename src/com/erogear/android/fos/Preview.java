@@ -9,6 +9,7 @@ import android.util.Log;
 
 public class Preview {
 	private String name;
+	private String filename;
 	private String resName;
 	
 	public void setName(String name) {
@@ -17,6 +18,14 @@ public class Preview {
 	
 	public String getName() {
 		return this.name;
+	}
+	
+	public void setFilename(String name) {
+		this.filename = name;
+	}
+	
+	public String getFilename() {
+		return this.filename;
 	}
 
 	/**

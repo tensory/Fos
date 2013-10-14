@@ -34,6 +34,4 @@ public class PreviewListItemView extends RelativeLayout {
 		}
 		isRunning = !isRunning;
 	}
-	
-	
 }

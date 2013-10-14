@@ -13,6 +13,7 @@ import android.util.Log;
 
 public class PreviewXmlParser {
 	private static final String PREVIEW_TAG = "preview";
+	private static final String FILENAME_TAG = "filename";
 	private static final String NAME_ATTR = "name";
 	private static final String ns = null;
 	private Context context;
@@ -26,7 +27,7 @@ public class PreviewXmlParser {
 		ArrayList<Preview> previews = new ArrayList<Preview>();
 		try {
 			int event = parser.getEventType();
-			Preview p = null;
+			Preview preview = null;
 			
 			while (event != XmlPullParser.END_DOCUMENT) {
 				// get the type of the event  
@@ -34,7 +35,7 @@ public class PreviewXmlParser {
 	       
 	            if (event == XmlPullParser.START_TAG) {
 	            	if (parser.getName().equals(PreviewXmlParser.PREVIEW_TAG)) {
-	            		p = new Preview();
+	            		preview = new Preview();
 	            		String n;
 	            		
 	            		try {
@@ -42,13 +43,25 @@ public class PreviewXmlParser {
 	            		} catch (Exception e) {
 	            			n = parser.getAttributeValue(ns, NAME_ATTR);
 	            		}
-            			p.setName(n);
-            			p.setResourceName(n);
+            			preview.setName(n);
+	            	}
+	            	
+	            	if (parser.getName().equals(PreviewXmlParser.FILENAME_TAG)) {
+	            		parser.next();
+	            		if (parser.getEventType() == XmlPullParser.TEXT) {
+		            		String filename = parser.getText();
+		            		preview.setFilename(filename);
+		            		preview.setResourceName(PreviewXmlParser.getResourceName(filename));
+	            		}
 	            	}
 	            	
 	            } else if (event == XmlPullParser.END_TAG) {
 	            	if (parser.getName().equals(PreviewXmlParser.PREVIEW_TAG)) {
-	            		previews.add(p);
+	            		if (preview.getFilename() == null) {
+	            			// Previews must have a filename specified
+	            			throw new Exception("Invalid preview: no filename was set");
+	            		}
+	            		previews.add(preview);
 	            	}
 	            }
 	            parser.next(); 
@@ -81,5 +94,18 @@ public class PreviewXmlParser {
 		if (id == 0) throw new Exception("Invalid string resource");
 
 		return context.getResources().getString(id);
+	}
+	
+	/**
+	 * Derives a resource name for Drawables and related media
+	 * from a filename.
+	 * 
+	 * Drawables pertaining to a file must match its name.
+	 * 
+	 * @param fn
+	 * @return String
+	 */
+	private static String getResourceName(String filename) {
+		return filename.substring(filename.lastIndexOf('.'), filename.length());
 	}
 }
