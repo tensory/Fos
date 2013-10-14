@@ -3,14 +3,13 @@ package com.erogear.android.fos.views;
 import android.content.Context;
 import android.graphics.drawable.AnimationDrawable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.erogear.android.fos.R;
 
 public class PreviewListItemView extends RelativeLayout {
-	AnimationDrawable animation;
+	private boolean isRunning = false;
 	
 	public PreviewListItemView(Context context) {
 		super(context);
@@ -24,13 +23,17 @@ public class PreviewListItemView extends RelativeLayout {
 		super(context, attrs, defStyle);
 	}
 	
-	public void runAnimation() {			
-		try {
-			ImageView iv = (ImageView) findViewById(R.id.ivPreview);
-			animation = (AnimationDrawable) iv.getBackground();
+	public void toggleAnimation() {
+		ImageView iv = (ImageView) findViewById(R.id.ivPreview);
+		AnimationDrawable animation = (AnimationDrawable) iv.getBackground();
+		if (!isRunning) {
 			animation.start();
-		} catch (Exception e) {
-			Log.e("PVLIV", e.getMessage());
+		} else {
+			animation.stop();
+			animation.selectDrawable(0);
 		}
+		isRunning = !isRunning;
 	}
+	
+	
 }

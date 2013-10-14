@@ -28,8 +28,10 @@ public class PreviewFragment extends SherlockListFragment {
 	@Override
     public void onListItemClick(ListView l, View view, int position, long id) {
 		PreviewListItemView pvView = (PreviewListItemView) view;
-		pvView.runAnimation();
-		Preview current = (Preview) getListAdapter().getItem(position);
-        Log.i("FragmentList", "Item clicked: " + current.getName());
+		try {
+			pvView.toggleAnimation();			
+		} catch (Exception e) {
+			Log.e("PreviewListItemView", "Cannot start background animation: " + e.getMessage());
+		} 
     }
 }
