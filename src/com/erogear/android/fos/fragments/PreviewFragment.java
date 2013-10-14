@@ -14,7 +14,7 @@ import com.erogear.android.fos.PreviewAdapter;
 import com.erogear.android.fos.R;
 
 public class PreviewFragment extends SherlockListFragment {
-
+	
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
@@ -26,6 +26,7 @@ public class PreviewFragment extends SherlockListFragment {
 	
 	@Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-        Log.i("FragmentList", "Item clicked: " + id);
+		Preview current = (Preview) getListAdapter().getItem(position);
+        Log.i("FragmentList", "Item clicked: " + current.getName());
     }
 }
