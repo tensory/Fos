@@ -9,12 +9,17 @@
             android:layout_height="75dp"
             android:layout_centerHorizontal="true" />
 
-        <TextView
+        <RelativeLayout
+            android:id="@+id/layoutPreviewControl"
+            style="@style/PreviewControlBar">
+            
+            <TextView
             android:id="@+id/tvAnimTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
             android:textColor="#FFFFFFFF" />
+        </RelativeLayout>
     
 </com.erogear.android.fos.views.PreviewListItemView>
