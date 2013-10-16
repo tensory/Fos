@@ -40,8 +40,8 @@
             android:layout_centerVertical="true" 
             android:layout_toLeftOf="@id/ivBtnAccept"
             android:drawable="@drawable/ic_inactive_preview"
-            android:clickable="true"
-            android:onClick="onClickInactivePreview"
+            android:clickable="false"
+            android:onClick="onClickPreview"
             />
             
         </RelativeLayout>

@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockListFragment;
 import com.erogear.android.fos.Preview;
@@ -50,4 +51,9 @@ public class PreviewFragment extends SherlockListFragment {
 		
 		selectedPreviewIndex = position;
     }
+	
+	public void onClickPreview(View v) {
+		Log.d("CLICK_PREVIEW", "Currently looking at " + String.valueOf(selectedPreviewIndex));
+	}
+	
 }

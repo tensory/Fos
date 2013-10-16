@@ -65,11 +65,21 @@ public class PreviewListItemLayoutView extends RelativeLayout {
 	private void setIconState() {
 		if (this.isActive) {
 			//TODO: replace this pair of calls with a pair of Drawables with highlight state
-			ivBtnPreview.setImageResource(R.drawable.ic_active_preview);
-			ivBtnAccept.setImageResource(R.drawable.ic_active_send);
+			activateImageButton(ivBtnPreview, R.drawable.ic_active_preview);
+			activateImageButton(ivBtnAccept, R.drawable.ic_active_send);
 		} else {
-			ivBtnPreview.setImageResource(R.drawable.ic_inactive_preview);
-			ivBtnAccept.setImageResource(R.drawable.ic_inactive_send);
+			deactivateImageButton(ivBtnPreview, R.drawable.ic_inactive_preview);
+			deactivateImageButton(ivBtnAccept, R.drawable.ic_inactive_send);
 		}	
 	};
+	
+	private void activateImageButton(ImageView target, int resId) {
+		target.setImageResource(resId);
+		target.setClickable(true);
+	}
+	
+	private void deactivateImageButton(ImageView target, int resId) {
+		target.setImageResource(resId);
+		target.setClickable(false);
+	}
 }
