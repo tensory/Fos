@@ -12,7 +12,7 @@ import com.actionbarsherlock.app.SherlockListFragment;
 import com.erogear.android.fos.Preview;
 import com.erogear.android.fos.PreviewAdapter;
 import com.erogear.android.fos.R;
-import com.erogear.android.fos.views.PreviewListItemView;
+import com.erogear.android.fos.views.PreviewListItemLayoutView;
 
 public class PreviewFragment extends SherlockListFragment {
 	private static int PREVIEW_NOT_SET_INDEX = -1;
@@ -31,7 +31,7 @@ public class PreviewFragment extends SherlockListFragment {
 	@Override
     public void onListItemClick(ListView l, View view, int position, long id) {
 		int lastSelectedIndex = selectedPreviewIndex;
-		PreviewListItemView pvView = (PreviewListItemView) view;
+		PreviewListItemLayoutView pvView = (PreviewListItemLayoutView) view;
 		if (lastSelectedIndex > PreviewFragment.PREVIEW_NOT_SET_INDEX) {
 			// A preview was selected before this event fired
 			
@@ -40,7 +40,7 @@ public class PreviewFragment extends SherlockListFragment {
 				// Stop the animation on the last active preview, 
 				// and start it on the current one.
 				
-				PreviewListItemView oldView = (PreviewListItemView) l.getChildAt(lastSelectedIndex);
+				PreviewListItemLayoutView oldView = (PreviewListItemLayoutView) l.getChildAt(lastSelectedIndex);
 				oldView.stopAnimation();
 			}
 		} 

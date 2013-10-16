@@ -9,7 +9,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.erogear.android.fos.views.PreviewListItemView;
+import com.erogear.android.fos.views.PreviewListItemLayoutView;
 
 public class PreviewAdapter extends ArrayAdapter<Preview> {
 	Context context;
@@ -21,10 +21,10 @@ public class PreviewAdapter extends ArrayAdapter<Preview> {
 	
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		PreviewListItemView view = (PreviewListItemView) convertView;
+		PreviewListItemLayoutView view = (PreviewListItemLayoutView) convertView;
 		if (view == null) {
 			LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-	    	view = (PreviewListItemView) inflater.inflate(R.layout.preview_list_item, null);
+	    	view = (PreviewListItemLayoutView) inflater.inflate(R.layout.preview_list_item, null);
 		}
 		
 		Preview p = getItem(position);

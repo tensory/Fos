@@ -3,22 +3,28 @@ package com.erogear.android.fos.views;
 import android.content.Context;
 import android.graphics.drawable.AnimationDrawable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.erogear.android.fos.R;
 
-public class PreviewListItemView extends RelativeLayout {
-	public PreviewListItemView(Context context) {
+public class PreviewListItemLayoutView extends RelativeLayout {
+	public PreviewListItemLayoutView(Context context) {
 		super(context);
 	}
 
-	public PreviewListItemView(Context context, AttributeSet attrs) {
+	public PreviewListItemLayoutView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 	}
 
-	public PreviewListItemView(Context context, AttributeSet attrs, int defStyle) {
+	public PreviewListItemLayoutView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
+	}
+	
+	@Override
+	public void onFinishInflate() {
+		Log.d("VIEWINFLATE", "It's okay to breathe");
 	}
 	
 	public void toggleAnimation() {

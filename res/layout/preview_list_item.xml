@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.erogear.android.fos.views.PreviewListItemView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.erogear.android.fos.views.PreviewListItemLayoutView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
     
@@ -17,9 +17,32 @@
             android:id="@+id/tvAnimTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
             android:textColor="#FFFFFFFF" />
+            
+            
+            <ImageView
+            android:id="@+id/ivBtnAccept"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true" 
+            android:layout_alignParentRight="true"
+            android:src="@drawable/ic_inactive_send"
+            android:layout_marginLeft="8dp"
+            android:clickable="true"
+            />
+            
+            <ImageView
+            android:id="@+id/ivBtnPreview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true" 
+            android:layout_toLeftOf="@id/ivBtnAccept"
+            android:src="@drawable/ic_inactive_preview"
+            android:clickable="true"
+            />
+            
         </RelativeLayout>
-    
-</com.erogear.android.fos.views.PreviewListItemView>
+
+</com.erogear.android.fos.views.PreviewListItemLayoutView>
