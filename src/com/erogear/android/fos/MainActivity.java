@@ -2,9 +2,10 @@ package com.erogear.android.fos;
 
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
 import com.erogear.android.fos.fragments.PreviewFragment;
 
 public class MainActivity extends SherlockFragmentActivity {
@@ -20,5 +21,12 @@ public class MainActivity extends SherlockFragmentActivity {
 	
 	public void onClickPreview(View v) {
 		list.onClickPreview(v);
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = new MenuInflater(getApplicationContext());
+        inflater.inflate(R.menu.main, menu);
+        return true;
 	}
 }
