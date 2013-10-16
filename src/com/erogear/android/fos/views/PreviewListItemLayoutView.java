@@ -3,13 +3,15 @@ package com.erogear.android.fos.views;
 import android.content.Context;
 import android.graphics.drawable.AnimationDrawable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.erogear.android.fos.R;
 
 public class PreviewListItemLayoutView extends RelativeLayout {
+	private boolean isActive;
+	public ImageView ivBtnPreview, ivBtnAccept;
+	
 	public PreviewListItemLayoutView(Context context) {
 		super(context);
 	}
@@ -24,13 +26,20 @@ public class PreviewListItemLayoutView extends RelativeLayout {
 	
 	@Override
 	public void onFinishInflate() {
-		Log.d("VIEWINFLATE", "It's okay to breathe");
+		isActive = false;
+		ivBtnPreview = (ImageView) findViewById(R.id.ivBtnPreview);
+		ivBtnAccept = (ImageView) findViewById(R.id.ivBtnAccept);
+	}
+	
+	public void toggleActive() {
+		isActive = !isActive;
+		setIconState();
 	}
 	
 	public void toggleAnimation() {
 		ImageView iv = (ImageView) findViewById(R.id.ivPreview);
 		AnimationDrawable animation = (AnimationDrawable) iv.getBackground();
-		if (!animation.isRunning()) {
+		if (!animation.isRunning() && isActive) {
 			animation.start();
 		} else {
 			stopAndReset(animation);
@@ -47,4 +56,15 @@ public class PreviewListItemLayoutView extends RelativeLayout {
 		d.stop();
 		d.selectDrawable(0);
 	}
+	
+	private void setIconState() {
+		if (this.isActive) {
+			//TODO: replace this pair of calls with a pair of Drawables with highlight state
+			ivBtnPreview.setImageResource(R.drawable.ic_active_preview);
+			ivBtnAccept.setImageResource(R.drawable.ic_active_send);
+		} else {
+			ivBtnPreview.setImageResource(R.drawable.ic_inactive_preview);
+			ivBtnAccept.setImageResource(R.drawable.ic_inactive_send);
+		}	
+	};
 }

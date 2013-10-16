@@ -44,6 +44,7 @@ public class PreviewFragment extends SherlockListFragment {
 				oldView.stopAnimation();
 			}
 		} 
+		pvView.toggleActive();
 		pvView.toggleAnimation();
 		
 		selectedPreviewIndex = position;

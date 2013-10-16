@@ -39,8 +39,9 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true" 
             android:layout_toLeftOf="@id/ivBtnAccept"
-            android:src="@drawable/ic_inactive_preview"
+            android:drawable="@drawable/ic_inactive_preview"
             android:clickable="true"
+            android:onClick="onClickInactivePreview"
             />
             
         </RelativeLayout>
