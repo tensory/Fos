@@ -41,6 +41,7 @@ public class PreviewFragment extends SherlockListFragment {
 				// and start it on the current one.
 				
 				PreviewListItemLayoutView oldView = (PreviewListItemLayoutView) l.getChildAt(lastSelectedIndex);
+				oldView.deactivate();
 				oldView.stopAnimation();
 			}
 		} 
