@@ -57,6 +57,10 @@ public class PreviewListItemLayoutView extends RelativeLayout {
 		setIconState();
 	}
 	
+	public boolean getIsActive() {
+		return isActive;
+	}
+	
 	private void stopAndReset(AnimationDrawable d) {
 		d.stop();
 		d.selectDrawable(0);

@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockListFragment;
 import com.erogear.android.fos.Preview;
@@ -17,7 +16,7 @@ import com.erogear.android.fos.views.PreviewListItemLayoutView;
 
 public class PreviewFragment extends SherlockListFragment {
 	private static int PREVIEW_NOT_SET_INDEX = -1;
-	private int selectedPreviewIndex;
+	private int selectedPreviewIndex;	
 	
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
@@ -49,11 +48,15 @@ public class PreviewFragment extends SherlockListFragment {
 		pvView.toggleActive();
 		pvView.toggleAnimation();
 		
-		selectedPreviewIndex = position;
+		selectedPreviewIndex = pvView.getIsActive() ? position : PreviewFragment.PREVIEW_NOT_SET_INDEX;
     }
 	
-	public void onClickPreview(View v) {
-		Log.d("CLICK_PREVIEW", "Currently looking at " + String.valueOf(selectedPreviewIndex));
+	/**
+	 * Get the Preview object at the currently activated list position.
+	 * @return Preview
+	 */
+	public Preview getSelectedPreview() {
+		return (Preview) getListAdapter().getItem(selectedPreviewIndex);
 	}
 	
 }
