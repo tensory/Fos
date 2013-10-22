@@ -6,7 +6,6 @@ import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -104,9 +103,8 @@ public class MainActivity extends SherlockFragmentActivity {
 			}
         };
 			
-        Log.d(MainActivity.TAG, "Bluetooth started");
         bindService(new Intent(MainActivity.this, BluetoothVideoService.class), svcConn, Service.START_STICKY);
-
+        Log.d(MainActivity.TAG, "Bluetooth started");
 	}
 	
 	
