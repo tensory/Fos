@@ -53,6 +53,15 @@ public class MainActivity extends SherlockFragmentActivity {
 		
 		@Override
 		protected void onPostExecute(ArrayList<Preview> result) {
+			
+			// Start populating previews with frame data.
+			// Eventually probably move this stuff to AsyncTask or Runnable 
+			for (Preview preview : result) {
+				// Verify existence of a preview image file 
+				// and create it if not present.
+				preview.confirmPreviewBitmapReady();
+			}
+			
 			/*
 			Bundle previews = new Bundle();
 			previews.putParcelableArrayList(MainActivity.PREVIEWS_DATA_TAG, result);

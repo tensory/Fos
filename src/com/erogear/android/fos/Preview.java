@@ -1,5 +1,6 @@
 package com.erogear.android.fos;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Locale;
@@ -9,9 +10,11 @@ import android.content.res.XmlResourceParser;
 import android.util.Log;
 
 public class Preview {
+	public static String IMAGE_EXTENSION = ".png";
 	private String name;
 	private String filename;
-	private String resName;
+	private String resName; // TODO: remove?
+	
 	
 	public void setName(String name) {
 		this.name = name;
@@ -71,6 +74,17 @@ public class Preview {
 			Log.e("FILE", e.getMessage());
 		}
 		return prevs;
+	}
+	
+	/**
+	 * Confirm that this Preview has a bitmap file 
+	 * ready to use as a preview image
+	 */
+	public void confirmPreviewBitmapReady(Context context) {
+		File f = new File(context.getFilesDir(), this.getResourceName() + Preview.IMAGE_EXTENSION);
+		if (!f.exists()) {
+			
+		}
 	}
 	
 	@Override
