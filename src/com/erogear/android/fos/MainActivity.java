@@ -6,6 +6,7 @@ import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -32,6 +33,10 @@ public class MainActivity extends SherlockFragmentActivity {
 	
 	private BluetoothVideoService videoSvc;
 	private ServiceConnection svcConn;
+	
+	/**
+	 * Keep the Bluetooth service connection alive.
+	 */
 	
 	/*
 	private class LoadingTask extends AsyncTask<ArrayList<Preview>> {
@@ -61,11 +66,10 @@ public class MainActivity extends SherlockFragmentActivity {
 	protected void onResume() {
 		super.onResume();
         Log.i(TAG, "--- ONRESUME ---");
-		
-		//Find or create the video service
+        
         startService(new Intent(this, BluetoothVideoService.class));
         svcConn = new ServiceConnection() {
-			@Override
+        	@Override
 			public void onServiceConnected(ComponentName name, IBinder service) {
 				// Set up notification, the old way.
 				// TODO add API check for using the new way
@@ -89,21 +93,20 @@ public class MainActivity extends SherlockFragmentActivity {
                 Intent btOn = videoSvc.start(note); //If bluetooth is off, this returns an intent that will get it turned on
                // videoSvc.addHandler(mHandler);
                 
-                if (btOn != null){
+                if (btOn != null) {
                     startActivityForResult(btOn, REQUEST_ENABLE_BT);
-                }
-                
-                Log.d(TAG, "Bluetooth started");
+                }   
 			}
-			
-			@Override
+        	
+        	@Override
 			public void onServiceDisconnected(ComponentName name) {
 				 videoSvc.removeHandler(mHandler);
 			}
         };
-        // Events depending on service availability will be set in svcConn.onServiceConnected
-        
-        bindService(new Intent(this, BluetoothVideoService.class), svcConn, Service.START_STICKY);
+			
+        Log.d(MainActivity.TAG, "Bluetooth started");
+        bindService(new Intent(MainActivity.this, BluetoothVideoService.class), svcConn, Service.START_STICKY);
+
 	}
 	
 	
