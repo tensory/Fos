@@ -1,24 +1,30 @@
 package com.erogear.android.fos;
 
+import java.util.ArrayList;
+
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
+import com.erogear.android.bluetooth.comm.BluetoothChatService;
 import com.erogear.android.bluetooth.comm.BluetoothVideoService;
 import com.erogear.android.bluetooth.comm.DeviceConnection;
+import com.erogear.android.bluetooth.comm.FrameConsumer;
 import com.erogear.android.fos.fragments.PreviewFragment;
 
 public class MainActivity extends SherlockFragmentActivity {
@@ -33,21 +39,90 @@ public class MainActivity extends SherlockFragmentActivity {
 	private BluetoothVideoService videoSvc;
 	private ServiceConnection svcConn;
 	
-	/**
-	 * Keep the Bluetooth service connection alive.
-	 */
+	// TODO: Log instead of Toasting.
+	private long lastNoDeviceToast = 0;
 	
-	/*
-	private class LoadingTask extends AsyncTask<ArrayList<Preview>> {
+	// Load previews on a different thread.
+	private class LoadingTask extends AsyncTask<Void, Void, ArrayList<Preview>> {
+		
+		@Override
+		protected ArrayList<Preview> doInBackground(Void... params) {
+			ArrayList<Preview> previewList = Preview.getAll(MainActivity.this, getResources().getXml(R.xml.previews));
+			return previewList;
+		}
+		
 		@Override
 		protected void onPostExecute(ArrayList<Preview> result) {
+			/*
 			Bundle previews = new Bundle();
 			previews.putParcelableArrayList(MainActivity.PREVIEWS_DATA_TAG, result);
 			list.setArguments(previews);
 			getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, list).commit();
+			*/
+			Log.d(MainActivity.TAG, String.valueOf(result.size()));
 		}
 	}
-	*/
+	
+	/**
+	 * Permit construction of a Handler for messages
+	 * from BluetoothVideoService
+	 */
+	private class IncomingMessageCallback implements Handler.Callback {
+		@Override
+		public boolean handleMessage(Message msg) {
+			DeviceConnection conn;
+
+			switch (msg.what) {
+			case BluetoothVideoService.MESSAGE_STATE_CHANGE:
+				switch(msg.arg1) {
+				case BluetoothChatService.STATE_CONNECTION_LOST:
+					conn = (DeviceConnection) msg.obj;
+					Toast.makeText(MainActivity.this, "Lost connection to " + conn.getDeviceName(), Toast.LENGTH_SHORT).show();
+					break;
+				case BluetoothChatService.STATE_CONNECTION_FAIL:
+					conn = (DeviceConnection) msg.obj;
+					Toast.makeText(MainActivity.this, "Could not connect to device " + conn.getDeviceName(), Toast.LENGTH_SHORT).show();
+					break;   	
+				}
+				break;
+			case BluetoothVideoService.MESSAGE_WRITE:
+				byte[] writeBuf = (byte[]) msg.obj;
+				//addConversationLine("Me: " + byteArrayToHex(writeBuf));
+				break;
+			case BluetoothVideoService.MESSAGE_READ:
+				//byte[] readBuf = (byte[]) msg.obj;
+				//String readMessage = byteArrayToHex(readBuf);
+				addConversationLine(((FrameConsumer)msg.obj).getName() + ":  " + msg.arg1 + " " + msg.arg2);
+				break;
+			case BluetoothVideoService.MESSAGE_NEW_FRAME:
+				/*
+	                previewFrame((ByteBufferFrame)msg.obj);
+
+				 */
+				break;
+			case BluetoothVideoService.MESSAGE_VIDEO_LOADED:
+				Toast.makeText(getApplicationContext(), "Video loaded!", Toast.LENGTH_SHORT).show();
+				addConversationLine((String) msg.obj);
+				break;
+			case BluetoothVideoService.MESSAGE_VIDEO_LOAD_FAIL:
+				Toast.makeText(getApplicationContext(), "Error while loading video; you may have some valid frames.", Toast.LENGTH_SHORT).show();
+				addConversationLine((String) msg.obj);
+				break;
+			case BluetoothVideoService.MESSAGE_FATAL_ERROR:
+				Toast.makeText(getApplicationContext(), "Video service had fatal error.", Toast.LENGTH_SHORT).show();
+				finish();
+				break;
+			case BluetoothVideoService.MESSAGE_NO_DEVICE:
+				conn = (DeviceConnection) msg.obj;
+				if(lastNoDeviceToast < System.currentTimeMillis() - 2000)
+					Toast.makeText(getApplicationContext(), conn.getDeviceName() + " is not connected.", Toast.LENGTH_SHORT).show();
+
+				lastNoDeviceToast = System.currentTimeMillis();
+				break;
+			}
+			return true;
+		};
+	}
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -56,9 +131,8 @@ public class MainActivity extends SherlockFragmentActivity {
 		list = new PreviewFragment();
 		
 		// Initialize previews
-		//new LoadingTask.execute();
-		
-		
+		new LoadingTask().execute();
+
 	}
 	
 	@Override
@@ -90,7 +164,9 @@ public class MainActivity extends SherlockFragmentActivity {
                 videoSvc = myBinder.getService();
                 
                 Intent btOn = videoSvc.start(note); //If bluetooth is off, this returns an intent that will get it turned on
-               // videoSvc.addHandler(mHandler);
+                videoSvc.addHandler(mHandler); 
+                
+                // Add back the handler if you're wondering why bluetooth isn't working
                 
                 if (btOn != null) {
                     startActivityForResult(btOn, REQUEST_ENABLE_BT);
@@ -142,63 +218,8 @@ public class MainActivity extends SherlockFragmentActivity {
     }
 	
     // The Handler that gets information back from the BluetoothVideoService
-    private final Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            DeviceConnection conn;
-/*
-            switch (msg.what) {
-            case BluetoothVideoService.MESSAGE_STATE_CHANGE:
-                switch(msg.arg1) {
-                    case BluetoothChatService.STATE_CONNECTION_LOST:
-                        conn = (DeviceConnection) msg.obj;
-                        Toast.makeText(VideoPlayer.this, "Lost connection to " + conn.getDeviceName(), Toast.LENGTH_SHORT).show();
-                        break;
-                    case BluetoothChatService.STATE_CONNECTION_FAIL:
-                        conn = (DeviceConnection) msg.obj;
-                        Toast.makeText(VideoPlayer.this, "Could not connect to device " + conn.getDeviceName(), Toast.LENGTH_SHORT).show();
-                        break;
-                }
-                break;
-            case BluetoothVideoService.MESSAGE_WRITE:
-                byte[] writeBuf = (byte[]) msg.obj;
-                addConversationLine("Me: " + byteArrayToHex(writeBuf));
-                break;
-            case BluetoothVideoService.MESSAGE_READ:
-                //byte[] readBuf = (byte[]) msg.obj;
-                //String readMessage = byteArrayToHex(readBuf);
-                addConversationLine(((FrameConsumer)msg.obj).getName() + ":  " + msg.arg1 + " " + msg.arg2);
-                break;
-            case BluetoothVideoService.MESSAGE_NEW_FRAME:
-                previewFrame((ByteBufferFrame)msg.obj);
-                mSeekBar.setProgress(msg.arg1);
-                mSeekBar.setMax(msg.arg2);
-                break;
-            case BluetoothVideoService.MESSAGE_VIDEO_LOADED:
-                mSeekBar.setMax(msg.arg1);
-                Toast.makeText(getApplicationContext(), "Video loaded!", Toast.LENGTH_SHORT).show();
-                addConversationLine((String) msg.obj);
-                break;
-            case BluetoothVideoService.MESSAGE_VIDEO_LOAD_FAIL:
-                Toast.makeText(getApplicationContext(), "Error while loading video; you may have some valid frames.", Toast.LENGTH_SHORT).show();
-                addConversationLine((String) msg.obj);
-                break;
-            case BluetoothVideoService.MESSAGE_FATAL_ERROR:
-                Toast.makeText(getApplicationContext(), "Video service had fatal error.", Toast.LENGTH_SHORT).show();
-                finish();
-                break;
-            case BluetoothVideoService.MESSAGE_NO_DEVICE:
-                conn = (DeviceConnection) msg.obj;
-                if(lastNoDeviceToast < System.currentTimeMillis() - 2000)
-                    Toast.makeText(getApplicationContext(), conn.getDeviceName() + " is not connected.", Toast.LENGTH_SHORT).show();
-
-                lastNoDeviceToast = System.currentTimeMillis();
-                break;
-            }
-            */
-        }
-    };
-
+    private final Handler mHandler = new Handler(new IncomingMessageCallback());
+    
     private void addConversationLine(String str) {
     	Log.d("BluetoothServiceConnection", str);
     }
