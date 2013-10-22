@@ -1,20 +1,55 @@
 package com.erogear.android.fos;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Locale;
 
 import android.content.Context;
 import android.content.res.XmlResourceParser;
+import android.graphics.Bitmap;
 import android.util.Log;
 
+import com.erogear.android.bluetooth.video.VideoProvider;
+
 public class Preview {
+	public static class FrameExtractor {
+		// TODO these cannot be set here, must be derived from video
+		private static int BITMAP_WIDTH = 32;
+		private static int BITMAP_HEIGHT = 8;
+		/**
+		 * Grab a frame from a video provider with loaded video.
+		 * @param videoProvider
+		 * @param position the requested frame index
+		 * @return frame as a bitmap
+		 */
+		public static Bitmap getFrameBitmap(VideoProvider provider, int position) {
+			Bitmap bmp = Bitmap.createBitmap(FrameExtractor.BITMAP_WIDTH, FrameExtractor.BITMAP_HEIGHT, Bitmap.Config.ARGB_8888);
+			VideoProvider.frameToBitmap(provider.getFrame(position), bmp);
+			return bmp;
+		}
+		
+	}
+	
 	public static String IMAGE_EXTENSION = ".png";
+	private static String TAG = "PREVIEW";
 	private String name;
 	private String filename;
 	private String resName; // TODO: remove?
 	
+	private VideoProvider provider;
+	private boolean videoLoaded;
+	
+	
+	
+	public Preview() {
+		// At creation time, video has not been loaded.
+		videoLoaded = false;
+	
+	}
 	
 	public void setName(String name) {
 		this.name = name;
@@ -79,12 +114,36 @@ public class Preview {
 	/**
 	 * Confirm that this Preview has a bitmap file 
 	 * ready to use as a preview image
+	 * @throws Exception 
 	 */
-	public void confirmPreviewBitmapReady(Context context) {
+	public void confirmPreviewBitmapReady(Context context) throws Exception {
 		File f = new File(context.getFilesDir(), this.getResourceName() + Preview.IMAGE_EXTENSION);
 		if (!f.exists()) {
-			
+			// Image has not been created
+			// Has the video file been loaded?
+			if (videoLoaded) {
+				// If video has been loaded, extract a frame and save it
+				Bitmap bmp = FrameExtractor.getFrameBitmap(provider, 0);
+				try {
+					saveThumbnail(f, bmp); 					
+				} catch (Exception e) {
+					throw e;
+				}
+
+			} else {
+				Log.e(Preview.TAG, "No video loaded");
+				
+			}
+			// Do a final check on the new file
 		}
+		
+		
+	}
+	
+	private void saveThumbnail(File file, Bitmap bitmap) throws FileNotFoundException, IOException {
+		FileOutputStream fos = new FileOutputStream(file);
+		bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+		fos.close();
 	}
 	
 	@Override

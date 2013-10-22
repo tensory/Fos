@@ -59,7 +59,11 @@ public class MainActivity extends SherlockFragmentActivity {
 			for (Preview preview : result) {
 				// Verify existence of a preview image file 
 				// and create it if not present.
-				preview.confirmPreviewBitmapReady();
+				try {
+					preview.confirmPreviewBitmapReady(getApplicationContext());
+				} catch (Exception e) {
+					Log.e(MainActivity.TAG, e.getMessage());
+				}
 			}
 			
 			/*
