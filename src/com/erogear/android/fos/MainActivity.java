@@ -1,11 +1,15 @@
 package com.erogear.android.fos;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.AsyncTask;
@@ -25,6 +29,8 @@ import com.erogear.android.bluetooth.comm.BluetoothChatService;
 import com.erogear.android.bluetooth.comm.BluetoothVideoService;
 import com.erogear.android.bluetooth.comm.DeviceConnection;
 import com.erogear.android.bluetooth.comm.FrameConsumer;
+import com.erogear.android.bluetooth.video.FFMPEGVideoProvider;
+import com.erogear.android.bluetooth.video.VideoProvider;
 import com.erogear.android.fos.fragments.PreviewFragment;
 
 public class MainActivity extends SherlockFragmentActivity {
@@ -53,10 +59,37 @@ public class MainActivity extends SherlockFragmentActivity {
 		
 		@Override
 		protected void onPostExecute(ArrayList<Preview> result) {
+			Context app = getApplicationContext();
 			
 			// Start populating previews with frame data.
 			// Eventually probably move this stuff to AsyncTask or Runnable 
 			for (Preview preview : result) {
+				// Copy the video asset to a file
+				File videoFile = new File(app.getFilesDir(), preview.getFilename());
+				try {
+					if (!videoFile.exists()) {
+						InputStream is = app.getAssets().open(preview.getFilename());
+						int size = is.available();
+						byte[] buffer = new byte[size];
+						is.read(buffer);
+						is.close();
+						
+						FileOutputStream fos = app.openFileOutput(preview.getFilename(), Context.MODE_PRIVATE);
+						fos.write(buffer);
+						fos.close();
+					}
+				} catch (Exception e) {
+					//throw new RuntimeException(e);
+					Log.e(MainActivity.TAG, "No video found: " + preview.getName());
+				}
+				
+
+				Log.d(MainActivity.TAG, videoFile.getAbsolutePath());
+				
+				// Load the video
+				VideoProvider mProvider = getVideoProvider(preview.getVideoFileType());
+				
+				
 				// Verify existence of a preview image file 
 				// and create it if not present.
 				try {
@@ -235,5 +268,19 @@ public class MainActivity extends SherlockFragmentActivity {
     
     private void addConversationLine(String str) {
     	Log.d("BluetoothServiceConnection", str);
+    }
+    
+    /**
+     * Get the right video provider for a given video file type. 
+     * @param extension
+     * @return
+     */
+    private VideoProvider getVideoProvider(String extension) {
+    	boolean colorPreview = false;
+    	int width = 32, height = 8;
+    	// the above vars must be made dynamic
+    	// see doAfterServiceBound in VideoPlayer.java
+    	return new FFMPEGVideoProvider(MainActivity.this, videoSvc, width, height, colorPreview);
+    	
     }
 }

@@ -146,6 +146,14 @@ public class Preview {
 		fos.close();
 	}
 	
+	/**
+	 * @return string the filetype of the preview's video file
+	 */
+	public String getVideoFileType() {
+		// Currently always AVI
+		return "AVI";
+	}
+	
 	@Override
 	public String toString() {
 		return this.name;
