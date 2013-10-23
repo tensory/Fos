@@ -30,32 +30,67 @@ import com.erogear.android.bluetooth.comm.BluetoothVideoService;
 import com.erogear.android.bluetooth.comm.DeviceConnection;
 import com.erogear.android.bluetooth.comm.FrameConsumer;
 import com.erogear.android.bluetooth.video.FFMPEGVideoProvider;
+import com.erogear.android.bluetooth.video.MultiheadController;
 import com.erogear.android.bluetooth.video.VideoProvider;
 import com.erogear.android.fos.fragments.PreviewFragment;
 
 public class MainActivity extends SherlockFragmentActivity {
+	public class PreviewList {
+		private ArrayList<Preview> items;
+		private boolean videoProvidersReady;
+		private boolean imagesReady;
+		private boolean ready;
+		
+		public PreviewList() {
+			items = new ArrayList<Preview>();
+			videoProvidersReady = false;
+			imagesReady = false;
+			ready = false;
+		}
+		
+		public void setItems(ArrayList<Preview> list) {
+			items = list;
+		}
+		
+		public ArrayList<Preview> getItems() {
+			return items;
+		}
+		
+	}
+	
 	// Intent request codes
 	public static final int PREFERENCE_INTENT_RESULT = 1;
 	private static final int REQUEST_ENABLE_BT = 2;
 	
 	public static final String TAG = "MAIN";
 	public static final String PREVIEWS_DATA_TAG = "previews";
+	
 	PreviewFragment list;
+	PreviewList previews = new PreviewList();
+	boolean previewVideoProvidersSet;
 	
 	private BluetoothVideoService videoSvc;
 	private ServiceConnection svcConn;
+    private MultiheadController headController;
+    
+    // false = see data as sent to panel. true = see color data from video file.
+    private static final boolean COLOR_PREVIEW = false;
 	
 	// TODO: Log instead of Toasting.
 	private long lastNoDeviceToast = 0;
-	
+	/*
 	// Load previews on a different thread.
 	private class LoadingTask extends AsyncTask<Void, Void, ArrayList<Preview>> {
 		
 		@Override
 		protected ArrayList<Preview> doInBackground(Void... params) {
-			ArrayList<Preview> previewList = Preview.getAll(MainActivity.this, getResources().getXml(R.xml.previews));
 			return previewList;
 		}
+		// Start bluetooth service
+		// When bluetooth service is started, make VideoSvc available to Previews
+		// so that Previews can have their own VideoProviders
+		// This MUST wait for VideoSvc
+		
 		
 		@Override
 		protected void onPostExecute(ArrayList<Preview> result) {
@@ -64,39 +99,7 @@ public class MainActivity extends SherlockFragmentActivity {
 			// Start populating previews with frame data.
 			// Eventually probably move this stuff to AsyncTask or Runnable 
 			for (Preview preview : result) {
-				// Copy the video asset to a file
-				File videoFile = new File(app.getFilesDir(), preview.getFilename());
-				try {
-					if (!videoFile.exists()) {
-						InputStream is = app.getAssets().open(preview.getFilename());
-						int size = is.available();
-						byte[] buffer = new byte[size];
-						is.read(buffer);
-						is.close();
-						
-						FileOutputStream fos = app.openFileOutput(preview.getFilename(), Context.MODE_PRIVATE);
-						fos.write(buffer);
-						fos.close();
-					}
-				} catch (Exception e) {
-					//throw new RuntimeException(e);
-					Log.e(MainActivity.TAG, "No video found: " + preview.getName());
-				}
 				
-
-				Log.d(MainActivity.TAG, videoFile.getAbsolutePath());
-				
-				// Load the video
-				VideoProvider mProvider = getVideoProvider(preview.getVideoFileType());
-				
-				
-				// Verify existence of a preview image file 
-				// and create it if not present.
-				try {
-					preview.confirmPreviewBitmapReady(getApplicationContext());
-				} catch (Exception e) {
-					Log.e(MainActivity.TAG, e.getMessage());
-				}
 			}
 			
 			/*
@@ -104,10 +107,10 @@ public class MainActivity extends SherlockFragmentActivity {
 			previews.putParcelableArrayList(MainActivity.PREVIEWS_DATA_TAG, result);
 			list.setArguments(previews);
 			getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, list).commit();
-			*/
+			
 			Log.d(MainActivity.TAG, String.valueOf(result.size()));
 		}
-	}
+	}*/
 	
 	/**
 	 * Permit construction of a Handler for messages
@@ -177,7 +180,10 @@ public class MainActivity extends SherlockFragmentActivity {
 		list = new PreviewFragment();
 		
 		// Initialize previews
-		new LoadingTask().execute();
+		// Previews are not yet ready: each must be assigned a VideoProvider
+		previews.setItems(Preview.getAll(MainActivity.this, getResources().getXml(R.xml.previews)));
+		
+		//new LoadingTask().execute();
 
 	}
 	
@@ -212,11 +218,22 @@ public class MainActivity extends SherlockFragmentActivity {
                 Intent btOn = videoSvc.start(note); //If bluetooth is off, this returns an intent that will get it turned on
                 videoSvc.addHandler(mHandler); 
                 
-                // Add back the handler if you're wondering why bluetooth isn't working
-                
                 if (btOn != null) {
                     startActivityForResult(btOn, REQUEST_ENABLE_BT);
-                }   
+                }
+                
+                headController = (MultiheadController) videoSvc.getConfigInstance(MultiheadController.CONFIG_INSTANCE_KEY);
+                if (headController == null) {
+                    headController = new MultiheadController(32, 24);
+                    videoSvc.setConfigInstance(MultiheadController.CONFIG_INSTANCE_KEY, headController);
+                    videoSvc.addHandler(headController.getHandler());
+                }
+                
+                try {
+                	initializePreviews();
+                } catch (Exception e) {
+                	Log.e(MainActivity.TAG, "Previews could not be initialized: " + e.getMessage());
+                }
 			}
         	
         	@Override
@@ -280,7 +297,43 @@ public class MainActivity extends SherlockFragmentActivity {
     	int width = 32, height = 8;
     	// the above vars must be made dynamic
     	// see doAfterServiceBound in VideoPlayer.java
-    	return new FFMPEGVideoProvider(MainActivity.this, videoSvc, width, height, colorPreview);
+    	return new FFMPEGVideoProvider(MainActivity.this, videoSvc, width, height, colorPreview);	
+    }
+    
+    private void initializePreviews() throws Exception {
+    	if (previews.getItems().size() == 0) {
+    		throw new Exception("No previews were read from XML");
+    	}
     	
+    	for (Preview p : previews.getItems()) {
+    		// Copy the video asset to a file if it doesn't already exist.
+			File videoFile = p.saveVideoFileAsset(getApplicationContext());
+			
+			// Bind a VideoProvider to this preview.
+			
+			// Preview has a video file, now load it.
+			if (videoFile.exists()) {
+				Log.d(MainActivity.TAG, "Trying to load video " + p.getFilename());
+				FFMPEGVideoProvider ffmpeg = new FFMPEGVideoProvider(MainActivity.this, videoSvc, headController.getVirtualWidth(), headController.getVirtualHeight(), COLOR_PREVIEW);
+		        ffmpeg.loadVideo(videoFile);
+		        
+		        p.setVideoProvider(ffmpeg);
+			}
+			
+			Log.d(MainActivity.TAG, videoFile.getAbsolutePath());
+			
+			
+			// Verify existence of a preview image file 
+			// and create it if not present.
+			try {
+				p.confirmPreviewBitmapReady(getApplicationContext());
+			} catch (Exception e) {
+				Log.e(MainActivity.TAG, e.getMessage());
+			}
+    		
+    		
+    	}
+
+    	Log.d(MainActivity.TAG, "REady to start?");
     }
 }

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Locale;
@@ -31,7 +32,6 @@ public class Preview {
 			VideoProvider.frameToBitmap(provider.getFrame(position), bmp);
 			return bmp;
 		}
-		
 	}
 	
 	public static String IMAGE_EXTENSION = ".png";
@@ -39,7 +39,6 @@ public class Preview {
 	private String name;
 	private String filename;
 	private String resName; // TODO: remove?
-	
 	private VideoProvider provider;
 	private boolean videoLoaded;
 	
@@ -157,5 +156,25 @@ public class Preview {
 	@Override
 	public String toString() {
 		return this.name;
+	}
+	
+	public void setVideoProvider(VideoProvider vp) {
+        provider = vp;
+	}
+	
+	public File saveVideoFileAsset(Context context) throws FileNotFoundException, IOException {
+		File videoFile = new File(context.getFilesDir(), this.getFilename());
+		if (!videoFile.exists()) {
+			InputStream is = context.getAssets().open(this.getFilename());
+			int size = is.available();
+			byte[] buffer = new byte[size];
+			is.read(buffer);
+			is.close();
+			
+			FileOutputStream fos = context.openFileOutput(this.getFilename(), Context.MODE_PRIVATE);
+			fos.write(buffer);
+			fos.close();
+		}
+		return videoFile;
 	}
 }

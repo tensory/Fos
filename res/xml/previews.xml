@@ -4,7 +4,9 @@
     <preview name="@string/txtAnimName_Heartbeat">
         <filename>heartbeat.avi</filename> 
     </preview>
-	<preview name="@string/txtAnimName_Safety1">
+<!-- 
+    	<preview name="@string/txtAnimName_Safety1">
         <filename>Safety1.avi</filename>
     </preview>
+     -->
 </previews>
