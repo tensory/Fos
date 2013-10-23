@@ -257,6 +257,7 @@ public class MainActivity extends SherlockFragmentActivity {
 			
         bindService(new Intent(MainActivity.this, BluetoothVideoService.class), svcConn, Service.START_STICKY);
         Log.d(MainActivity.TAG, "Bluetooth started");
+
 	}
 	
 	

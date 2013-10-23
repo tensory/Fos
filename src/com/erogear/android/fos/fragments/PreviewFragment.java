@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockListFragment;
 import com.erogear.android.fos.Preview;
@@ -43,11 +42,9 @@ public class PreviewFragment extends SherlockListFragment {
 				
 				PreviewListItemLayoutView oldView = (PreviewListItemLayoutView) l.getChildAt(lastSelectedIndex);
 				oldView.deactivate();
-				oldView.stopAnimation();
 			}
 		} 
 		pvView.toggleActive();
-		pvView.toggleAnimation();
 		
 		selectedPreviewIndex = position;
     }
@@ -56,4 +53,10 @@ public class PreviewFragment extends SherlockListFragment {
 		Log.d("CLICK_PREVIEW", "Currently looking at " + String.valueOf(selectedPreviewIndex));
 	}
 	
+	@Override
+	public void onDestroyView() {
+		super.onDestroyView();
+		
+		Log.e("PF", "View getting destroyed!");
+	}
 }
