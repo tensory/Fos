@@ -265,33 +265,9 @@ public class MainActivity extends SherlockFragmentActivity {
 			p.saveVideoFileAsset(getApplicationContext());
 
 			// Enqueue the preview for loading video assets
-			q.add(p);
-    	
-			/*
-			// Bind a VideoProvider to this preview.
-			
-			// Preview has a video file, now load it.
-			if (videoFile.exists()) {
-				Log.d(MainActivity.TAG, "Trying to load video " + p.getFilename());
-				FFMPEGVideoProvider ffmpeg = new FFMPEGVideoProvider(MainActivity.this, videoSvc, headController.getVirtualWidth(), headController.getVirtualHeight(), COLOR_PREVIEW);
-		        ffmpeg.loadVideo(videoFile);
-		        
-		        p.setVideoProvider(ffmpeg);
-			}
-			
-			Log.d(MainActivity.TAG, videoFile.getAbsolutePath());
-			
-			
-			// Verify existence of a preview image file 
-			// and create it if not present.
-			try {
-				p.confirmPreviewBitmapReady(getApplicationContext());
-			} catch (Exception e) {
-				Log.e(MainActivity.TAG, e.getMessage());
-			}
-    		*/
-    		
+			q.add(p);    		
     	}
+    	
     	// Set activePreview as first element
     	activePreview = q.peek();
 
