@@ -1,18 +1,16 @@
 package com.erogear.android.fos;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
 
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -64,6 +62,10 @@ public class MainActivity extends SherlockFragmentActivity {
 	
 	public static final String TAG = "MAIN";
 	public static final String PREVIEWS_DATA_TAG = "previews";
+	
+	// Preview video queue
+	Queue<Preview> q = new LinkedList<Preview>();
+	Preview activePreview;
 	
 	PreviewFragment list;
 	PreviewList previews = new PreviewList();
@@ -152,6 +154,16 @@ public class MainActivity extends SherlockFragmentActivity {
 			case BluetoothVideoService.MESSAGE_VIDEO_LOADED:
 				Toast.makeText(getApplicationContext(), "Video loaded!", Toast.LENGTH_SHORT).show();
 				addConversationLine((String) msg.obj);
+				
+				q.remove();
+				if (q.size() > 0) {
+					activePreview = q.peek();
+					loadNextPreviewVideo();
+				} else {
+					// Finished loading preview videos
+					activePreview = null;
+				}
+
 				break;
 			case BluetoothVideoService.MESSAGE_VIDEO_LOAD_FAIL:
 				Toast.makeText(getApplicationContext(), "Error while loading video; you may have some valid frames.", Toast.LENGTH_SHORT).show();
@@ -307,8 +319,12 @@ public class MainActivity extends SherlockFragmentActivity {
     	
     	for (Preview p : previews.getItems()) {
     		// Copy the video asset to a file if it doesn't already exist.
-			File videoFile = p.saveVideoFileAsset(getApplicationContext());
-			
+			p.saveVideoFileAsset(getApplicationContext());
+
+			// Enqueue the preview for loading video assets
+			q.add(p);
+    	
+			/*
 			// Bind a VideoProvider to this preview.
 			
 			// Preview has a video file, now load it.
@@ -330,10 +346,24 @@ public class MainActivity extends SherlockFragmentActivity {
 			} catch (Exception e) {
 				Log.e(MainActivity.TAG, e.getMessage());
 			}
-    		
+    		*/
     		
     	}
+    	// Set activePreview as first element
+    	activePreview = q.peek();
 
-    	Log.d(MainActivity.TAG, "REady to start?");
+    	Log.d(MainActivity.TAG, "Start loadign videos");
+    	loadNextPreviewVideo();
+    }
+    
+    public void loadNextPreviewVideo() {
+    	FFMPEGVideoProvider ffmpeg = new FFMPEGVideoProvider(MainActivity.this, videoSvc, headController.getVirtualWidth(), headController.getVirtualHeight(), COLOR_PREVIEW);
+        File f = new File(getApplicationContext().getFilesDir(), activePreview.getFilename());
+    	if (!f.exists()) {
+    		Toast.makeText(MainActivity.this, "fucked", Toast.LENGTH_SHORT).show();
+    		return;
+    	}
+    	ffmpeg.loadVideo(f);
+    	activePreview.setVideoProvider(ffmpeg);
     }
 }
