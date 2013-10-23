@@ -132,7 +132,11 @@ public class MainActivity extends SherlockFragmentActivity {
 			case BluetoothVideoService.MESSAGE_VIDEO_LOADED:
 				Toast.makeText(getApplicationContext(), "Video loaded!", Toast.LENGTH_SHORT).show();
 				addConversationLine((String) msg.obj);
+				activePreview.setVideoLoaded(true);
 				
+				// Use the just-loaded video to extract a thumbnail
+				activePreview.confirmPreviewBitmapReady(getApplicationContext());
+				// Advance the queue
 				q.remove();
 				if (q.size() > 0) {
 					activePreview = q.peek();
@@ -337,10 +341,9 @@ public class MainActivity extends SherlockFragmentActivity {
     public void loadNextPreviewVideo() {
     	FFMPEGVideoProvider ffmpeg = new FFMPEGVideoProvider(MainActivity.this, videoSvc, headController.getVirtualWidth(), headController.getVirtualHeight(), COLOR_PREVIEW);
         File f = new File(getApplicationContext().getFilesDir(), activePreview.getFilename());
-    	if (!f.exists()) {
-    		Toast.makeText(MainActivity.this, "fucked", Toast.LENGTH_SHORT).show();
-    		return;
-    	}
+    	// File should exist at this point.
+        // Fatal error if it does not.
+        
     	ffmpeg.loadVideo(f);
     	activePreview.setVideoProvider(ffmpeg);
     }

@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Locale;
 
 import android.content.Context;
 import android.content.res.XmlResourceParser;
@@ -38,16 +37,13 @@ public class Preview {
 	private static String TAG = "PREVIEW";
 	private String name;
 	private String filename;
-	private String resName; // TODO: remove?
 	private VideoProvider provider;
 	private boolean videoLoaded;
-	
 	
 	
 	public Preview() {
 		// At creation time, video has not been loaded.
 		videoLoaded = false;
-	
 	}
 	
 	public void setName(String name) {
@@ -66,36 +62,9 @@ public class Preview {
 		return this.filename;
 	}
 
-	/**
-	 * Sets the resource name.
-	 * This string will be used by /res/drawable matchers
-	 * to locate images and animation XML files.
-	 * @param name
-	 */
-	public void setResourceName(String filename) {
-		String truncated = filename.substring(0, filename.lastIndexOf('.'));
-		this.resName = truncated.toLowerCase(Locale.US);
-	}
-
 	public String getResourceName() {
-		return this.resName;
+		return this.filename.substring(0, filename.lastIndexOf('.'));
 	}
-	
-	/**
-	 * Get the resource ID of the animation XML file in /res/drawable
-	 * From http://daniel-codes.blogspot.com/2009/12/dynamically-retrieving-resources-in.html
-	 * 
-	 * @return int
-	 */
-	public int getDrawableResourceId() {
-		try {
-			Class res = R.drawable.class;
-			Field field = res.getField(this.resName);
-			return field.getInt(null);
-		} catch (Exception e) {
-			return 0;
-		}
-	} 
 	
 	public static ArrayList<Preview> getAll(Context context, XmlResourceParser parser) {
 		ArrayList<Preview> prevs = new ArrayList<Preview>();
@@ -115,8 +84,9 @@ public class Preview {
 	 * ready to use as a preview image
 	 * @throws Exception 
 	 */
-	public void confirmPreviewBitmapReady(Context context) throws Exception {
-		File f = new File(context.getFilesDir(), this.getResourceName() + Preview.IMAGE_EXTENSION);
+	public void confirmPreviewBitmapReady(Context context) {
+		String imageFilename = this.getResourceName() + Preview.IMAGE_EXTENSION;
+		File f = new File(context.getFilesDir(), imageFilename);
 		if (!f.exists()) {
 			// Image has not been created
 			// Has the video file been loaded?
@@ -126,16 +96,17 @@ public class Preview {
 				try {
 					saveThumbnail(f, bmp); 					
 				} catch (Exception e) {
-					throw e;
+					Log.e(Preview.TAG, "Could not save thumbnail: " + e.getMessage());
 				}
 
 			} else {
 				Log.e(Preview.TAG, "No video loaded");
 				
 			}
-			// Do a final check on the new file
 		}
-		
+		// Do a final check on the new file
+		f = new File(context.getFilesDir(), imageFilename);
+		Log.d(Preview.TAG, f.exists() ? f.getAbsolutePath() : ":(");
 		
 	}
 	
@@ -177,4 +148,8 @@ public class Preview {
 		}
 		return videoFile;
 	}
+	
+	public void setVideoLoaded(boolean isLoaded) {
+		videoLoaded = isLoaded;
+	};
 }
