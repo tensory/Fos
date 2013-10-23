@@ -42,6 +42,7 @@ public class MainActivity extends SherlockFragmentActivity {
 	
 	// Preview video queue
 	Queue<Preview> q = new LinkedList<Preview>();
+	PreviewLoadStateManager qManager;
 	Preview activePreview;
 	
 	// Previews sent to the display fragment
@@ -110,10 +111,14 @@ public class MainActivity extends SherlockFragmentActivity {
 				} else {
 					// Finished loading preview videos
 					activePreview = null;
-					// Launch preview display
-					displayPreviews();
+					qManager.setFinished();
 				}
 
+				if (qManager.hasFinished()) {
+					// All videos have loaded!
+					// Launch preview display
+					displayPreviews();					
+				}
 				break;
 			case BluetoothVideoService.MESSAGE_VIDEO_LOAD_FAIL:
 				Toast.makeText(getApplicationContext(), "Error while loading video; you may have some valid frames.", Toast.LENGTH_SHORT).show();
@@ -135,6 +140,44 @@ public class MainActivity extends SherlockFragmentActivity {
 		};
 	}
 	
+	/**
+	 * Manager for state variables about video preview loading.
+	 * This prevents the load attempt from being restarted.
+	 * Only one manager should be created for a queue of videos to load.
+	 */
+	private static class PreviewLoadStateManager {
+		boolean started = false;
+		boolean finished = false;
+		private static PreviewLoadStateManager instance = null;
+		
+		protected PreviewLoadStateManager() {}
+		
+		public static PreviewLoadStateManager getInstance() {
+			if (instance == null) {
+				instance = new PreviewLoadStateManager();
+				instance.started = false;
+				instance.finished = false;
+			}
+			return instance;
+		}
+		
+		public void setStarted() {
+			instance.started = true;
+		}
+		
+		public void setFinished() {
+			instance.finished = true;
+		}
+		
+		public boolean hasStarted() {
+			return instance.finished;
+		}
+		
+		public boolean hasFinished() {
+			return instance.finished;
+		}
+	}
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -151,7 +194,7 @@ public class MainActivity extends SherlockFragmentActivity {
 		 * it is safe to hand previews off to PreviewFragment
 		 */
 		previews = Preview.getAll(MainActivity.this, getResources().getXml(R.xml.previews));
-
+		qManager = PreviewLoadStateManager.getInstance();
 	}
 	
 	@Override
@@ -196,10 +239,13 @@ public class MainActivity extends SherlockFragmentActivity {
                     videoSvc.addHandler(headController.getHandler());
                 }
                 
-                try {
-                	initializePreviews();
-                } catch (Exception e) {
-                	Log.e(MainActivity.TAG, "Previews could not be initialized: " + e.getMessage());
+                if (!qManager.hasStarted()) {
+                    try {
+                    	initializePreviews();
+                    	qManager.setStarted();
+                    } catch (Exception e) {
+                    	Log.e(MainActivity.TAG, "Previews could not be initialized: " + e.getMessage());
+                    }
                 }
 			}
         	
@@ -270,7 +316,7 @@ public class MainActivity extends SherlockFragmentActivity {
     	// Set activePreview as first element
     	activePreview = q.peek();
 
-    	Log.d(MainActivity.TAG, "Start loadign videos");
+    	Log.d(MainActivity.TAG, "initializePreviews: Start loading videos");
     	loadNextPreviewVideo();
     }
     
