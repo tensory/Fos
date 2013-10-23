@@ -33,33 +33,11 @@ import com.erogear.android.bluetooth.video.VideoProvider;
 import com.erogear.android.fos.fragments.PreviewFragment;
 
 public class MainActivity extends SherlockFragmentActivity {
-	public class PreviewList {
-		private ArrayList<Preview> items;
-		private boolean videoProvidersReady;
-		private boolean imagesReady;
-		private boolean ready;
-		
-		public PreviewList() {
-			items = new ArrayList<Preview>();
-			videoProvidersReady = false;
-			imagesReady = false;
-			ready = false;
-		}
-		
-		public void setItems(ArrayList<Preview> list) {
-			items = list;
-		}
-		
-		public ArrayList<Preview> getItems() {
-			return items;
-		}
-		
-	}
-	
 	// Intent request codes
 	public static final int PREFERENCE_INTENT_RESULT = 1;
 	private static final int REQUEST_ENABLE_BT = 2;
 	
+	// Tags
 	public static final String TAG = "MAIN";
 	public static final String PREVIEWS_DATA_TAG = "previews";
 	
@@ -67,9 +45,9 @@ public class MainActivity extends SherlockFragmentActivity {
 	Queue<Preview> q = new LinkedList<Preview>();
 	Preview activePreview;
 	
+	// Previews sent to the display fragment
 	PreviewFragment list;
-	PreviewList previews = new PreviewList();
-	boolean previewVideoProvidersSet;
+	ArrayList<Preview> previews = new ArrayList<Preview>();
 	
 	private BluetoothVideoService videoSvc;
 	private ServiceConnection svcConn;
@@ -193,7 +171,7 @@ public class MainActivity extends SherlockFragmentActivity {
 		
 		// Initialize previews
 		// Previews are not yet ready: each must be assigned a VideoProvider
-		previews.setItems(Preview.getAll(MainActivity.this, getResources().getXml(R.xml.previews)));
+		previews = Preview.getAll(MainActivity.this, getResources().getXml(R.xml.previews));
 		
 		//new LoadingTask().execute();
 
@@ -313,11 +291,11 @@ public class MainActivity extends SherlockFragmentActivity {
     }
     
     private void initializePreviews() throws Exception {
-    	if (previews.getItems().size() == 0) {
+    	if (previews.size() == 0) {
     		throw new Exception("No previews were read from XML");
     	}
     	
-    	for (Preview p : previews.getItems()) {
+    	for (Preview p : previews) {
     		// Copy the video asset to a file if it doesn't already exist.
 			p.saveVideoFileAsset(getApplicationContext());
 
