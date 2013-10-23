@@ -17,11 +17,9 @@ import android.widget.TextView;
 import com.erogear.android.fos.views.PreviewListItemLayoutView;
 
 public class PreviewAdapter extends ArrayAdapter<Preview> {
-	//Context context;
 	
 	public PreviewAdapter(Context context, List<Preview> previews) {
 		super(context, 0, previews);
-	//	this.context = context;
 	}
 	
 	@Override
@@ -50,7 +48,7 @@ public class PreviewAdapter extends ArrayAdapter<Preview> {
 		return view;
 	}
 	
-	// Multi-API level targeting because setBackgroundDrawable is deprecated
+	// Multi-API level targeting because view.setBackgroundDrawable is deprecated
 	// http://stackoverflow.com/questions/18806709/how-to-set-a-bitmap-to-background-for-a-view-android-api-10-18
 	@TargetApi(16)
 	private void setBackgroundV16Plus(View view, Bitmap bmp) {
