@@ -9,12 +9,14 @@ import android.view.View;
 import android.widget.ListView;
 
 import com.actionbarsherlock.app.SherlockListFragment;
+import com.erogear.android.fos.MainActivity;
 import com.erogear.android.fos.Preview;
 import com.erogear.android.fos.PreviewAdapter;
 import com.erogear.android.fos.R;
 import com.erogear.android.fos.views.PreviewListItemLayoutView;
 
 public class PreviewFragment extends SherlockListFragment {
+	private ArrayList<Preview> previews;
 	private static int PREVIEW_NOT_SET_INDEX = -1;
 	private int selectedPreviewIndex;
 	
@@ -23,8 +25,7 @@ public class PreviewFragment extends SherlockListFragment {
 		super.onActivityCreated(savedInstanceState);
 		
 		selectedPreviewIndex = PreviewFragment.PREVIEW_NOT_SET_INDEX;
-		Context activity = getActivity();
-		ArrayList<Preview> previews = Preview.getAll(activity, activity.getResources().getXml(R.xml.previews));
+		previews = getArguments().getParcelableArrayList(MainActivity.PREVIEWS_DATA_TAG);
 		setListAdapter(new PreviewAdapter(getActivity(), previews));
 	}
 	
@@ -52,11 +53,19 @@ public class PreviewFragment extends SherlockListFragment {
 	public void onClickPreview(View v) {
 		Log.d("CLICK_PREVIEW", "Currently looking at " + String.valueOf(selectedPreviewIndex));
 	}
-	
+	/*
 	@Override
 	public void onDestroyView() {
 		super.onDestroyView();
 		
 		Log.e("PF", "View getting destroyed!");
+		Bundle loadedPreviews = new Bundle();
+		saveInstanceData(loadedPreviews);
+		
 	}
+	
+	protected saveInstanceData(Bundle bundle) {
+		bundle.putParcelableArrayList(MainActivity.PREVIEWS_DATA_TAG, value)
+	}
+	*/
 }
