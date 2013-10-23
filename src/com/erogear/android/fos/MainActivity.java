@@ -58,39 +58,6 @@ public class MainActivity extends SherlockFragmentActivity {
 	
 	// TODO: Log instead of Toasting.
 	private long lastNoDeviceToast = 0;
-	/*
-	// Load previews on a different thread.
-	private class LoadingTask extends AsyncTask<Void, Void, ArrayList<Preview>> {
-		
-		@Override
-		protected ArrayList<Preview> doInBackground(Void... params) {
-			return previewList;
-		}
-		// Start bluetooth service
-		// When bluetooth service is started, make VideoSvc available to Previews
-		// so that Previews can have their own VideoProviders
-		// This MUST wait for VideoSvc
-		
-		
-		@Override
-		protected void onPostExecute(ArrayList<Preview> result) {
-			Context app = getApplicationContext();
-			
-			// Start populating previews with frame data.
-			// Eventually probably move this stuff to AsyncTask or Runnable 
-			for (Preview preview : result) {
-				
-			}
-			
-			/*
-			Bundle previews = new Bundle();
-			previews.putParcelableArrayList(MainActivity.PREVIEWS_DATA_TAG, result);
-			list.setArguments(previews);
-			getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, list).commit();
-			
-			Log.d(MainActivity.TAG, String.valueOf(result.size()));
-		}
-	}*/
 	
 	/**
 	 * Permit construction of a Handler for messages
@@ -173,11 +140,16 @@ public class MainActivity extends SherlockFragmentActivity {
 		setContentView(R.layout.activity_main);
 		list = new PreviewFragment();
 		
-		// Initialize previews
-		// Previews are not yet ready: each must be assigned a VideoProvider
+		/*
+		 * Initialize previews
+		 * 
+		 * Previews are not yet ready when Preview.getAll returns: 
+		 * each must be assigned a VideoProvider
+		 * 
+		 * After videos finish loading (through queue processed by VideoService message handler)
+		 * it is safe to hand previews off to PreviewFragment
+		 */
 		previews = Preview.getAll(MainActivity.this, getResources().getXml(R.xml.previews));
-		
-		//new LoadingTask().execute();
 
 	}
 	
@@ -279,19 +251,6 @@ public class MainActivity extends SherlockFragmentActivity {
     
     private void addConversationLine(String str) {
     	Log.d("BluetoothServiceConnection", str);
-    }
-    
-    /**
-     * Get the right video provider for a given video file type. 
-     * @param extension
-     * @return
-     */
-    private VideoProvider getVideoProvider(String extension) {
-    	boolean colorPreview = false;
-    	int width = 32, height = 8;
-    	// the above vars must be made dynamic
-    	// see doAfterServiceBound in VideoPlayer.java
-    	return new FFMPEGVideoProvider(MainActivity.this, videoSvc, width, height, colorPreview);	
     }
     
     private void initializePreviews() throws Exception {
