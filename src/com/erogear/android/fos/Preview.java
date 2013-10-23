@@ -5,17 +5,19 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 import android.content.Context;
 import android.content.res.XmlResourceParser;
 import android.graphics.Bitmap;
+import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
 
 import com.erogear.android.bluetooth.video.VideoProvider;
 
-public class Preview {
+public class Preview implements Parcelable {
 	public static class FrameExtractor {
 		// TODO these cannot be set here, must be derived from video
 		private static int BITMAP_WIDTH = 32;
@@ -40,6 +42,12 @@ public class Preview {
 	private VideoProvider provider;
 	private boolean videoLoaded;
 	
+	public Preview(Parcel in) {
+		name = in.readString();
+		filename = in.readString();
+		videoLoaded = (in.readByte() == 1);
+		// provider is not rehydrated because serialization is hard
+	}
 	
 	public Preview() {
 		// At creation time, video has not been loaded.
@@ -151,5 +159,18 @@ public class Preview {
 	
 	public void setVideoLoaded(boolean isLoaded) {
 		videoLoaded = isLoaded;
+	}
+
+	@Override
+	public int describeContents() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeString(name);
+		dest.writeString(filename);
+		dest.writeByte((byte)(videoLoaded ? 1 : 0));
 	};
 }

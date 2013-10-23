@@ -311,7 +311,7 @@ public class MainActivity extends SherlockFragmentActivity {
     
     public void displayPreviews() {
     	Bundle fragmentData = new Bundle();
-    	fragmentData.putParcelableArrayList(MainActivity.PREVIEWS_DATA_TAG, previews);
+    	fragmentData.putParcelableArrayList(MainActivity.PREVIEWS_DATA_TAG, new ArrayList<Preview>());
 		list.setArguments(fragmentData);
 		getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, list).commit();
 		
