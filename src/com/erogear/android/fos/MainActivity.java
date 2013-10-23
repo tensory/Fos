@@ -111,6 +111,8 @@ public class MainActivity extends SherlockFragmentActivity {
 				} else {
 					// Finished loading preview videos
 					activePreview = null;
+					// Launch preview display
+					displayPreviews();
 				}
 
 				break;
@@ -305,5 +307,14 @@ public class MainActivity extends SherlockFragmentActivity {
         
     	ffmpeg.loadVideo(f);
     	activePreview.setVideoProvider(ffmpeg);
+    }
+    
+    public void displayPreviews() {
+    	Bundle fragmentData = new Bundle();
+    	fragmentData.putParcelableArrayList(MainActivity.PREVIEWS_DATA_TAG, previews);
+		list.setArguments(fragmentData);
+		getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, list).commit();
+		
+		Log.d(MainActivity.TAG, String.valueOf(previews.size()) + " added to preview fragment :)");
     }
 }
