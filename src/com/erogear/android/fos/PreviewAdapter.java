@@ -40,11 +40,11 @@ public class PreviewAdapter extends ArrayAdapter<Preview> {
 		Bitmap bitmap = BitmapFactory.decodeFile(pvImagePath);
 		// Set it as background
 		if (android.os.Build.VERSION.SDK_INT >= 16){
-            setBackgroundV16Plus(previewImage, bitmap);
-        } else {
-            setBackgroundV16Minus(previewImage, bitmap);
-        }
-		
+			setBackgroundV16Plus(previewImage, bitmap);
+		} else {
+			setBackgroundV16Minus(previewImage, bitmap);
+		}
+
 		return view;
 	}
 	
