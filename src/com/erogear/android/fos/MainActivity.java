@@ -344,4 +344,8 @@ public class MainActivity extends SherlockFragmentActivity {
 		
 		Log.d(MainActivity.TAG, String.valueOf(previews.size()) + " added to preview fragment :)");
     }
+    
+    public HashMap<Integer, VideoProvider> getVideoProviderCache() {
+    	return previewVideoProviderCache;
+    }
 }

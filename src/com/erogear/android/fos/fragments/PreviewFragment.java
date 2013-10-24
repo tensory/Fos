@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.ListView;
 
 import com.actionbarsherlock.app.SherlockListFragment;
+import com.erogear.android.bluetooth.video.VideoProvider;
 import com.erogear.android.fos.MainActivity;
 import com.erogear.android.fos.Preview;
 import com.erogear.android.fos.PreviewAdapter;
@@ -49,6 +50,11 @@ public class PreviewFragment extends SherlockListFragment {
 	}
 
 	public void onClickPreview(View v) {
-		Log.d("CLICK_PREVIEW", "Currently looking at " + String.valueOf(selectedPreviewIndex));
+		PreviewListItemLayoutView pvView = (PreviewListItemLayoutView) v;
+		Preview selected = (Preview) previews.get(selectedPreviewIndex);
+		VideoProvider provider = ((MainActivity) getActivity()).getVideoProviderCache().get(selected.hashCode());
+		pvView.toggleAnimation(provider);
+		Log.d("CLICK_PREVIEW", "Currently looking at " + selected.toString());
+		
 	}
 }
