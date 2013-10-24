@@ -17,6 +17,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.View;
 import android.widget.Toast;
 
@@ -44,11 +45,11 @@ public class MainActivity extends SherlockFragmentActivity {
 	
 	// Preview video queue
 	Queue<Preview> q = new LinkedList<Preview>();
-	PreviewLoadStateManager qManager;
-	Preview activePreview;
+	PreviewLoadStateManager qManager = PreviewLoadStateManager.getInstance();
+	PreviewLoader activePreview = new PreviewLoader();
 	
 	// Video controller pool
-	private HashMap<Integer, VideoProvider> previewVideoProviderCache;
+	private SparseArray<VideoProvider> previewVideoProviderCache;
 	
 	// Previews sent to the display fragment
 	PreviewFragment list;
@@ -104,14 +105,15 @@ public class MainActivity extends SherlockFragmentActivity {
 			case BluetoothVideoService.MESSAGE_VIDEO_LOADED:
 				Toast.makeText(getApplicationContext(), "Video loaded!", Toast.LENGTH_SHORT).show();
 				addConversationLine((String) msg.obj);
-				activePreview.setVideoLoaded(true);
+				activePreview.getPreview().setVideoLoaded(true); // make this go away
 				
 				// Use the just-loaded video to extract a thumbnail
-				activePreview.confirmPreviewBitmapReady(getApplicationContext());
+				activePreview.getPreview().confirmPreviewBitmapReady(getApplicationContext());
+				previewVideoProviderCache.put(activePreview.getPreview().hashCode(), activePreview.getVideoProvider());
 				// Advance the queue
 				q.remove();
 				if (q.size() > 0) {
-					activePreview = q.peek();
+					activePreview.attachPreview(q.peek());
 					loadNextPreviewVideo();
 				} else {
 					// Finished loading preview videos
@@ -199,7 +201,9 @@ public class MainActivity extends SherlockFragmentActivity {
 		 * it is safe to hand previews off to PreviewFragment
 		 */
 		previews = Preview.getAll(MainActivity.this, getResources().getXml(R.xml.previews));
-		qManager = PreviewLoadStateManager.getInstance();
+		
+		// Initialize video providers cache
+		previewVideoProviderCache = new SparseArray<VideoProvider>(previews.size());
 	}
 	
 	@Override
@@ -320,7 +324,7 @@ public class MainActivity extends SherlockFragmentActivity {
     	}
     	
     	// Set activePreview as first element
-    	activePreview = q.peek();
+    	activePreview.attachPreview(q.peek());
 
     	Log.d(MainActivity.TAG, "initializePreviews: Start loading videos");
     	loadNextPreviewVideo();
@@ -328,7 +332,7 @@ public class MainActivity extends SherlockFragmentActivity {
     
     public void loadNextPreviewVideo() {
     	FFMPEGVideoProvider ffmpeg = new FFMPEGVideoProvider(MainActivity.this, videoSvc, headController.getVirtualWidth(), headController.getVirtualHeight(), COLOR_PREVIEW);
-        File f = new File(getApplicationContext().getFilesDir(), activePreview.getFilename());
+        File f = new File(getApplicationContext().getFilesDir(), activePreview.getPreview().getFilename());
     	// File should exist at this point.
         // Fatal error if it does not.
         
@@ -345,7 +349,7 @@ public class MainActivity extends SherlockFragmentActivity {
 		Log.d(MainActivity.TAG, String.valueOf(previews.size()) + " added to preview fragment :)");
     }
     
-    public HashMap<Integer, VideoProvider> getVideoProviderCache() {
+    public SparseArray<VideoProvider> getVideoProviderCache() {
     	return previewVideoProviderCache;
     }
 }

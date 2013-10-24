@@ -56,9 +56,12 @@ public class PreviewFragment extends SherlockListFragment {
 		Preview selected = (Preview) getListAdapter().getItem(selectedPreviewIndex);
 		
 		// Provide the preview's VideoProvider to the view controller
-		VideoProvider provider = ((MainActivity) getActivity()).getVideoProviderCache().get(selected.hashCode());
-		pvView.toggleAnimation(provider);
-		Log.d("CLICK_PREVIEW", "Currently looking at " + selected.toString());
-		
+		try {
+			VideoProvider provider = ((MainActivity) getActivity()).getVideoProviderCache().get(selected.hashCode());
+			pvView.toggleAnimation(provider);
+			Log.d("CLICK_PREVIEW", "Currently looking at " + selected.toString());
+		} catch (Exception e) {
+			Log.e("PLILV", e.getMessage());
+		}
 	}
 }
