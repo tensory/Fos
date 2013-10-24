@@ -3,8 +3,8 @@ package com.erogear.android.fos.views;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.AnimationDrawable;
-import android.os.AsyncTask;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
@@ -14,31 +14,11 @@ import com.erogear.android.fos.PreviewAdapter;
 import com.erogear.android.fos.R;
 
 public class PreviewListItemLayoutView extends RelativeLayout {
+	private static final int UNSET_FRAME_ID = -1;
 	private Context context;
 	private boolean isActive;
 	public ImageView ivBtnPreview, ivBtnAccept;
-	private AnimationTask animation;
-
-	
-	private class AnimationTask extends AsyncTask<VideoProvider, Void, Void> {
-
-		@Override
-		protected Void doInBackground(VideoProvider... params) {
-			/* VideoProvider does not provide a public interface
-			 * to its frameList, so one must be approximated
-			 * by iterating over frames
-			 */
-			ImageView iv = (ImageView) findViewById(R.id.ivPreview);
-			VideoProvider provider = params[0];
-			int frameCount = provider.getFrameCount();
-			for (int i = 0; i < frameCount; i++) {
-				Bitmap bmp = Preview.FrameExtractor.getFrameBitmap(provider, i);
-				PreviewAdapter.setBackgroundImage(context, iv, bmp);
-			}
-			
-			return null;
-		}
-	}
+	private int lastFrameId;
 	
 	public PreviewListItemLayoutView(Context context) {
 		super(context);
@@ -68,13 +48,9 @@ public class PreviewListItemLayoutView extends RelativeLayout {
 	}
 	
 	public void toggleAnimation(VideoProvider provider) {
-		ImageView iv = (ImageView) findViewById(R.id.ivPreview);
-		if (animation == null) {
-			animation = new AnimationTask();
-		}
-
+		
 //		if (!animation.isRunning() && isActive) {
-			animation.execute();
+		startAnimation(provider);
 //		} else {
 //			stopAndReset(animation);
 //		}
@@ -115,5 +91,20 @@ public class PreviewListItemLayoutView extends RelativeLayout {
 	private void deactivateImageButton(ImageView target, int resId) {
 		target.setImageResource(resId);
 		target.setClickable(false);
+	}
+	
+	private void startAnimation(VideoProvider provider) {
+		if (lastFrameId == PreviewListItemLayoutView.UNSET_FRAME_ID) {
+			lastFrameId = 0;
+		}
+		
+		ImageView iv = (ImageView) findViewById(R.id.ivPreview);
+		
+		for (int i = lastFrameId; i < provider.getFrameCount(); i++) {
+			Bitmap bmp = Preview.FrameExtractor.getFrameBitmap(provider, i);
+			PreviewAdapter.setBackgroundImage(context, iv, bmp);			
+		}
+		
+		Log.d("PVLIV", "Done");
 	}
 }
