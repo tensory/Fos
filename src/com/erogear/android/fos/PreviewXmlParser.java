@@ -51,7 +51,6 @@ public class PreviewXmlParser {
 	            		if (parser.getEventType() == XmlPullParser.TEXT) {
 		            		String filename = parser.getText();
 		            		preview.setFilename(filename);
-		            		preview.setResourceName(filename);
 	            		}
 	            	}
 	            	
