@@ -46,6 +46,7 @@ public class Preview implements Parcelable {
 	}
 	
 	public Preview() { }
+	// TODO: add CREATOR field
 
 	public void setName(String name) {
 		this.name = name;
