@@ -200,7 +200,11 @@ public class MainActivity extends SherlockFragmentActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
+		
         Log.i(TAG, "--- ONRESUME ---");
+        
+        // Redraw previews items to fill view.
+        list.resetPreviewItemHeight();
         
         startService(new Intent(this, BluetoothVideoService.class));
         svcConn = new ServiceConnection() {
@@ -339,4 +343,5 @@ public class MainActivity extends SherlockFragmentActivity {
 		
 		Log.d(MainActivity.TAG, String.valueOf(previews.size()) + " added to preview fragment :)");
     }
+    
 }
