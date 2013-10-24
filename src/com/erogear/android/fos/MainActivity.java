@@ -30,6 +30,7 @@ import com.erogear.android.bluetooth.comm.BluetoothVideoService;
 import com.erogear.android.bluetooth.comm.DeviceConnection;
 import com.erogear.android.bluetooth.comm.FrameConsumer;
 import com.erogear.android.bluetooth.video.FFMPEGVideoProvider;
+import com.erogear.android.bluetooth.video.FrameController;
 import com.erogear.android.bluetooth.video.MultiheadController;
 import com.erogear.android.bluetooth.video.VideoProvider;
 import com.erogear.android.fos.fragments.PreviewFragment;
@@ -55,6 +56,7 @@ public class MainActivity extends SherlockFragmentActivity {
 	PreviewFragment list;
 	ArrayList<Preview> previews = new ArrayList<Preview>();
 	
+    private FrameController<VideoProvider, MultiheadController> controller;
 	private BluetoothVideoService videoSvc;
 	private ServiceConnection svcConn;
     private MultiheadController headController;
@@ -348,7 +350,19 @@ public class MainActivity extends SherlockFragmentActivity {
 		Log.d(MainActivity.TAG, String.valueOf(previews.size()) + " added to preview fragment :)");
     }
     
+    /**
+     * Get the mapping of preview IDs to loaded video providers
+     * @return video provider cache
+     */
     public SparseArray<VideoProvider> getVideoProviderCache() {
     	return previewVideoProviderCache;
+    }
+    
+    /**
+     * Get the video controller for the EroGear device.
+     * @return frame controller
+     */
+    public FrameController<VideoProvider, MultiheadController> getController() {
+    	return controller;
     }
 }
