@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import android.content.Context;
 import android.content.res.XmlResourceParser;
 import android.graphics.Bitmap;
-import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -40,6 +39,7 @@ public class Preview implements Parcelable {
 	private String name;
 	private String filename;
 	private VideoProvider provider;
+	private int id;
 	private boolean videoLoaded;
 	
 	public Preview(Parcel in) {
@@ -129,11 +129,29 @@ public class Preview implements Parcelable {
 	public String toString() {
 		return this.name;
 	}
-	
+
+	// Only used in "active preview" context
 	public void setVideoProvider(VideoProvider vp) {
-        provider = vp;
+		provider = vp;
 	}
 	
+	/**
+	 * Used by the "active" preview.
+	 * Temporarily store a hash code that identifies the preview.
+	 * 
+	 * The passed-in hashCode is not intended to be the same 
+	 * as the hashCode of the "active" Preview that only serves as a wrapper.
+	 * 
+	 * Maintaining a table of videoProviders with Preview hashCodes 
+	 * is a workaround solution instead of serializing VideoProvider
+	 * to pass its instances to the PreviewFragment.
+	 * 
+	 * @param idCode
+	 */ 
+	public void setId(int hashCode) {
+		id = hashCode;
+	}
+
 	public File saveVideoFileAsset(Context context) throws FileNotFoundException, IOException {
 		File videoFile = new File(context.getFilesDir(), this.getFilename());
 		if (!videoFile.exists()) {

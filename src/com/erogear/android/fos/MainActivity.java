@@ -2,6 +2,7 @@ package com.erogear.android.fos;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -29,6 +30,7 @@ import com.erogear.android.bluetooth.comm.DeviceConnection;
 import com.erogear.android.bluetooth.comm.FrameConsumer;
 import com.erogear.android.bluetooth.video.FFMPEGVideoProvider;
 import com.erogear.android.bluetooth.video.MultiheadController;
+import com.erogear.android.bluetooth.video.VideoProvider;
 import com.erogear.android.fos.fragments.PreviewFragment;
 
 public class MainActivity extends SherlockFragmentActivity {
@@ -44,6 +46,9 @@ public class MainActivity extends SherlockFragmentActivity {
 	Queue<Preview> q = new LinkedList<Preview>();
 	PreviewLoadStateManager qManager;
 	Preview activePreview;
+	
+	// Video controller pool
+	private HashMap<Integer, VideoProvider> previewVideoProviderCache;
 	
 	// Previews sent to the display fragment
 	PreviewFragment list;
