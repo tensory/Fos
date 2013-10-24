@@ -50,8 +50,12 @@ public class PreviewFragment extends SherlockListFragment {
 	}
 
 	public void onClickPreview(View v) {
-		PreviewListItemLayoutView pvView = (PreviewListItemLayoutView) v;
-		Preview selected = (Preview) previews.get(selectedPreviewIndex);
+		// Get the clicked parent view
+		PreviewListItemLayoutView pvView = (PreviewListItemLayoutView) getListView().getChildAt(selectedPreviewIndex);
+		// Get the selected Preview object
+		Preview selected = (Preview) getListAdapter().getItem(selectedPreviewIndex);
+		
+		// Provide the preview's VideoProvider to the view controller
 		VideoProvider provider = ((MainActivity) getActivity()).getVideoProviderCache().get(selected.hashCode());
 		pvView.toggleAnimation(provider);
 		Log.d("CLICK_PREVIEW", "Currently looking at " + selected.toString());
