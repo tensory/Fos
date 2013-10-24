@@ -39,22 +39,14 @@ public class Preview implements Parcelable {
 	private static String TAG = "PREVIEW";
 	private String name;
 	private String filename;
-	private VideoProvider provider;
-	private int id;
-	private boolean videoLoaded;
 	
 	public Preview(Parcel in) {
 		name = in.readString();
 		filename = in.readString();
-		videoLoaded = (in.readByte() == 1);
-		// provider is not rehydrated because serialization is hard
 	}
 	
-	public Preview() {
-		// At creation time, video has not been loaded.
-		videoLoaded = false;
-	}
-	
+	public Preview() { }
+
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -99,9 +91,9 @@ public class Preview implements Parcelable {
 		if (!f.exists()) {
 			// Image has not been created
 			// Has the video file been loaded?
-			if (videoLoaded) {
+			if (((MainActivity) context).getVideoProviderCache().get(this.hashCode()) != null) {
 				// If video has been loaded, extract a frame and save it
-				Bitmap bmp = FrameExtractor.getFrameBitmap(provider, 0);
+				Bitmap bmp = FrameExtractor.getFrameBitmap(((MainActivity) context).getVideoProviderCache().get(this.hashCode()), 0);
 				try {
 					saveThumbnail(f, bmp); 					
 				} catch (Exception e) {
@@ -131,28 +123,6 @@ public class Preview implements Parcelable {
 		return this.name;
 	}
 
-	// Only used in "active preview" context
-	public void setVideoProvider(VideoProvider vp) {
-		provider = vp;
-	}
-	
-	/**
-	 * Used by the "active" preview.
-	 * Temporarily store a hash code that identifies the preview.
-	 * 
-	 * The passed-in hashCode is not intended to be the same 
-	 * as the hashCode of the "active" Preview that only serves as a wrapper.
-	 * 
-	 * Maintaining a table of videoProviders with Preview hashCodes 
-	 * is a workaround solution instead of serializing VideoProvider
-	 * to pass its instances to the PreviewFragment.
-	 * 
-	 * @param idCode
-	 */ 
-	public void setId(int hashCode) {
-		id = hashCode;
-	}
-
 	public File saveVideoFileAsset(Context context) throws FileNotFoundException, IOException {
 		File videoFile = new File(context.getFilesDir(), this.getFilename());
 		if (!videoFile.exists()) {
@@ -168,10 +138,6 @@ public class Preview implements Parcelable {
 		}
 		return videoFile;
 	}
-	
-	public void setVideoLoaded(boolean isLoaded) {
-		videoLoaded = isLoaded;
-	}
 
 	@Override
 	public int describeContents() {
@@ -183,6 +149,5 @@ public class Preview implements Parcelable {
 	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeString(name);
 		dest.writeString(filename);
-		dest.writeByte((byte)(videoLoaded ? 1 : 0));
 	};
 }

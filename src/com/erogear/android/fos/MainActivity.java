@@ -105,7 +105,6 @@ public class MainActivity extends SherlockFragmentActivity {
 			case BluetoothVideoService.MESSAGE_VIDEO_LOADED:
 				Toast.makeText(getApplicationContext(), "Video loaded!", Toast.LENGTH_SHORT).show();
 				addConversationLine((String) msg.obj);
-				activePreview.getPreview().setVideoLoaded(true); // make this go away
 				
 				// Use the just-loaded video to extract a thumbnail
 				activePreview.getPreview().confirmPreviewBitmapReady(getApplicationContext());
