@@ -114,8 +114,9 @@ public class Preview implements Parcelable {
 		}
 		// Do a final check on the new file
 		f = new File(context.getFilesDir(), imageFilename);
-		Log.d(Preview.TAG, f.exists() ? f.getAbsolutePath() : ":(");
-		
+		if (!f.exists()) {
+			Log.e(Preview.TAG, this.name + ": No image preview found");
+		}		
 	}
 	
 	private void saveThumbnail(File file, Bitmap bitmap) throws FileNotFoundException, IOException {
