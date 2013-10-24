@@ -64,4 +64,21 @@ public class PreviewFragment extends SherlockListFragment {
 			Log.e("PLILV", e.getMessage());
 		}
 	}
+	
+	/**
+	 * Reset the heights of all list items dynamically
+	 * when the device is rotated
+	 * to preserve visible ratio.
+	 */
+    public void redrawPreviewItems(int containerWidth, double ratio) {
+    	int height = (int) (containerWidth * ratio);
+    	
+    	ListView list = getListView();
+    	for (int i = 0; i < list.getCount(); i++) {
+    		PreviewListItemLayoutView layout = (PreviewListItemLayoutView) list.getChildAt(i);
+    		layout.setLayoutHeight(height);
+    	}
+    	
+    	Log.d("PF", "Changing height ratio");
+    }
 }

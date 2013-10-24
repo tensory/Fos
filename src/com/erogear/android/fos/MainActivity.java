@@ -12,6 +12,7 @@ import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -208,8 +209,20 @@ public class MainActivity extends SherlockFragmentActivity {
 	}
 	
 	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+		
+		// Use different aspect ratio depending on orientation
+		double aspectRatio = getPreviewAspectRatio(newConfig.orientation);
+		
+		// Redraw previews items to fill view at proportional height.
+        scalePreviewItemHeights(aspectRatio);
+	}
+	
+	@Override
 	protected void onResume() {
 		super.onResume();
+		
         Log.i(TAG, "--- ONRESUME ---");
         
         startService(new Intent(this, BluetoothVideoService.class));
@@ -346,8 +359,31 @@ public class MainActivity extends SherlockFragmentActivity {
     	fragmentData.putParcelableArrayList(MainActivity.PREVIEWS_DATA_TAG, previews);
 		list.setArguments(fragmentData);
 		getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, list).commit();
-		
-		Log.d(MainActivity.TAG, String.valueOf(previews.size()) + " added to preview fragment :)");
+    }
+    
+    /**
+     * Scale the height of preview items
+     * based on the container width.
+     */
+    public void scalePreviewItemHeights(double aspectRatio) {
+    	list.redrawPreviewItems(findViewById(R.id.frameLayout).getWidth(), aspectRatio);    		
+    }
+    
+    public int getPreviewItemHeight() {
+    	int width = findViewById(R.id.frameLayout).getWidth();
+    	return (int) (width * getPreviewAspectRatio());
+    }
+    
+    private double getPreviewAspectRatio() {
+    	return getPreviewAspectRatio(getResources().getConfiguration().orientation);
+    }
+
+    private double getPreviewAspectRatio(int orientation) {
+    	double aspectRatio = 1.0;
+    	if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+    		return aspectRatio / 4;
+    	}
+    	return aspectRatio / 6;
     }
     
     /**

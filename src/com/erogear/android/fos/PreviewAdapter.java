@@ -12,14 +12,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
 
 import com.erogear.android.fos.views.PreviewListItemLayoutView;
 
 public class PreviewAdapter extends ArrayAdapter<Preview> {
+	private int previewItemHeight;
 	
 	public PreviewAdapter(Context context, List<Preview> previews) {
 		super(context, 0, previews);
+		previewItemHeight = ((MainActivity) context).getPreviewItemHeight();
 	}
 	
 	@Override
@@ -29,7 +33,7 @@ public class PreviewAdapter extends ArrayAdapter<Preview> {
 			LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	    	view = (PreviewListItemLayoutView) inflater.inflate(R.layout.preview_list_item, null);
 		}
-		
+
 		Preview p = getItem(position);
 		TextView title = (TextView) view.findViewById(R.id.tvAnimTitle);
 		title.setText(p.getName());
