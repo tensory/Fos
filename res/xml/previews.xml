@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <previews>
-	<!-- Filename is case sensitive and will also be used to locate Drawable 
-		resources. -->
+	<!-- Filename is case sensitive and will also be used to locate related resources. -->
 	<preview name="@string/txtAnimName_Heartbeat">
 		<filename>heartbeat.avi</filename>
 	</preview>
