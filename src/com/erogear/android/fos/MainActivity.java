@@ -203,12 +203,7 @@ public class MainActivity extends SherlockFragmentActivity {
 		super.onConfigurationChanged(newConfig);
 		
 		// Use different aspect ratio depending on orientation
-		double aspectRatio = 1.0;
-		if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-			aspectRatio = aspectRatio / 4;
-	    } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
-	    	aspectRatio = aspectRatio / 6;
-	    }
+		double aspectRatio = getPreviewAspectRatio(newConfig.orientation);
 		
 		// Redraw previews items to fill view at proportional height.
         scalePreviewItemHeights(aspectRatio);
@@ -364,4 +359,20 @@ public class MainActivity extends SherlockFragmentActivity {
     	list.redrawPreviewItems(findViewById(R.id.frameLayout).getWidth(), aspectRatio);    		
     }
     
+    public int getPreviewItemHeight() {
+    	int width = findViewById(R.id.frameLayout).getWidth();
+    	return (int) (width * getPreviewAspectRatio());
+    }
+    
+    private double getPreviewAspectRatio() {
+    	return getPreviewAspectRatio(getResources().getConfiguration().orientation);
+    }
+
+    private double getPreviewAspectRatio(int orientation) {
+    	double aspectRatio = 1.0;
+    	if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+    		return aspectRatio / 4;
+    	}
+    	return aspectRatio / 6;
+    }
 }
