@@ -3,6 +3,7 @@ package com.erogear.android.fos.views;
 import android.content.Context;
 import android.graphics.drawable.AnimationDrawable;
 import android.util.AttributeSet;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
@@ -81,5 +82,16 @@ public class PreviewListItemLayoutView extends RelativeLayout {
 	private void deactivateImageButton(ImageView target, int resId) {
 		target.setImageResource(resId);
 		target.setClickable(false);
+	}
+	
+	/**
+	 * Set the height of the list item
+	 * and the background ImageView.
+	 * @param height
+	 */
+	public void setLayoutHeight(int height) {
+		ViewGroup.LayoutParams dims = this.getLayoutParams();
+		dims.height = height;
+		this.setLayoutParams(dims);
 	}
 }

@@ -5,15 +5,12 @@ import java.util.ArrayList;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 
 import com.actionbarsherlock.app.SherlockListFragment;
 import com.erogear.android.fos.MainActivity;
 import com.erogear.android.fos.Preview;
 import com.erogear.android.fos.PreviewAdapter;
-import com.erogear.android.fos.R;
 import com.erogear.android.fos.views.PreviewListItemLayoutView;
 
 public class PreviewFragment extends SherlockListFragment {
@@ -56,29 +53,19 @@ public class PreviewFragment extends SherlockListFragment {
 	}
 	
 	/**
-	 * Reset the heights of list items dynamically
+	 * Reset the heights of all list items dynamically
 	 * when the device is rotated
-	 * to preserve 4:1 ratio.
+	 * to preserve visible ratio.
 	 */
-    public void redrawPreviewItems() {
+    public void redrawPreviewItems(int containerWidth, double ratio) {
+    	int height = (int) (containerWidth * ratio);
     	
-    	/*
-    
-    	View pvLayout = (RelativeLayout) findViewById(R.id.rlPreviewItem);
+    	ListView list = getListView();
+    	for (int i = 0; i < list.getCount(); i++) {
+    		PreviewListItemLayoutView layout = (PreviewListItemLayoutView) list.getChildAt(i);
+    		layout.setLayoutHeight(height);
+    	}
     	
-    	// http://stackoverflow.com/questions/17481120/android-how-to-set-imageview-with-percentage-in-relativelayout
-    	View parentView= findViewById(R.id.mainContent);
-    	int height=parentView.getHeight();
-    	int width=parentView.getWidth();
-
-    	ImageView effect_camera= (ImageView)findViewById(R.id.img_effect+camera);
-    	RelativeLayout.LayoutParams lp= (RelativeLayout.LayoutParams)effect_camera.getLayoutParams();
-    	int percentHeight=height*.25;
-    	int percentWidth= width*1;
-    	lp.height=percentHeight;
-    	lp.width=percentWidth;
-    	effect_camera.setLayoutParams(lp);
-    	*/
     	Log.d("PF", "Changing height ratio");
     }
 }
