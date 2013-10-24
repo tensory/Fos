@@ -203,8 +203,8 @@ public class MainActivity extends SherlockFragmentActivity {
 		
         Log.i(TAG, "--- ONRESUME ---");
         
-        // Redraw previews items to fill view.
-        list.resetPreviewItemHeight();
+        // Redraw previews items to fill view at proportional height.
+        list.redrawPreviewItems();
         
         startService(new Intent(this, BluetoothVideoService.class));
         svcConn = new ServiceConnection() {

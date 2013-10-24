@@ -60,7 +60,8 @@ public class PreviewFragment extends SherlockListFragment {
 	 * when the device is rotated
 	 * to preserve 4:1 ratio.
 	 */
-    public void resetPreviewItemHeight() {
+    public void redrawPreviewItems() {
+    	
     	/*
     
     	View pvLayout = (RelativeLayout) findViewById(R.id.rlPreviewItem);
