@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.ImageView;
 import android.widget.ListView;
 
 import com.actionbarsherlock.app.SherlockListFragment;
@@ -14,6 +16,7 @@ import com.erogear.android.bluetooth.video.VideoProvider;
 import com.erogear.android.fos.MainActivity;
 import com.erogear.android.fos.Preview;
 import com.erogear.android.fos.PreviewAdapter;
+import com.erogear.android.fos.R;
 import com.erogear.android.fos.views.PreviewListItemLayoutView;
 
 public class PreviewFragment extends SherlockListFragment {
@@ -47,6 +50,7 @@ public class PreviewFragment extends SherlockListFragment {
 			}
 		} 
 		pvView.toggleActive();
+		toggleControlsClickable(pvView);
 
 		selectedPreviewIndex = position;
 	}
@@ -55,6 +59,22 @@ public class PreviewFragment extends SherlockListFragment {
 		return (Preview) getListAdapter().getItem(selectedPreviewIndex);
 	}
 	
+	public void toggleControlsClickable(PreviewListItemLayoutView v) {
+		if (v.isActive()) {
+			v.ivBtnPreview.setClickable(true);
+			v.ivBtnPreview.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View arg0) {
+					Log.e("PF", "Clicked preview");
+					((MainActivity) getActivity()).togglePreviewVideo(getSelectedPreview());
+				}});
+		} else {
+			v.ivBtnPreview.setClickable(false);
+			v.ivBtnPreview.setOnClickListener(null);
+		}
+		
+	}
 	// DEPRECATED
 	public void onClickPreview(View v) {
 		// Get the selected Preview object

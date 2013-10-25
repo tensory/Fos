@@ -42,7 +42,6 @@
             android:layout_toLeftOf="@id/ivBtnAccept"
             android:src="@drawable/ic_inactive_preview"
             android:clickable="false"
-            android:onClick="onClickPreview"
             />
             
         </RelativeLayout>

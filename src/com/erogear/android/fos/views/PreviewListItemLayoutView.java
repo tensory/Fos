@@ -50,6 +50,11 @@ public class PreviewListItemLayoutView extends RelativeLayout {
 		setIconState();
 	}
 	
+	public boolean isActive() {
+		return isActive;
+	}
+	
+	/** DEPRECATED
 	public void toggleAnimation(VideoProvider provider) {
 		
 //		if (!animation.isRunning() && isActive) {
@@ -58,7 +63,7 @@ public class PreviewListItemLayoutView extends RelativeLayout {
 //			stopAndReset(animation);
 //		}
 	}
-	
+	*/
 	public void stopAnimation() {
 		ImageView iv = (ImageView) findViewById(R.id.ivPreview);
 		AnimationDrawable animation = (AnimationDrawable) iv.getBackground();
@@ -96,7 +101,7 @@ public class PreviewListItemLayoutView extends RelativeLayout {
 		target.setClickable(false);
 	}
 	
-
+/** DEPRECATED
 	private void startAnimation(VideoProvider provider) {
 		if (lastFrameId == PreviewListItemLayoutView.UNSET_FRAME_ID) {
 			lastFrameId = 0;
@@ -111,6 +116,7 @@ public class PreviewListItemLayoutView extends RelativeLayout {
 		
 		Log.d("PVLIV", "Done");
 	}
+	*/
 
 	/**
 	 * Set the height of the list item
