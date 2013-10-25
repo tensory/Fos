@@ -404,14 +404,23 @@ public class MainActivity extends SherlockFragmentActivity {
     
     public void togglePreviewVideo(Preview preview) {
     	// Set the active preview.
-    	/*
+    	
     	// Only reset the active preview if it differs from the currently set one.
-    	if (activePreview.getPreview() == null || 
-    		activePreview.getPreview().hashCode() != preview.hashCode()) {
-        	activePreview.attachPreview(preview);
-        	activePreview.setVideoProvider(previewVideoProviderCache.get(preview.hashCode()));    		
+    	if (activePreview != null) {
+    		if (activePreview.getPreview().hashCode() != preview.hashCode()) {
+        		setActivePreview(preview);    			
+    		}
+    	} else {
+    		activePreview = new PreviewLoader();
+    		setActivePreview(preview);
     	}
-    	*/
+    	
     	Toast.makeText(this, "Toggled preview", Toast.LENGTH_SHORT).show();
     } 
+    	
+    private void setActivePreview(Preview p) {
+    	activePreview.attachPreview(p);
+    	activePreview.setVideoProvider(previewVideoProviderCache.get(p.hashCode()));
+    	Log.d(MainActivity.TAG, "Freshly reset active preview");
+    }
 }
