@@ -9,6 +9,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
+import com.erogear.android.bluetooth.video.FrameController;
+import com.erogear.android.bluetooth.video.MultiheadController;
 import com.erogear.android.bluetooth.video.VideoProvider;
 import com.erogear.android.fos.Preview;
 import com.erogear.android.fos.PreviewAdapter;

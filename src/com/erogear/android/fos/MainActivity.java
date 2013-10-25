@@ -104,6 +104,9 @@ public class MainActivity extends SherlockFragmentActivity {
 	                previewFrame((ByteBufferFrame)msg.obj);
 
 				 */
+				
+				// Figure out which preview the frame belongs to, and send the frame to it
+				Log.d("VIDEOFRAME", msg.toString());
 				break;
 			case BluetoothVideoService.MESSAGE_VIDEO_LOADED:
 				Toast.makeText(getApplicationContext(), "Video loaded!", Toast.LENGTH_SHORT).show();
@@ -285,7 +288,8 @@ public class MainActivity extends SherlockFragmentActivity {
 	
 	
 	public void onClickPreview(View v) {
-		list.onClickPreview(v);
+		Preview selected = list.getSelectedPreview();
+		this.togglePreviewVideo(selected);
 	}
 	
 	@Override
@@ -394,11 +398,20 @@ public class MainActivity extends SherlockFragmentActivity {
     	return previewVideoProviderCache;
     }
     
-    /**
-     * Get the video controller for the EroGear device.
-     * @return frame controller
-     */
-    public FrameController<VideoProvider, MultiheadController> getController() {
-    	return controller;
+    public BluetoothVideoService getBluetoothVideoService() {
+    	return videoSvc;
     }
+    
+    public void togglePreviewVideo(Preview preview) {
+    	// Set the active preview.
+    	/*
+    	// Only reset the active preview if it differs from the currently set one.
+    	if (activePreview.getPreview() == null || 
+    		activePreview.getPreview().hashCode() != preview.hashCode()) {
+        	activePreview.attachPreview(preview);
+        	activePreview.setVideoProvider(previewVideoProviderCache.get(preview.hashCode()));    		
+    	}
+    	*/
+    	Toast.makeText(this, "Toggled preview", Toast.LENGTH_SHORT).show();
+    } 
 }

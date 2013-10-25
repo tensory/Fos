@@ -8,6 +8,8 @@ import android.view.View;
 import android.widget.ListView;
 
 import com.actionbarsherlock.app.SherlockListFragment;
+import com.erogear.android.bluetooth.video.FrameController;
+import com.erogear.android.bluetooth.video.MultiheadController;
 import com.erogear.android.bluetooth.video.VideoProvider;
 import com.erogear.android.fos.MainActivity;
 import com.erogear.android.fos.Preview;
@@ -49,11 +51,37 @@ public class PreviewFragment extends SherlockListFragment {
 		selectedPreviewIndex = position;
 	}
 
+	public Preview getSelectedPreview() {
+		return (Preview) getListAdapter().getItem(selectedPreviewIndex);
+	}
+	
+	// DEPRECATED
 	public void onClickPreview(View v) {
+		// Get the selected Preview object
+		//Preview selected = (Preview) getListAdapter().getItem(selectedPreviewIndex);
+		
+		//((MainActivity) getActivity()).togglePreviewVideo(selected, selectedPreviewIndex);
+		
+		/*
+	
+		VideoProvider provider = ((MainActivity) getActivity()).getVideoProviderCache().get(selected.hashCode());
+		FrameController<VideoProvider, MultiheadController> controller = 
+				new FrameController<VideoProvider, MultiheadController>(
+						provider,
+						
+						);
+		
+		public void toggleVideo(Preview preview, VideoProvider provider) {
+			VideoProvider videoProvider = context.
+	        controller = new FrameController<VideoProvider, MultiheadController>(provider, headController, videoSvc);
+	        videoSvc.setConfigInstance(FrameController.CONFIG_INSTANCE_KEY, controller);
+
+			
+		}
+		 /*
+		
 		// Get the clicked parent view
 		PreviewListItemLayoutView pvView = (PreviewListItemLayoutView) getListView().getChildAt(selectedPreviewIndex);
-		// Get the selected Preview object
-		Preview selected = (Preview) getListAdapter().getItem(selectedPreviewIndex);
 		
 		// Provide the preview's VideoProvider to the view controller
 		try {
@@ -63,6 +91,7 @@ public class PreviewFragment extends SherlockListFragment {
 		} catch (Exception e) {
 			Log.e("PLILV", e.getMessage());
 		}
+		*/
 	}
 	
 	/**
