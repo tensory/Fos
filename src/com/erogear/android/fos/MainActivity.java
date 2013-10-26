@@ -5,10 +5,12 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ComponentName;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
@@ -27,6 +29,7 @@ import com.erogear.android.bluetooth.comm.BluetoothChatService;
 import com.erogear.android.bluetooth.comm.BluetoothVideoService;
 import com.erogear.android.bluetooth.comm.DeviceConnection;
 import com.erogear.android.bluetooth.comm.FrameConsumer;
+import com.erogear.android.bluetooth.comm.MultiheadSetupActivity;
 import com.erogear.android.bluetooth.video.FFMPEGVideoProvider;
 import com.erogear.android.bluetooth.video.MultiheadController;
 import com.erogear.android.fos.fragments.PreviewFragment;
@@ -35,6 +38,7 @@ public class MainActivity extends SherlockFragmentActivity {
 	// Intent request codes
 	public static final int PREFERENCE_INTENT_RESULT = 1;
 	private static final int REQUEST_ENABLE_BT = 2;
+	private static final int MULTIHEAD_SETUP_RESULT = 3;
 	
 	// Tags
 	public static final String TAG = "MAIN";
@@ -260,7 +264,8 @@ public class MainActivity extends SherlockFragmentActivity {
 
                 // Prompt user to set up device controllers if none found
                 if (headController.getHeads().size() == 0) {
-                	Log.e(TAG, "no head x_x");
+                	AlertDialog alertDialog = getConfigurationAlertBuilder().create();
+                	alertDialog.show();
                 }
 			}
         	
@@ -356,5 +361,37 @@ public class MainActivity extends SherlockFragmentActivity {
     
     public boolean isDeviceConnected(MultiheadController headController) {
     	return headController.getHeads().size() > 0;
+    }
+    
+    /**
+     * Get an AlertDialog.Builder to construct the error dialog
+     * when no device configuration has been set.
+     * 
+     * Resulting Builder must have create() called on it.
+     * @return builder for alert dialog
+     */
+    private AlertDialog.Builder getConfigurationAlertBuilder() {
+    	AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+    	
+    	alertDialogBuilder.setTitle(getResources().getString(R.string.txtNoDevices));
+    	alertDialogBuilder
+	    	.setMessage(getResources().getString(R.string.txtExplainNoDevices))
+	    	.setCancelable(false)
+	    	.setPositiveButton(R.string.txtConnect, new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					Intent i = new Intent(MainActivity.this, MultiheadSetupActivity.class);
+					startActivityForResult(i, MainActivity.MULTIHEAD_SETUP_RESULT);					
+				}
+			})
+			.setNegativeButton(R.string.txtExit, new DialogInterface.OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					finish();
+				}
+			});
+	
+    	return alertDialogBuilder;
     }
 }
