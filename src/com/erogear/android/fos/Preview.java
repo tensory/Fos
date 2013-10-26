@@ -85,9 +85,9 @@ public class Preview implements Parcelable {
 	 * ready to use as a preview image
 	 * @throws Exception 
 	 */
-	public void confirmPreviewBitmapReady(Context context) {
+	public void confirmPreviewBitmapReady(Context context, File filePath) {
 		String imageFilename = this.getResourceName() + Preview.IMAGE_EXTENSION;
-		File f = new File(context.getFilesDir(), imageFilename);
+		File f = new File(filePath, imageFilename);
 		if (!f.exists()) {
 			// Image has not been created
 			// Has the video file been loaded?
@@ -99,14 +99,10 @@ public class Preview implements Parcelable {
 				} catch (Exception e) {
 					Log.e(Preview.TAG, "Could not save thumbnail: " + e.getMessage());
 				}
-
-			} else {
-				Log.e(Preview.TAG, "No video loaded");
-				
 			}
 		}
 		// Do a final check on the new file
-		f = new File(context.getFilesDir(), imageFilename);
+		f = new File(filePath, imageFilename);
 		if (!f.exists()) {
 			Log.e(Preview.TAG, this.name + ": No image preview found");
 		}		
