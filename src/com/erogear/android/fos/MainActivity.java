@@ -116,8 +116,8 @@ public class MainActivity extends SherlockFragmentActivity {
 				addConversationLine((String) msg.obj);
 				
 				// Use the just-loaded video to extract a thumbnail
-				activePreview.getPreview().confirmPreviewBitmapReady(getApplicationContext());
 				previewVideoProviderCache.put(activePreview.getPreview().hashCode(), activePreview.getVideoProvider());
+				activePreview.getPreview().confirmPreviewBitmapReady(MainActivity.this, getApplicationContext().getFilesDir());
 				// Advance the queue
 				q.remove();
 				if (q.size() > 0) {
