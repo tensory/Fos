@@ -150,4 +150,15 @@ public class Preview implements Parcelable {
 		dest.writeString(name);
 		dest.writeString(filename);
 	};
+	
+    public static final Parcelable.Creator<Preview> CREATOR = new Parcelable.Creator<Preview>() {
+        public Preview createFromParcel(Parcel in) {
+            return new Preview(in); 
+        }
+
+		@Override
+		public Preview[] newArray(int size) {
+			return new Preview[size];
+		}
+    };
 }
