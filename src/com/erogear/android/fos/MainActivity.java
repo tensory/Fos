@@ -35,6 +35,7 @@ public class MainActivity extends SherlockFragmentActivity {
 	// Intent request codes
 	public static final int PREFERENCE_INTENT_RESULT = 1;
 	private static final int REQUEST_ENABLE_BT = 2;
+	private static final int MULTIHEAD_SETUP_RESULT = 3;
 	
 	// Tags
 	public static final String TAG = "MAIN";
