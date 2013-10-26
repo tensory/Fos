@@ -437,12 +437,11 @@ public class MainActivity extends SherlockFragmentActivity {
     	
     	Toast.makeText(this, "Toggled preview", Toast.LENGTH_SHORT).show();
     	
-    	// NOw that an active preview was set, play its video
+    	// Now that an active preview was set, play its video
     	controller = new FrameController<VideoProvider, MultiheadController>(activePreview.getVideoProvider(), headController, videoSvc);
         videoSvc.setConfigInstance(FrameController.CONFIG_INSTANCE_KEY, controller);
         
         // Bombs away
-        
         if (!controller.isAutoAdvancing()) {
             controller.setAutoAdvance(true, controller.getAutoAdvanceInterval(), null);
     	}
@@ -454,10 +453,6 @@ public class MainActivity extends SherlockFragmentActivity {
     private void setActivePreview(Preview p) {
     	activePreview.attachPreview(p);
     	activePreview.setVideoProvider(previewVideoProviderCache.get(p.hashCode()));
-    }
-    
-    public boolean isDeviceConnected(MultiheadController headController) {
-    	return headController.getHeads().size() > 0;
     }
     
     /**
