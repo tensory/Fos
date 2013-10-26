@@ -291,6 +291,8 @@ public class MainActivity extends SherlockFragmentActivity {
                 if (headController.getHeads().size() == 0) {
                 	AlertDialog alertDialog = getConfigurationAlertBuilder().create();
                 	alertDialog.show();
+                } else {
+                	Log.i(MainActivity.TAG, headController.getHeads().size() + " heads attached");
                 }
 			}
         	
