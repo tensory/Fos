@@ -144,6 +144,8 @@ public class MainActivity extends SherlockFragmentActivity {
 	 * Manager for state variables about video preview loading.
 	 * This prevents the load attempt from being restarted.
 	 * Only one manager should be created for a queue of videos to load.
+	 * 
+	 * This class may not be necessary when onConfigChange is overridden. Try it...
 	 */
 	private static class PreviewLoadStateManager {
 		boolean started = false;
@@ -177,7 +179,7 @@ public class MainActivity extends SherlockFragmentActivity {
 			return instance.finished;
 		}
 	}
-	
+	    
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -239,13 +241,26 @@ public class MainActivity extends SherlockFragmentActivity {
                     videoSvc.addHandler(headController.getHandler());
                 }
                 
-                if (!qManager.hasStarted()) {
-                    try {
-                    	initializePreviews();
-                    	qManager.setStarted();
-                    } catch (Exception e) {
-                    	Log.e(MainActivity.TAG, "Previews could not be initialized: " + e.getMessage());
-                    }
+                // Bluetooth Service init finished
+                
+                Thread initPreviews = new Thread(new Runnable() {
+                	@Override
+                	public void run() {
+                		if (!qManager.hasStarted()) {
+                			try {
+                				initializePreviews();
+                				qManager.setStarted();
+                			} catch (Exception e) {
+                				Log.e(MainActivity.TAG, "Previews could not be initialized: " + e.getMessage());
+                			}
+                		}	
+                	}
+                });
+                initPreviews.start();
+
+                // Prompt user to set up device controllers if none found
+                if (headController.getHeads().size() == 0) {
+                	Log.e(TAG, "no head x_x");
                 }
 			}
         	
@@ -257,7 +272,6 @@ public class MainActivity extends SherlockFragmentActivity {
 			
         bindService(new Intent(MainActivity.this, BluetoothVideoService.class), svcConn, Service.START_STICKY);
         Log.d(MainActivity.TAG, "Bluetooth started");
-
 	}
 	
 	
@@ -338,5 +352,9 @@ public class MainActivity extends SherlockFragmentActivity {
 		getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, list).commit();
 		
 		Log.d(MainActivity.TAG, String.valueOf(previews.size()) + " added to preview fragment :)");
+    }
+    
+    public boolean isDeviceConnected(MultiheadController headController) {
+    	return headController.getHeads().size() > 0;
     }
 }
