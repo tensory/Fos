@@ -6,10 +6,16 @@
     <string name="txtAnimName_Heartbeat">Heartbeat</string>
     <string name="txtAnimName_Safety1">Safety</string>
     <string name="prefFrameRate">Frame rate</string>
-
+	<string name="txtNoDevices">Connect device</string>
+	<string name="txtConnect">Connect</string>
+	<string name="txtExit">Exit</string>
+	<string name="txtExplainNoDevices">No EroGear devices have been paired. Please pair a device now.</string>
+    
     <string-array name="entriesFrameRate">
         <item>0.5</item>
         <item>1.0</item>
         <item>1.2</item>
     </string-array>
+    
+    
 </resources>

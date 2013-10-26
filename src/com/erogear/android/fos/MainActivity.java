@@ -6,10 +6,12 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ComponentName;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.res.Configuration;
@@ -30,6 +32,7 @@ import com.erogear.android.bluetooth.comm.BluetoothChatService;
 import com.erogear.android.bluetooth.comm.BluetoothVideoService;
 import com.erogear.android.bluetooth.comm.DeviceConnection;
 import com.erogear.android.bluetooth.comm.FrameConsumer;
+import com.erogear.android.bluetooth.comm.MultiheadSetupActivity;
 import com.erogear.android.bluetooth.video.FFMPEGVideoProvider;
 import com.erogear.android.bluetooth.video.FrameController;
 import com.erogear.android.bluetooth.video.MultiheadController;
@@ -40,6 +43,7 @@ public class MainActivity extends SherlockFragmentActivity {
 	// Intent request codes
 	public static final int PREFERENCE_INTENT_RESULT = 1;
 	private static final int REQUEST_ENABLE_BT = 2;
+	private static final int MULTIHEAD_SETUP_RESULT = 3;
 	
 	// Tags
 	public static final String TAG = "MAIN";
@@ -156,6 +160,8 @@ public class MainActivity extends SherlockFragmentActivity {
 	 * Manager for state variables about video preview loading.
 	 * This prevents the load attempt from being restarted.
 	 * Only one manager should be created for a queue of videos to load.
+	 * 
+	 * This class may not be necessary when onConfigChange is overridden. Try it...
 	 */
 	private static class PreviewLoadStateManager {
 		boolean started = false;
@@ -189,7 +195,7 @@ public class MainActivity extends SherlockFragmentActivity {
 			return instance.finished;
 		}
 	}
-	
+	    
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -265,13 +271,27 @@ public class MainActivity extends SherlockFragmentActivity {
                     videoSvc.addHandler(headController.getHandler());
                 }
                 
-                if (!qManager.hasStarted()) {
-                    try {
-                    	initializePreviews();
-                    	qManager.setStarted();
-                    } catch (Exception e) {
-                    	Log.e(MainActivity.TAG, "Previews could not be initialized: " + e.getMessage());
-                    }
+                // Bluetooth Service init finished
+                
+                Thread initPreviews = new Thread(new Runnable() {
+                	@Override
+                	public void run() {
+                		if (!qManager.hasStarted()) {
+                			try {
+                				initializePreviews();
+                				qManager.setStarted();
+                			} catch (Exception e) {
+                				Log.e(MainActivity.TAG, "Previews could not be initialized: " + e.getMessage());
+                			}
+                		}	
+                	}
+                });
+                initPreviews.start();
+
+                // Prompt user to set up device controllers if none found
+                if (headController.getHeads().size() == 0) {
+                	AlertDialog alertDialog = getConfigurationAlertBuilder().create();
+                	alertDialog.show();
                 }
 			}
         	
@@ -283,7 +303,6 @@ public class MainActivity extends SherlockFragmentActivity {
 			
         bindService(new Intent(MainActivity.this, BluetoothVideoService.class), svcConn, Service.START_STICKY);
         Log.d(MainActivity.TAG, "Bluetooth started");
-
 	}
 	
 	
@@ -434,5 +453,41 @@ public class MainActivity extends SherlockFragmentActivity {
     private void setActivePreview(Preview p) {
     	activePreview.attachPreview(p);
     	activePreview.setVideoProvider(previewVideoProviderCache.get(p.hashCode()));
+    }
+    
+    public boolean isDeviceConnected(MultiheadController headController) {
+    	return headController.getHeads().size() > 0;
+    }
+    
+    /**
+     * Get an AlertDialog.Builder to construct the error dialog
+     * when no device configuration has been set.
+     * 
+     * Resulting Builder must have create() called on it.
+     * @return builder for alert dialog
+     */
+    private AlertDialog.Builder getConfigurationAlertBuilder() {
+    	AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+    	
+    	alertDialogBuilder.setTitle(getResources().getString(R.string.txtNoDevices));
+    	alertDialogBuilder
+	    	.setMessage(getResources().getString(R.string.txtExplainNoDevices))
+	    	.setCancelable(false)
+	    	.setPositiveButton(R.string.txtConnect, new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					Intent i = new Intent(MainActivity.this, MultiheadSetupActivity.class);
+					startActivityForResult(i, MainActivity.MULTIHEAD_SETUP_RESULT);					
+				}
+			})
+			.setNegativeButton(R.string.txtExit, new DialogInterface.OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					finish();
+				}
+			});
+	
+    	return alertDialogBuilder;
     }
 }
