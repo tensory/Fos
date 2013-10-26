@@ -27,6 +27,7 @@ import com.erogear.android.bluetooth.comm.BluetoothChatService;
 import com.erogear.android.bluetooth.comm.BluetoothVideoService;
 import com.erogear.android.bluetooth.comm.DeviceConnection;
 import com.erogear.android.bluetooth.comm.FrameConsumer;
+import com.erogear.android.bluetooth.comm.MultiheadSetupActivity;
 import com.erogear.android.bluetooth.video.FFMPEGVideoProvider;
 import com.erogear.android.bluetooth.video.MultiheadController;
 import com.erogear.android.fos.fragments.PreviewFragment;
@@ -280,7 +281,10 @@ public class MainActivity extends SherlockFragmentActivity {
 				Intent i = new Intent(getBaseContext(), PrefsActivity.class);
 				startActivityForResult(i, MainActivity.PREFERENCE_INTENT_RESULT);
 				return true;
-				
+			case R.id.action_configure_panels:
+				Intent j = new Intent(getBaseContext(), MultiheadSetupActivity.class);
+				startActivityForResult(j, MainActivity.MULTIHEAD_SETUP_RESULT);
+				return true;
 			default:
 				return super.onOptionsItemSelected(item);
 		}
