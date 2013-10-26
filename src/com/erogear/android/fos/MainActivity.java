@@ -2,7 +2,6 @@ package com.erogear.android.fos;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
 
