@@ -226,7 +226,19 @@ public class MainActivity extends SherlockFragmentActivity {
 		prefs = getSharedPreferences(getResources().getString(R.string.app_name), android.content.Context.MODE_PRIVATE);
 		loadPanelDimensionsFromPreferences();
 		
-		loadPreviews();
+		/*
+		 * Initialize previews
+		 * 
+		 * Previews are not yet ready when Preview.getAll returns: 
+		 * each must be assigned a VideoProvider
+		 * 
+		 * After videos finish loading (through queue processed by VideoService message handler)
+		 * it is safe to hand previews off to PreviewFragment
+		 */
+		previews = Preview.getAll(MainActivity.this, getResources().getXml(R.xml.previews));
+		
+		// Initialize video providers cache
+		previewVideoProviderCache = new SparseArray<VideoProvider>(previews.size());
 	}
 	
 	/**
@@ -304,9 +316,9 @@ public class MainActivity extends SherlockFragmentActivity {
                  * if panel dimensions have changed on this resume.
                  */
                 if (panelDimensionsChanged == true) {
+                	// Prepare to reload videos
                 	qManager.reset();
-                	Log.e(MainActivity.TAG, "about to reload videos");
-                	loadPreviews();
+                	previewVideoProviderCache = new SparseArray<VideoProvider>(previews.size());
                 	
                 }
                 
@@ -561,21 +573,7 @@ public class MainActivity extends SherlockFragmentActivity {
     	panelDimensionsChanged = true;
     }
     
-    private void loadPreviews() {
-		/*
-		 * Initialize previews
-		 * 
-		 * Previews are not yet ready when Preview.getAll returns: 
-		 * each must be assigned a VideoProvider
-		 * 
-		 * After videos finish loading (through queue processed by VideoService message handler)
-		 * it is safe to hand previews off to PreviewFragment
-		 */
-		previews = Preview.getAll(MainActivity.this, getResources().getXml(R.xml.previews));
-		
-		// Initialize video providers cache
-		previewVideoProviderCache = new SparseArray<VideoProvider>(previews.size());
-		
-		Log.d(MainActivity.TAG, "Loading previews");
+    public boolean getPanelDimensionsChanged() {
+    	return panelDimensionsChanged;
     }
 }

@@ -88,7 +88,7 @@ public class Preview implements Parcelable {
 	public void confirmPreviewBitmapReady(Context context, File filePath) {
 		String imageFilename = this.getResourceName() + Preview.IMAGE_EXTENSION;
 		File f = new File(filePath, imageFilename);
-		if (!f.exists()) {
+		if (!f.exists() || ((MainActivity) context).getPanelDimensionsChanged() == true) {
 			// Image has not been created
 			// Has the video file been loaded?
 			if (((MainActivity) context).getVideoProviderCache().get(this.hashCode()) != null) {
