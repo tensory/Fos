@@ -3,17 +3,14 @@ package com.erogear.android.fos.views;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.AnimationDrawable;
+import android.graphics.drawable.BitmapDrawable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
-import com.erogear.android.bluetooth.video.FrameController;
-import com.erogear.android.bluetooth.video.MultiheadController;
+import com.erogear.android.bluetooth.video.ByteBufferFrame;
 import com.erogear.android.bluetooth.video.VideoProvider;
-import com.erogear.android.fos.Preview;
-import com.erogear.android.fos.PreviewAdapter;
 import com.erogear.android.fos.R;
 
 public class PreviewListItemLayoutView extends RelativeLayout {
@@ -21,7 +18,8 @@ public class PreviewListItemLayoutView extends RelativeLayout {
 	private Context context;
 	private boolean isActive;
 	public ImageView ivBtnPreview, ivBtnAccept;
-	private int lastFrameId;
+	public Bitmap bm;
+	public BitmapDrawable bmd;
 	
 	public PreviewListItemLayoutView(Context context) {
 		super(context);
@@ -127,5 +125,24 @@ public class PreviewListItemLayoutView extends RelativeLayout {
 		ViewGroup.LayoutParams dims = this.getLayoutParams();
 		dims.height = height;
 		this.setLayoutParams(dims);
+	}
+	
+	public void drawFrame(ByteBufferFrame frameData) {
+		VideoProvider.frameToBitmap(frameData, bm);
+		bmd = new BitmapDrawable(getResources(), bm);
+
+		bmd.invalidateSelf();
+		ImageView iv = (ImageView) findViewById(R.id.ivPreview);
+		iv.setBackgroundDrawable(bmd);
+	}
+	
+	public void initBitmap(Bitmap bitmap) {
+		bm = bitmap;
+	}
+	
+	public void initBitmapDrawable(BitmapDrawable bitmapDrawable) {
+		bmd = bitmapDrawable;
+		bmd.setDither(false);
+        bmd.setFilterBitmap(false);
 	}
 }

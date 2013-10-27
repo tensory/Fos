@@ -42,8 +42,14 @@ public class PreviewAdapter extends ArrayAdapter<Preview> {
 		// Fetch background image
 		String pvImagePath = new File(getContext().getFilesDir(), p.getResourceName() + Preview.IMAGE_EXTENSION).getPath();
 		Bitmap bitmap = BitmapFactory.decodeFile(pvImagePath);
+		BitmapDrawable btmDw = getBitmapDrawable(getContext(), bitmap);
+		
+		// Set the bitmap as the view's default bitmap
+		view.initBitmap(bitmap);
+		view.initBitmapDrawable(btmDw);
+		
 		// Set it as background
-		PreviewAdapter.setBackgroundImage(getContext(), previewImage, bitmap);
+		PreviewAdapter.setBackgroundImage(previewImage, btmDw);
 		
 		return view;
 	}
@@ -51,20 +57,24 @@ public class PreviewAdapter extends ArrayAdapter<Preview> {
 	// Multi-API level targeting because view.setBackgroundDrawable is deprecated
 	// http://stackoverflow.com/questions/18806709/how-to-set-a-bitmap-to-background-for-a-view-android-api-10-18
 	@TargetApi(16)
-	private static void setBackgroundV16Plus(Context context, View view, Bitmap bmp) {
-		view.setBackground(new BitmapDrawable(context.getResources(), bmp));
+	private static void setBackgroundV16Plus(View view, BitmapDrawable bmd) {
+		view.setBackground(bmd);
 	}
 	
-	@TargetApi(16)
-	private static void setBackgroundV16Minus(View view, Bitmap bmp) {
-		view.setBackgroundDrawable(new BitmapDrawable(bmp));
+	@SuppressWarnings("deprecation")
+	private static void setBackgroundV16Minus(View view, BitmapDrawable bmd) {
+		view.setBackgroundDrawable(bmd);
 	}
 	
-	public static void setBackgroundImage(Context context, View view, Bitmap bmp) {
+	public static void setBackgroundImage(View view, BitmapDrawable bmd) {
 		if (android.os.Build.VERSION.SDK_INT >= 16){
-			setBackgroundV16Plus(context, view, bmp);
+			setBackgroundV16Plus(view, bmd);
 		} else {
-			setBackgroundV16Minus(view, bmp);
+			setBackgroundV16Minus(view, bmd);
 		}
+	}
+	
+	private BitmapDrawable getBitmapDrawable(Context context, Bitmap bmp) {
+		return new BitmapDrawable(context.getResources(), bmp);
 	}
 }
