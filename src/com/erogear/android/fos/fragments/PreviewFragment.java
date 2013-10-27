@@ -19,7 +19,8 @@ public class PreviewFragment extends SherlockListFragment {
 	private ArrayList<Preview> previews;
 	private static int PREVIEW_NOT_SET_INDEX = -1;
 	private int selectedPreviewIndex;
-
+	private static final String TAG = "PF";
+	
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
@@ -62,14 +63,13 @@ public class PreviewFragment extends SherlockListFragment {
 
 				@Override
 				public void onClick(View arg0) {
-					Log.e("PF", "Clicked preview");
+					Log.e(PreviewFragment.TAG, "Clicked preview");
 					((MainActivity) getActivity()).togglePreviewVideo(getSelectedPreview());
 				}});
 		} else {
 			v.ivBtnPreview.setClickable(false);
 			v.ivBtnPreview.setOnClickListener(null);
-		}
-		
+		}	
 	}
 	
 	/**
@@ -85,8 +85,6 @@ public class PreviewFragment extends SherlockListFragment {
     		PreviewListItemLayoutView layout = (PreviewListItemLayoutView) list.getChildAt(i);
     		layout.setLayoutHeight(height);
     	}
-    	
-    	Log.d("PF", "Changing height ratio");
     }
     
     /**
@@ -99,7 +97,7 @@ public class PreviewFragment extends SherlockListFragment {
      */
     public void drawFrameInCurrentPreview(Object frame) {
     	if (selectedPreviewIndex == PreviewFragment.PREVIEW_NOT_SET_INDEX) {
-    		Log.e("PF", "Can't draw a frame for an unselected preview");
+    		Log.e(PreviewFragment.TAG, "Can't draw a frame for an unselected preview");
     	}
     	
     	PreviewListItemLayoutView layout = (PreviewListItemLayoutView) getListView().getChildAt(selectedPreviewIndex);
