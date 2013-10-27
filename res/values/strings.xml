@@ -2,14 +2,16 @@
 <resources>
 
     <string name="app_name">Fos</string>
+    <string name="configure_panels">Configure panels</string>
     <string name="action_settings">Settings</string>
     <string name="txtAnimName_Heartbeat">Heartbeat</string>
     <string name="txtAnimName_Safety1">Safety</string>
     <string name="prefFrameRate">Frame rate</string>
-	<string name="txtNoDevices">Connect device</string>
+    <string name="txtNoDevices">Connect device</string>
 	<string name="txtConnect">Connect</string>
 	<string name="txtExit">Exit</string>
 	<string name="txtExplainNoDevices">No EroGear devices have been paired. Please pair a device now.</string>
+	
     
     <string-array name="entriesFrameRate">
         <item>0.5</item>

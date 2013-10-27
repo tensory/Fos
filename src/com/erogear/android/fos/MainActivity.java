@@ -59,6 +59,8 @@ public class MainActivity extends SherlockFragmentActivity {
 	// Previews sent to the display fragment
 	PreviewFragment list;
 	ArrayList<Preview> previews = new ArrayList<Preview>();
+	// Boolean flag permitting the list fragment to be loaded.
+	boolean mainActivityRunning;
 	
     private FrameController<VideoProvider, MultiheadController> controller;
 	private BluetoothVideoService videoSvc;
@@ -199,8 +201,7 @@ public class MainActivity extends SherlockFragmentActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		list = new PreviewFragment();
-		
+
 		/*
 		 * Initialize previews
 		 * 
@@ -216,6 +217,9 @@ public class MainActivity extends SherlockFragmentActivity {
 		previewVideoProviderCache = new SparseArray<VideoProvider>(previews.size());
 	}
 	
+	/**
+	 * Inhibit BluetoothVideoService from being started every time orientation changes.
+	 */
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
@@ -230,9 +234,13 @@ public class MainActivity extends SherlockFragmentActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		
+
         Log.i(TAG, "--- ONRESUME ---");
+
         
+		// Resume state indicating that MainActivity is running.
+		mainActivityRunning = true;
+		
         startService(new Intent(this, BluetoothVideoService.class));
         svcConn = new ServiceConnection() {
         	@Override
@@ -270,23 +278,8 @@ public class MainActivity extends SherlockFragmentActivity {
                     videoSvc.addHandler(headController.getHandler());
                 }
                 
-                // Bluetooth Service init finished
+                /* Bluetooth Service init finished */
                 
-                Thread initPreviews = new Thread(new Runnable() {
-                	@Override
-                	public void run() {
-                		if (!qManager.hasStarted()) {
-                			try {
-                				initializePreviews();
-                				qManager.setStarted();
-                			} catch (Exception e) {
-                				Log.e(MainActivity.TAG, "Previews could not be initialized: " + e.getMessage());
-                			}
-                		}	
-                	}
-                });
-                initPreviews.start();
-
                 // Prompt user to set up device controllers if none found
                 if (headController.getHeads().size() == 0) {
                 	AlertDialog alertDialog = getConfigurationAlertBuilder().create();
@@ -294,6 +287,17 @@ public class MainActivity extends SherlockFragmentActivity {
                 } else {
                 	Log.i(MainActivity.TAG, headController.getHeads().size() + " heads attached");
                 }
+                
+                if (!qManager.hasStarted()) {
+        			try {
+        				initializePreviews();
+        				qManager.setStarted();
+        			} catch (Exception e) {
+        				Log.e(MainActivity.TAG, "Previews could not be initialized: " + e.getMessage());
+        			}
+        		} else if (qManager.hasFinished()) {
+                	displayPreviews();
+        		}
 			}
         	
         	@Override
@@ -326,10 +330,19 @@ public class MainActivity extends SherlockFragmentActivity {
 				Intent i = new Intent(getBaseContext(), PrefsActivity.class);
 				startActivityForResult(i, MainActivity.PREFERENCE_INTENT_RESULT);
 				return true;
-				
+			case R.id.action_configure_panels:
+				Intent j = new Intent(getBaseContext(), MultiheadSetupActivity.class);
+				startActivityForResult(j, MainActivity.MULTIHEAD_SETUP_RESULT);
+				return true;
 			default:
 				return super.onOptionsItemSelected(item);
 		}
+	}
+	
+	@Override
+	public void onPause() {
+		super.onPause();
+		mainActivityRunning = false;
 	}
 	
     @Override
@@ -340,7 +353,7 @@ public class MainActivity extends SherlockFragmentActivity {
         	unbindService(svcConn);
         }
     }
-	
+    
     // The Handler that gets information back from the BluetoothVideoService
     private final Handler mHandler = new Handler(new IncomingMessageCallback());
     
@@ -364,7 +377,6 @@ public class MainActivity extends SherlockFragmentActivity {
     	// Set activePreview as first element
     	activePreview.attachPreview(q.peek());
 
-    	Log.d(MainActivity.TAG, "initializePreviews: Start loading videos");
     	loadNextPreviewVideo();
     }
     
@@ -379,10 +391,14 @@ public class MainActivity extends SherlockFragmentActivity {
     }
     
     public void displayPreviews() {
+    	list = new PreviewFragment();
     	Bundle fragmentData = new Bundle();
     	fragmentData.putParcelableArrayList(MainActivity.PREVIEWS_DATA_TAG, previews);
 		list.setArguments(fragmentData);
-		getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, list).commit();
+		
+		if (mainActivityRunning == true) {
+			getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, list).commit();
+		}
     }
     
     /**
