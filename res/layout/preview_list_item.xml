@@ -22,7 +22,6 @@
             android:layout_centerVertical="true"
             android:textColor="#FFFFFFFF" />
             
-            
             <ImageView
             android:id="@+id/ivBtnAccept"
             android:layout_width="wrap_content"
@@ -31,7 +30,6 @@
             android:layout_alignParentRight="true"
             android:src="@drawable/ic_inactive_send"
             android:layout_marginLeft="8dp"
-            android:clickable="false"
             />
             
             <ImageView
@@ -41,7 +39,6 @@
             android:layout_centerVertical="true" 
             android:layout_toLeftOf="@id/ivBtnAccept"
             android:src="@drawable/ic_inactive_preview"
-            android:clickable="false"
             />
             
         </RelativeLayout>
