@@ -11,6 +11,7 @@ import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -50,6 +51,8 @@ public class MainActivity extends SherlockFragmentActivity {
 	// Previews sent to the display fragment
 	PreviewFragment list;
 	ArrayList<Preview> previews = new ArrayList<Preview>();
+	// Boolean flag permitting the list fragment to be loaded.
+	boolean mainActivityRunning;
 	
 	private BluetoothVideoService videoSvc;
 	private ServiceConnection svcConn;
@@ -184,8 +187,7 @@ public class MainActivity extends SherlockFragmentActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		list = new PreviewFragment();
-		
+
 		/*
 		 * Initialize previews
 		 * 
@@ -202,6 +204,10 @@ public class MainActivity extends SherlockFragmentActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
+		
+		// Resume state indicating that MainActivity is running.
+		mainActivityRunning = true;
+		
         Log.i(TAG, "--- ONRESUME ---");
         
         startService(new Intent(this, BluetoothVideoService.class));
@@ -242,12 +248,14 @@ public class MainActivity extends SherlockFragmentActivity {
                 }
                 
                 if (!qManager.hasStarted()) {
-                    try {
+                	try {
                     	initializePreviews();
                     	qManager.setStarted();
                     } catch (Exception e) {
                     	Log.e(MainActivity.TAG, "Previews could not be initialized: " + e.getMessage());
                     }
+                } else if (qManager.hasFinished()) {
+                	displayPreviews();
                 }
 			}
         	
@@ -290,6 +298,20 @@ public class MainActivity extends SherlockFragmentActivity {
 		}
 	}
 	
+	@Override
+	public void onPause() {
+		super.onPause();
+		mainActivityRunning = false;
+	}
+	
+	/**
+	 * Inhibit BluetoothVideoService from being started every time orientation changes.
+	 */
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+	}
+	
     @Override
     public void onStop() {
         super.onStop();
@@ -298,7 +320,7 @@ public class MainActivity extends SherlockFragmentActivity {
         	unbindService(svcConn);
         }
     }
-	
+    
     // The Handler that gets information back from the BluetoothVideoService
     private final Handler mHandler = new Handler(new IncomingMessageCallback());
     
@@ -337,10 +359,27 @@ public class MainActivity extends SherlockFragmentActivity {
     }
     
     public void displayPreviews() {
+    	Log.e("MAINACTIVITY", "displayPreviews");
+    	/*
+    	// If the fragment already has an arguments bundle, update it
+    	if (list.getArguments() != null) {
+    		list.getArguments().putParcelableArrayList(MainActivity.PREVIEWS_DATA_TAG, previews);
+    	} else {
+        	Bundle fragmentData = new Bundle();
+        	fragmentData.putParcelableArrayList(MainActivity.PREVIEWS_DATA_TAG, previews);
+    		list.setArguments(fragmentData);
+    	}
+    	*/
+    	list = new PreviewFragment();
     	Bundle fragmentData = new Bundle();
     	fragmentData.putParcelableArrayList(MainActivity.PREVIEWS_DATA_TAG, previews);
 		list.setArguments(fragmentData);
-		getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, list).commit();
+		
+    	Log.e("MAINACTIVITY", "running? " + mainActivityRunning);
+		// Only do the fragment replacement if MainActivity is running
+		if (mainActivityRunning == true) {
+			getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, list).commit();
+		}
 		
 		Log.d(MainActivity.TAG, String.valueOf(previews.size()) + " added to preview fragment :)");
     }
