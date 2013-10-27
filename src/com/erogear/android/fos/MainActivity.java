@@ -344,7 +344,6 @@ public class MainActivity extends SherlockFragmentActivity {
     	// Set activePreview as first element
     	activePreview = q.peek();
 
-    	Log.d(MainActivity.TAG, "initializePreviews: Start loading videos");
     	loadNextPreviewVideo();
     }
     
@@ -359,28 +358,15 @@ public class MainActivity extends SherlockFragmentActivity {
     }
     
     public void displayPreviews() {
-    	Log.e("MAINACTIVITY", "displayPreviews");
-    	/*
-    	// If the fragment already has an arguments bundle, update it
-    	if (list.getArguments() != null) {
-    		list.getArguments().putParcelableArrayList(MainActivity.PREVIEWS_DATA_TAG, previews);
-    	} else {
-        	Bundle fragmentData = new Bundle();
-        	fragmentData.putParcelableArrayList(MainActivity.PREVIEWS_DATA_TAG, previews);
-    		list.setArguments(fragmentData);
-    	}
-    	*/
     	list = new PreviewFragment();
     	Bundle fragmentData = new Bundle();
     	fragmentData.putParcelableArrayList(MainActivity.PREVIEWS_DATA_TAG, previews);
 		list.setArguments(fragmentData);
 		
-    	Log.e("MAINACTIVITY", "running? " + mainActivityRunning);
-		// Only do the fragment replacement if MainActivity is running
+    	// Only do the fragment replacement if MainActivity is running
 		if (mainActivityRunning == true) {
 			getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, list).commit();
 		}
 		
-		Log.d(MainActivity.TAG, String.valueOf(previews.size()) + " added to preview fragment :)");
     }
 }
