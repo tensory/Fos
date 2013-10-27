@@ -32,6 +32,7 @@ public class PreviewFragment extends SherlockListFragment {
 
 	@Override
 	public void onListItemClick(ListView l, View view, int position, long id) {
+		/*
 		int lastSelectedIndex = selectedPreviewIndex;
 		PreviewListItemLayoutView pvView = (PreviewListItemLayoutView) view;
 		if (lastSelectedIndex > PreviewFragment.PREVIEW_NOT_SET_INDEX) {
@@ -50,12 +51,13 @@ public class PreviewFragment extends SherlockListFragment {
 		toggleControlsClickable(pvView);
 
 		selectedPreviewIndex = position;
+		*/
 	}
 
 	public Preview getSelectedPreview() {
 		return (Preview) getListAdapter().getItem(selectedPreviewIndex);
 	}
-	
+	/*
 	public void toggleControlsClickable(PreviewListItemLayoutView v) {
 		if (v.isActive()) {
 			v.ivBtnPreview.setClickable(true);
@@ -63,14 +65,17 @@ public class PreviewFragment extends SherlockListFragment {
 
 				@Override
 				public void onClick(View arg0) {
+					/*
 					Log.e(PreviewFragment.TAG, "Clicked preview");
 					((MainActivity) getActivity()).togglePreviewVideo(getSelectedPreview());
+					
 				}});
 		} else {
 			v.ivBtnPreview.setClickable(false);
 			v.ivBtnPreview.setOnClickListener(null);
 		}	
 	}
+	*/
 	
 	/**
 	 * Reset the heights of all list items dynamically

@@ -73,7 +73,6 @@ public class MainActivity extends SherlockFragmentActivity {
 	// Boolean flag permitting the list fragment to be loaded.
 	boolean mainActivityRunning;
 	
-    private FrameController<VideoProvider, MultiheadController> controller;
 	private BluetoothVideoService videoSvc;
 	private ServiceConnection svcConn;
     private MultiheadController headController;
@@ -108,6 +107,7 @@ public class MainActivity extends SherlockFragmentActivity {
 				break;
 			case BluetoothVideoService.MESSAGE_WRITE:
 				// Get the current frame and video provider
+				/*
 				if (controller != null) {
 					try {
 						int previewKey = list.getSelectedPreview().hashCode();
@@ -117,9 +117,9 @@ public class MainActivity extends SherlockFragmentActivity {
 						Log.e(MainActivity.TAG, "No frame data available for index " + String.valueOf(controller.getCurrentFrame()));
 					}
 				}
+				*/
 				
 				//byte[] writeBuf = (byte[]) msg.obj;
-				//previewFrame((ByteBufferFrame) msg.obj);
 				//addConversationLine("Me: " + byteArrayToHex(writeBuf));
 				break;
 			case BluetoothVideoService.MESSAGE_READ:
@@ -493,7 +493,7 @@ public class MainActivity extends SherlockFragmentActivity {
     public BluetoothVideoService getBluetoothVideoService() {
     	return videoSvc;
     }
-    
+    /*
     public void togglePreviewVideo(Preview preview) {
     	// Set the active preview.
     	
@@ -523,7 +523,7 @@ public class MainActivity extends SherlockFragmentActivity {
     	} else {
             controller.setAutoAdvance(false);
     	}
-        */
+        
         if (controller == null) {
         	controller = new FrameController<VideoProvider, MultiheadController>(activePreview.getVideoProvider(), headController, videoSvc);
         	videoSvc.setConfigInstance(FrameController.CONFIG_INSTANCE_KEY, controller);
@@ -535,7 +535,7 @@ public class MainActivity extends SherlockFragmentActivity {
             controller.setAutoAdvance(false);
     	}
     } 
-    	
+    	*/
     private void setActivePreview(Preview p) {
     	activePreview.attachPreview(p);
     	activePreview.setVideoProvider(previewVideoProviderCache.get(p.hashCode()));

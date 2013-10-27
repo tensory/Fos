@@ -14,8 +14,6 @@ import com.erogear.android.bluetooth.video.VideoProvider;
 import com.erogear.android.fos.R;
 
 public class PreviewListItemLayoutView extends RelativeLayout {
-	private static final int UNSET_FRAME_ID = -1;
-	private Context context;
 	private boolean isActive;
 	public ImageView ivBtnPreview, ivBtnAccept;
 	public Bitmap bm;
@@ -23,17 +21,14 @@ public class PreviewListItemLayoutView extends RelativeLayout {
 	
 	public PreviewListItemLayoutView(Context context) {
 		super(context);
-		this.context = context;
 	}
 
 	public PreviewListItemLayoutView(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		this.context = context;
 	}
 
 	public PreviewListItemLayoutView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
-		this.context = context;
 	}
 	
 	@Override
@@ -42,7 +37,7 @@ public class PreviewListItemLayoutView extends RelativeLayout {
 		ivBtnPreview = (ImageView) findViewById(R.id.ivBtnPreview);
 		ivBtnAccept = (ImageView) findViewById(R.id.ivBtnAccept);
 	}
-	
+	/*
 	public void toggleActive() {
 		isActive = !isActive;
 		setIconState();
@@ -52,16 +47,6 @@ public class PreviewListItemLayoutView extends RelativeLayout {
 		return isActive;
 	}
 	
-	/** DEPRECATED
-	public void toggleAnimation(VideoProvider provider) {
-		
-//		if (!animation.isRunning() && isActive) {
-		startAnimation(provider);
-//		} else {
-//			stopAndReset(animation);
-//		}
-	}
-	*/
 	public void stopAnimation() {
 		ImageView iv = (ImageView) findViewById(R.id.ivPreview);
 		AnimationDrawable animation = (AnimationDrawable) iv.getBackground();
@@ -98,24 +83,8 @@ public class PreviewListItemLayoutView extends RelativeLayout {
 		target.setImageResource(resId);
 		target.setClickable(false);
 	}
-	
-/** DEPRECATED
-	private void startAnimation(VideoProvider provider) {
-		if (lastFrameId == PreviewListItemLayoutView.UNSET_FRAME_ID) {
-			lastFrameId = 0;
-		}
-		
-		ImageView iv = (ImageView) findViewById(R.id.ivPreview);
-		
-		for (int i = lastFrameId; i < provider.getFrameCount(); i++) {
-			Bitmap bmp = Preview.FrameExtractor.getFrameBitmap(provider, i);
-			PreviewAdapter.setBackgroundImage(context, iv, bmp);			
-		}
-		
-		Log.d("PVLIV", "Done");
-	}
 	*/
-
+	
 	/**
 	 * Set the height of the list item
 	 * and the background ImageView.
