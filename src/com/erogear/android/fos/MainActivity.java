@@ -13,7 +13,9 @@ import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -44,9 +46,19 @@ public class MainActivity extends SherlockFragmentActivity {
 	private static final int REQUEST_ENABLE_BT = 2;
 	private static final int MULTIHEAD_SETUP_RESULT = 3;
 	
+	// Preferences
+	private SharedPreferences prefs;
+	
 	// Tags
 	public static final String TAG = "MAIN";
 	public static final String PREVIEWS_DATA_TAG = "previews";
+	
+	// Video dimensions
+	private static final String PREFS_WIDTH = "PANEL_WIDTH";
+	private static final String PREFS_HEIGHT = "PANEL_HEIGHT";
+	private int panelWidth = 32;
+	private int panelHeight = 24;
+	private boolean panelDimensionsChanged = false;
 	
 	// Preview video queue
 	Queue<Preview> q = new LinkedList<Preview>();
@@ -201,7 +213,8 @@ public class MainActivity extends SherlockFragmentActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-
+		prefs = getSharedPreferences(getResources().getString(R.string.app_name), android.content.Context.MODE_PRIVATE);
+			
 		/*
 		 * Initialize previews
 		 * 
@@ -271,9 +284,10 @@ public class MainActivity extends SherlockFragmentActivity {
                     startActivityForResult(btOn, REQUEST_ENABLE_BT);
                 }
                 
+                loadPanelDimensionsFromPreferences();
                 headController = (MultiheadController) videoSvc.getConfigInstance(MultiheadController.CONFIG_INSTANCE_KEY);
                 if (headController == null) {
-                    headController = new MultiheadController(32, 24);
+                    headController = new MultiheadController(panelWidth, panelHeight);
                     videoSvc.setConfigInstance(MultiheadController.CONFIG_INSTANCE_KEY, headController);
                     videoSvc.addHandler(headController.getHandler());
                 }
@@ -308,12 +322,6 @@ public class MainActivity extends SherlockFragmentActivity {
 			
         bindService(new Intent(MainActivity.this, BluetoothVideoService.class), svcConn, Service.START_STICKY);
         Log.d(MainActivity.TAG, "Bluetooth started");
-	}
-	
-	
-	public void onClickPreview(View v) {
-		Preview selected = list.getSelectedPreview();
-		this.togglePreviewVideo(selected);
 	}
 	
 	@Override
@@ -361,6 +369,11 @@ public class MainActivity extends SherlockFragmentActivity {
     	Log.d("BluetoothServiceConnection", str);
     }
     
+	public void onClickPreview(View v) {
+		Preview selected = list.getSelectedPreview();
+		this.togglePreviewVideo(selected);
+	}
+	
     private void initializePreviews() throws Exception {
     	if (previews.size() == 0) {
     		throw new Exception("No previews were read from XML");
@@ -501,5 +514,19 @@ public class MainActivity extends SherlockFragmentActivity {
 			});
 	
     	return alertDialogBuilder;
+    }
+    
+    private void loadPanelDimensionsFromPreferences() {
+    	panelWidth = prefs.getInt(MainActivity.PREFS_WIDTH, panelWidth);
+    	panelHeight = prefs.getInt(MainActivity.PREFS_HEIGHT, panelHeight);
+    	panelDimensionsChanged = false;
+    }
+    
+    private void setPanelDimensionsPreferences(int w, int h) {
+    	SharedPreferences.Editor editor = prefs.edit();
+		editor.putInt(MainActivity.PREFS_WIDTH, w);
+		editor.putInt(MainActivity.PREFS_WIDTH, h);
+		editor.commit();
+    	panelDimensionsChanged = true;
     }
 }
