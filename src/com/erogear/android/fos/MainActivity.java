@@ -140,13 +140,14 @@ public class MainActivity extends SherlockFragmentActivity {
 				} else {
 					// Finished loading preview videos
 					activePreview = null;
+					panelDimensionsChanged = false;
 					qManager.setFinished();
 				}
 
 				if (qManager.hasFinished()) {
 					// All videos have loaded!
 					// Launch preview display
-					displayPreviews();					
+					displayPreviews();
 				}
 				break;
 			case BluetoothVideoService.MESSAGE_VIDEO_LOAD_FAIL:
@@ -196,6 +197,15 @@ public class MainActivity extends SherlockFragmentActivity {
 			instance.started = true;
 		}
 		
+		/**
+		 * Use this method only when you want to force 
+		 * a restart of the video loading process.
+		 */
+		public void reset() {
+			instance.started = false;
+			instance.finished = false;
+		}
+		
 		public void setFinished() {
 			instance.finished = true;
 		}
@@ -214,20 +224,9 @@ public class MainActivity extends SherlockFragmentActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		prefs = getSharedPreferences(getResources().getString(R.string.app_name), android.content.Context.MODE_PRIVATE);
-			
-		/*
-		 * Initialize previews
-		 * 
-		 * Previews are not yet ready when Preview.getAll returns: 
-		 * each must be assigned a VideoProvider
-		 * 
-		 * After videos finish loading (through queue processed by VideoService message handler)
-		 * it is safe to hand previews off to PreviewFragment
-		 */
-		previews = Preview.getAll(MainActivity.this, getResources().getXml(R.xml.previews));
+		loadPanelDimensionsFromPreferences();
 		
-		// Initialize video providers cache
-		previewVideoProviderCache = new SparseArray<VideoProvider>(previews.size());
+		loadPreviews();
 	}
 	
 	/**
@@ -284,7 +283,6 @@ public class MainActivity extends SherlockFragmentActivity {
                     startActivityForResult(btOn, REQUEST_ENABLE_BT);
                 }
                 
-                loadPanelDimensionsFromPreferences();
                 headController = (MultiheadController) videoSvc.getConfigInstance(MultiheadController.CONFIG_INSTANCE_KEY);
                 if (headController == null) {
                     headController = new MultiheadController(panelWidth, panelHeight);
@@ -293,7 +291,6 @@ public class MainActivity extends SherlockFragmentActivity {
                 }
                 
                 /* Bluetooth Service init finished */
-                
                 // Prompt user to set up device controllers if none found
                 if (headController.getHeads().size() == 0) {
                 	AlertDialog alertDialog = getConfigurationAlertBuilder().create();
@@ -302,12 +299,26 @@ public class MainActivity extends SherlockFragmentActivity {
                 	Log.i(MainActivity.TAG, headController.getHeads().size() + " heads attached");
                 }
                 
+                /*
+                 * Restart video loading with new dimensions 
+                 * if panel dimensions have changed on this resume.
+                 */
+                if (panelDimensionsChanged == true) {
+                	qManager.reset();
+                	Log.e(MainActivity.TAG, "about to reload videos");
+                	loadPreviews();
+                	
+                }
+                
+                /* Load previews or redraw them if loaded */
                 if (!qManager.hasStarted()) {
         			try {
+        				activePreview = new PreviewLoader();
         				initializePreviews();
         				qManager.setStarted();
         			} catch (Exception e) {
-        				Log.e(MainActivity.TAG, "Previews could not be initialized: " + e.getMessage());
+        				Log.e(MainActivity.TAG, "Previews could not be initialized");
+        				e.printStackTrace();
         			}
         		} else if (qManager.hasFinished()) {
                 	displayPreviews();
@@ -360,6 +371,26 @@ public class MainActivity extends SherlockFragmentActivity {
         if (svcConn != null) {
         	unbindService(svcConn);
         }
+    }
+    
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    	switch(requestCode) {
+    	case MULTIHEAD_SETUP_RESULT:
+    		int newWidth, newHeight;
+    		newWidth = headController.getVirtualWidth();
+    		newHeight = headController.getVirtualHeight();
+    	
+    		loadPanelDimensionsFromPreferences();
+    		if (newWidth != panelWidth || newHeight != panelHeight) {
+    			setPanelDimensionsPreferences(newWidth, newHeight);
+    		}
+    		
+    		Log.d(MainActivity.TAG, "setup activity completed");
+    		break;
+    	default:
+    		break;
+    	}
     }
     
     // The Handler that gets information back from the BluetoothVideoService
@@ -525,8 +556,26 @@ public class MainActivity extends SherlockFragmentActivity {
     private void setPanelDimensionsPreferences(int w, int h) {
     	SharedPreferences.Editor editor = prefs.edit();
 		editor.putInt(MainActivity.PREFS_WIDTH, w);
-		editor.putInt(MainActivity.PREFS_WIDTH, h);
+		editor.putInt(MainActivity.PREFS_HEIGHT, h);
 		editor.commit();
     	panelDimensionsChanged = true;
+    }
+    
+    private void loadPreviews() {
+		/*
+		 * Initialize previews
+		 * 
+		 * Previews are not yet ready when Preview.getAll returns: 
+		 * each must be assigned a VideoProvider
+		 * 
+		 * After videos finish loading (through queue processed by VideoService message handler)
+		 * it is safe to hand previews off to PreviewFragment
+		 */
+		previews = Preview.getAll(MainActivity.this, getResources().getXml(R.xml.previews));
+		
+		// Initialize video providers cache
+		previewVideoProviderCache = new SparseArray<VideoProvider>(previews.size());
+		
+		Log.d(MainActivity.TAG, "Loading previews");
     }
 }
