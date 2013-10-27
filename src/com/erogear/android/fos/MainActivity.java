@@ -107,6 +107,8 @@ public class MainActivity extends SherlockFragmentActivity {
 				break;
 			case BluetoothVideoService.MESSAGE_WRITE:
 				// Get the current frame and video provider
+				
+				//TODO
 				/*
 				if (controller != null) {
 					try {
@@ -493,6 +495,8 @@ public class MainActivity extends SherlockFragmentActivity {
     public BluetoothVideoService getBluetoothVideoService() {
     	return videoSvc;
     }
+    
+    // TODO cleanup
     /*
     public void togglePreviewVideo(Preview preview) {
     	// Set the active preview.
@@ -536,10 +540,13 @@ public class MainActivity extends SherlockFragmentActivity {
     	}
     } 
     	*/
+    //TODO remove if never used
+    /*
     private void setActivePreview(Preview p) {
     	activePreview.attachPreview(p);
     	activePreview.setVideoProvider(previewVideoProviderCache.get(p.hashCode()));
     }
+    */
     
     /**
      * Get an AlertDialog.Builder to construct the error dialog
@@ -590,8 +597,10 @@ public class MainActivity extends SherlockFragmentActivity {
     public boolean getPanelDimensionsChanged() {
     	return panelDimensionsChanged;
     }
-    
+    // TODO cleanup
+    /*
     private void previewFrame(ByteBufferFrame bbf) {
     	list.drawFrameInCurrentPreview(bbf);
     }
+    */
 }
