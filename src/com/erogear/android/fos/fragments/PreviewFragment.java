@@ -71,44 +71,6 @@ public class PreviewFragment extends SherlockListFragment {
 		}
 		
 	}
-	// DEPRECATED
-	public void onClickPreview(View v) {
-		// Get the selected Preview object
-		//Preview selected = (Preview) getListAdapter().getItem(selectedPreviewIndex);
-		
-		//((MainActivity) getActivity()).togglePreviewVideo(selected, selectedPreviewIndex);
-		
-		/*
-	
-		VideoProvider provider = ((MainActivity) getActivity()).getVideoProviderCache().get(selected.hashCode());
-		FrameController<VideoProvider, MultiheadController> controller = 
-				new FrameController<VideoProvider, MultiheadController>(
-						provider,
-						
-						);
-		
-		public void toggleVideo(Preview preview, VideoProvider provider) {
-			VideoProvider videoProvider = context.
-	        controller = new FrameController<VideoProvider, MultiheadController>(provider, headController, videoSvc);
-	        videoSvc.setConfigInstance(FrameController.CONFIG_INSTANCE_KEY, controller);
-
-			
-		}
-		 /*
-		
-		// Get the clicked parent view
-		PreviewListItemLayoutView pvView = (PreviewListItemLayoutView) getListView().getChildAt(selectedPreviewIndex);
-		
-		// Provide the preview's VideoProvider to the view controller
-		try {
-			VideoProvider provider = ((MainActivity) getActivity()).getVideoProviderCache().get(selected.hashCode());
-			pvView.toggleAnimation(provider);
-			Log.d("CLICK_PREVIEW", "Currently looking at " + selected.toString());
-		} catch (Exception e) {
-			Log.e("PLILV", e.getMessage());
-		}
-		*/
-	}
 	
 	/**
 	 * Reset the heights of all list items dynamically
