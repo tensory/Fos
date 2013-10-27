@@ -500,13 +500,17 @@ public class MainActivity extends SherlockFragmentActivity {
     	// Only reset the active preview if it differs from the currently set one.
     	if (activePreview != null) {
     		if (activePreview.getPreview().hashCode() != preview.hashCode()) {
-        		setActivePreview(preview);    			
+        		setActivePreview(preview);
+        		
+        		controller.setAutoAdvance(false);
+        		controller = null;
     		}
     	} else {
     		activePreview = new PreviewLoader();
     		setActivePreview(preview);
     	}
     	
+    	/*
     	Toast.makeText(this, "Toggled preview", Toast.LENGTH_SHORT).show();
     	
     	// Now that an active preview was set, play its video
@@ -516,8 +520,18 @@ public class MainActivity extends SherlockFragmentActivity {
         // Bombs away
         if (!controller.isAutoAdvancing()) {
             controller.setAutoAdvance(true, controller.getAutoAdvanceInterval(), null);
+    	} else {
+            controller.setAutoAdvance(false);
     	}
-    	else {
+        */
+        if (controller == null) {
+        	controller = new FrameController<VideoProvider, MultiheadController>(activePreview.getVideoProvider(), headController, videoSvc);
+        	videoSvc.setConfigInstance(FrameController.CONFIG_INSTANCE_KEY, controller);
+        }
+        
+        if (!controller.isAutoAdvancing()) {
+            controller.setAutoAdvance(true, controller.getAutoAdvanceInterval(), null);
+    	} else {
             controller.setAutoAdvance(false);
     	}
     } 
