@@ -2,13 +2,17 @@ package com.erogear.android.fos.fragments;
 
 import java.util.ArrayList;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.ImageView;
 import android.widget.ListView;
 
 import com.actionbarsherlock.app.SherlockListFragment;
+import com.erogear.android.bluetooth.video.FrameController;
+import com.erogear.android.bluetooth.video.MultiheadController;
+import com.erogear.android.bluetooth.video.VideoProvider;
 import com.erogear.android.fos.MainActivity;
 import com.erogear.android.fos.Preview;
 import com.erogear.android.fos.PreviewAdapter;
@@ -46,11 +50,84 @@ public class PreviewFragment extends SherlockListFragment {
 			}
 		} 
 		pvView.toggleActive();
+		toggleControlsClickable(pvView);
 
 		selectedPreviewIndex = position;
 	}
 
-	public void onClickPreview(View v) {
-		Log.d("CLICK_PREVIEW", "Currently looking at " + String.valueOf(selectedPreviewIndex));
+	public Preview getSelectedPreview() {
+		return (Preview) getListAdapter().getItem(selectedPreviewIndex);
 	}
+	
+	public void toggleControlsClickable(PreviewListItemLayoutView v) {
+		if (v.isActive()) {
+			v.ivBtnPreview.setClickable(true);
+			v.ivBtnPreview.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View arg0) {
+					Log.e("PF", "Clicked preview");
+					((MainActivity) getActivity()).togglePreviewVideo(getSelectedPreview());
+				}});
+		} else {
+			v.ivBtnPreview.setClickable(false);
+			v.ivBtnPreview.setOnClickListener(null);
+		}
+		
+	}
+	// DEPRECATED
+	public void onClickPreview(View v) {
+		// Get the selected Preview object
+		//Preview selected = (Preview) getListAdapter().getItem(selectedPreviewIndex);
+		
+		//((MainActivity) getActivity()).togglePreviewVideo(selected, selectedPreviewIndex);
+		
+		/*
+	
+		VideoProvider provider = ((MainActivity) getActivity()).getVideoProviderCache().get(selected.hashCode());
+		FrameController<VideoProvider, MultiheadController> controller = 
+				new FrameController<VideoProvider, MultiheadController>(
+						provider,
+						
+						);
+		
+		public void toggleVideo(Preview preview, VideoProvider provider) {
+			VideoProvider videoProvider = context.
+	        controller = new FrameController<VideoProvider, MultiheadController>(provider, headController, videoSvc);
+	        videoSvc.setConfigInstance(FrameController.CONFIG_INSTANCE_KEY, controller);
+
+			
+		}
+		 /*
+		
+		// Get the clicked parent view
+		PreviewListItemLayoutView pvView = (PreviewListItemLayoutView) getListView().getChildAt(selectedPreviewIndex);
+		
+		// Provide the preview's VideoProvider to the view controller
+		try {
+			VideoProvider provider = ((MainActivity) getActivity()).getVideoProviderCache().get(selected.hashCode());
+			pvView.toggleAnimation(provider);
+			Log.d("CLICK_PREVIEW", "Currently looking at " + selected.toString());
+		} catch (Exception e) {
+			Log.e("PLILV", e.getMessage());
+		}
+		*/
+	}
+	
+	/**
+	 * Reset the heights of all list items dynamically
+	 * when the device is rotated
+	 * to preserve visible ratio.
+	 */
+    public void redrawPreviewItems(int containerWidth, double ratio) {
+    	int height = (int) (containerWidth * ratio);
+    	
+    	ListView list = getListView();
+    	for (int i = 0; i < list.getCount(); i++) {
+    		PreviewListItemLayoutView layout = (PreviewListItemLayoutView) list.getChildAt(i);
+    		layout.setLayoutHeight(height);
+    	}
+    	
+    	Log.d("PF", "Changing height ratio");
+    }
 }

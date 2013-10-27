@@ -12,14 +12,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
 
 import com.erogear.android.fos.views.PreviewListItemLayoutView;
 
 public class PreviewAdapter extends ArrayAdapter<Preview> {
+	private int previewItemHeight;
 	
 	public PreviewAdapter(Context context, List<Preview> previews) {
 		super(context, 0, previews);
+		previewItemHeight = ((MainActivity) context).getPreviewItemHeight();
 	}
 	
 	@Override
@@ -29,7 +33,7 @@ public class PreviewAdapter extends ArrayAdapter<Preview> {
 			LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	    	view = (PreviewListItemLayoutView) inflater.inflate(R.layout.preview_list_item, null);
 		}
-		
+
 		Preview p = getItem(position);
 		TextView title = (TextView) view.findViewById(R.id.tvAnimTitle);
 		title.setText(p.getName());
@@ -39,24 +43,28 @@ public class PreviewAdapter extends ArrayAdapter<Preview> {
 		String pvImagePath = new File(getContext().getFilesDir(), p.getResourceName() + Preview.IMAGE_EXTENSION).getPath();
 		Bitmap bitmap = BitmapFactory.decodeFile(pvImagePath);
 		// Set it as background
-		if (android.os.Build.VERSION.SDK_INT >= 16){
-			setBackgroundV16Plus(previewImage, bitmap);
-		} else {
-			setBackgroundV16Minus(previewImage, bitmap);
-		}
-
+		PreviewAdapter.setBackgroundImage(getContext(), previewImage, bitmap);
+		
 		return view;
 	}
 	
 	// Multi-API level targeting because view.setBackgroundDrawable is deprecated
 	// http://stackoverflow.com/questions/18806709/how-to-set-a-bitmap-to-background-for-a-view-android-api-10-18
 	@TargetApi(16)
-	private void setBackgroundV16Plus(View view, Bitmap bmp) {
-		view.setBackground(new BitmapDrawable(getContext().getResources(), bmp));
+	private static void setBackgroundV16Plus(Context context, View view, Bitmap bmp) {
+		view.setBackground(new BitmapDrawable(context.getResources(), bmp));
 	}
 	
 	@TargetApi(16)
-	private void setBackgroundV16Minus(View view, Bitmap bmp) {
+	private static void setBackgroundV16Minus(View view, Bitmap bmp) {
 		view.setBackgroundDrawable(new BitmapDrawable(bmp));
+	}
+	
+	public static void setBackgroundImage(Context context, View view, Bitmap bmp) {
+		if (android.os.Build.VERSION.SDK_INT >= 16){
+			setBackgroundV16Plus(context, view, bmp);
+		} else {
+			setBackgroundV16Minus(view, bmp);
+		}
 	}
 }

@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import android.content.Context;
 import android.content.res.XmlResourceParser;
 import android.graphics.Bitmap;
-import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -39,21 +38,15 @@ public class Preview implements Parcelable {
 	private static String TAG = "PREVIEW";
 	private String name;
 	private String filename;
-	private VideoProvider provider;
-	private boolean videoLoaded;
 	
 	public Preview(Parcel in) {
 		name = in.readString();
 		filename = in.readString();
-		videoLoaded = (in.readByte() == 1);
-		// provider is not rehydrated because serialization is hard
 	}
 	
-	public Preview() {
-		// At creation time, video has not been loaded.
-		videoLoaded = false;
-	}
-	
+	public Preview() { }
+	// TODO: add CREATOR field
+
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -92,28 +85,24 @@ public class Preview implements Parcelable {
 	 * ready to use as a preview image
 	 * @throws Exception 
 	 */
-	public void confirmPreviewBitmapReady(Context context) {
+	public void confirmPreviewBitmapReady(Context context, File filePath) {
 		String imageFilename = this.getResourceName() + Preview.IMAGE_EXTENSION;
-		File f = new File(context.getFilesDir(), imageFilename);
+		File f = new File(filePath, imageFilename);
 		if (!f.exists()) {
 			// Image has not been created
 			// Has the video file been loaded?
-			if (videoLoaded) {
+			if (((MainActivity) context).getVideoProviderCache().get(this.hashCode()) != null) {
 				// If video has been loaded, extract a frame and save it
-				Bitmap bmp = FrameExtractor.getFrameBitmap(provider, 0);
+				Bitmap bmp = FrameExtractor.getFrameBitmap(((MainActivity) context).getVideoProviderCache().get(this.hashCode()), 0);
 				try {
 					saveThumbnail(f, bmp); 					
 				} catch (Exception e) {
 					Log.e(Preview.TAG, "Could not save thumbnail: " + e.getMessage());
 				}
-
-			} else {
-				Log.e(Preview.TAG, "No video loaded");
-				
 			}
 		}
 		// Do a final check on the new file
-		f = new File(context.getFilesDir(), imageFilename);
+		f = new File(filePath, imageFilename);
 		if (!f.exists()) {
 			Log.e(Preview.TAG, this.name + ": No image preview found");
 		}		
@@ -129,11 +118,7 @@ public class Preview implements Parcelable {
 	public String toString() {
 		return this.name;
 	}
-	
-	public void setVideoProvider(VideoProvider vp) {
-        provider = vp;
-	}
-	
+
 	public File saveVideoFileAsset(Context context) throws FileNotFoundException, IOException {
 		File videoFile = new File(context.getFilesDir(), this.getFilename());
 		if (!videoFile.exists()) {
@@ -149,10 +134,6 @@ public class Preview implements Parcelable {
 		}
 		return videoFile;
 	}
-	
-	public void setVideoLoaded(boolean isLoaded) {
-		videoLoaded = isLoaded;
-	}
 
 	@Override
 	public int describeContents() {
@@ -164,6 +145,16 @@ public class Preview implements Parcelable {
 	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeString(name);
 		dest.writeString(filename);
-		dest.writeByte((byte)(videoLoaded ? 1 : 0));
 	};
+	
+    public static final Parcelable.Creator<Preview> CREATOR = new Parcelable.Creator<Preview>() {
+        public Preview createFromParcel(Parcel in) {
+            return new Preview(in); 
+        }
+
+		@Override
+		public Preview[] newArray(int size) {
+			return new Preview[size];
+		}
+    };
 }

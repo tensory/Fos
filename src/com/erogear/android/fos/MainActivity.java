@@ -5,10 +5,12 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ComponentName;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.res.Configuration;
@@ -17,6 +19,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.View;
 import android.widget.Toast;
 
@@ -30,7 +33,9 @@ import com.erogear.android.bluetooth.comm.DeviceConnection;
 import com.erogear.android.bluetooth.comm.FrameConsumer;
 import com.erogear.android.bluetooth.comm.MultiheadSetupActivity;
 import com.erogear.android.bluetooth.video.FFMPEGVideoProvider;
+import com.erogear.android.bluetooth.video.FrameController;
 import com.erogear.android.bluetooth.video.MultiheadController;
+import com.erogear.android.bluetooth.video.VideoProvider;
 import com.erogear.android.fos.fragments.PreviewFragment;
 
 public class MainActivity extends SherlockFragmentActivity {
@@ -45,8 +50,11 @@ public class MainActivity extends SherlockFragmentActivity {
 	
 	// Preview video queue
 	Queue<Preview> q = new LinkedList<Preview>();
-	PreviewLoadStateManager qManager;
-	Preview activePreview;
+	PreviewLoadStateManager qManager = PreviewLoadStateManager.getInstance();
+	PreviewLoader activePreview = new PreviewLoader();
+	
+	// Video controller pool
+	private SparseArray<VideoProvider> previewVideoProviderCache;
 	
 	// Previews sent to the display fragment
 	PreviewFragment list;
@@ -54,6 +62,7 @@ public class MainActivity extends SherlockFragmentActivity {
 	// Boolean flag permitting the list fragment to be loaded.
 	boolean mainActivityRunning;
 	
+    private FrameController<VideoProvider, MultiheadController> controller;
 	private BluetoothVideoService videoSvc;
 	private ServiceConnection svcConn;
     private MultiheadController headController;
@@ -100,18 +109,21 @@ public class MainActivity extends SherlockFragmentActivity {
 	                previewFrame((ByteBufferFrame)msg.obj);
 
 				 */
+				
+				// Figure out which preview the frame belongs to, and send the frame to it
+				Log.d("VIDEOFRAME", msg.toString());
 				break;
 			case BluetoothVideoService.MESSAGE_VIDEO_LOADED:
 				Toast.makeText(getApplicationContext(), "Video loaded!", Toast.LENGTH_SHORT).show();
 				addConversationLine((String) msg.obj);
-				activePreview.setVideoLoaded(true);
 				
 				// Use the just-loaded video to extract a thumbnail
-				activePreview.confirmPreviewBitmapReady(getApplicationContext());
+				previewVideoProviderCache.put(activePreview.getPreview().hashCode(), activePreview.getVideoProvider());
+				activePreview.getPreview().confirmPreviewBitmapReady(MainActivity.this, getApplicationContext().getFilesDir());
 				// Advance the queue
 				q.remove();
 				if (q.size() > 0) {
-					activePreview = q.peek();
+					activePreview.attachPreview(q.peek());
 					loadNextPreviewVideo();
 				} else {
 					// Finished loading preview videos
@@ -149,6 +161,8 @@ public class MainActivity extends SherlockFragmentActivity {
 	 * Manager for state variables about video preview loading.
 	 * This prevents the load attempt from being restarted.
 	 * Only one manager should be created for a queue of videos to load.
+	 * 
+	 * This class may not be necessary when onConfigChange is overridden. Try it...
 	 */
 	private static class PreviewLoadStateManager {
 		boolean started = false;
@@ -182,7 +196,7 @@ public class MainActivity extends SherlockFragmentActivity {
 			return instance.finished;
 		}
 	}
-	
+	    
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -198,18 +212,35 @@ public class MainActivity extends SherlockFragmentActivity {
 		 * it is safe to hand previews off to PreviewFragment
 		 */
 		previews = Preview.getAll(MainActivity.this, getResources().getXml(R.xml.previews));
-		qManager = PreviewLoadStateManager.getInstance();
+		
+		// Initialize video providers cache
+		previewVideoProviderCache = new SparseArray<VideoProvider>(previews.size());
+	}
+	
+	/**
+	 * Inhibit BluetoothVideoService from being started every time orientation changes.
+	 */
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+		
+		// Use different aspect ratio depending on orientation
+		double aspectRatio = getPreviewAspectRatio(newConfig.orientation);
+		
+		// Redraw previews items to fill view at proportional height.
+        scalePreviewItemHeights(aspectRatio);
 	}
 	
 	@Override
 	protected void onResume() {
 		super.onResume();
-		
+
+        Log.i(TAG, "--- ONRESUME ---");
+
+        
 		// Resume state indicating that MainActivity is running.
 		mainActivityRunning = true;
 		
-        Log.i(TAG, "--- ONRESUME ---");
-        
         startService(new Intent(this, BluetoothVideoService.class));
         svcConn = new ServiceConnection() {
         	@Override
@@ -247,16 +278,26 @@ public class MainActivity extends SherlockFragmentActivity {
                     videoSvc.addHandler(headController.getHandler());
                 }
                 
-                if (!qManager.hasStarted()) {
-                	try {
-                    	initializePreviews();
-                    	qManager.setStarted();
-                    } catch (Exception e) {
-                    	Log.e(MainActivity.TAG, "Previews could not be initialized: " + e.getMessage());
-                    }
-                } else if (qManager.hasFinished()) {
-                	displayPreviews();
+                /* Bluetooth Service init finished */
+                
+                // Prompt user to set up device controllers if none found
+                if (headController.getHeads().size() == 0) {
+                	AlertDialog alertDialog = getConfigurationAlertBuilder().create();
+                	alertDialog.show();
+                } else {
+                	Log.i(MainActivity.TAG, headController.getHeads().size() + " heads attached");
                 }
+                
+                if (!qManager.hasStarted()) {
+        			try {
+        				initializePreviews();
+        				qManager.setStarted();
+        			} catch (Exception e) {
+        				Log.e(MainActivity.TAG, "Previews could not be initialized: " + e.getMessage());
+        			}
+        		} else if (qManager.hasFinished()) {
+                	displayPreviews();
+        		}
 			}
         	
         	@Override
@@ -267,12 +308,12 @@ public class MainActivity extends SherlockFragmentActivity {
 			
         bindService(new Intent(MainActivity.this, BluetoothVideoService.class), svcConn, Service.START_STICKY);
         Log.d(MainActivity.TAG, "Bluetooth started");
-
 	}
 	
 	
 	public void onClickPreview(View v) {
-		list.onClickPreview(v);
+		Preview selected = list.getSelectedPreview();
+		this.togglePreviewVideo(selected);
 	}
 	
 	@Override
@@ -302,14 +343,6 @@ public class MainActivity extends SherlockFragmentActivity {
 	public void onPause() {
 		super.onPause();
 		mainActivityRunning = false;
-	}
-	
-	/**
-	 * Inhibit BluetoothVideoService from being started every time orientation changes.
-	 */
-	@Override
-	public void onConfigurationChanged(Configuration newConfig) {
-		super.onConfigurationChanged(newConfig);
 	}
 	
     @Override
@@ -342,14 +375,14 @@ public class MainActivity extends SherlockFragmentActivity {
     	}
     	
     	// Set activePreview as first element
-    	activePreview = q.peek();
+    	activePreview.attachPreview(q.peek());
 
     	loadNextPreviewVideo();
     }
     
     public void loadNextPreviewVideo() {
     	FFMPEGVideoProvider ffmpeg = new FFMPEGVideoProvider(MainActivity.this, videoSvc, headController.getVirtualWidth(), headController.getVirtualHeight(), COLOR_PREVIEW);
-        File f = new File(getApplicationContext().getFilesDir(), activePreview.getFilename());
+        File f = new File(getApplicationContext().getFilesDir(), activePreview.getPreview().getFilename());
     	// File should exist at this point.
         // Fatal error if it does not.
         
@@ -363,10 +396,110 @@ public class MainActivity extends SherlockFragmentActivity {
     	fragmentData.putParcelableArrayList(MainActivity.PREVIEWS_DATA_TAG, previews);
 		list.setArguments(fragmentData);
 		
-    	// Only do the fragment replacement if MainActivity is running
 		if (mainActivityRunning == true) {
 			getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, list).commit();
 		}
-		
+    }
+    
+    /**
+     * Scale the height of preview items
+     * based on the container width.
+     */
+    public void scalePreviewItemHeights(double aspectRatio) {
+    	list.redrawPreviewItems(findViewById(R.id.frameLayout).getWidth(), aspectRatio);    		
+    }
+    
+    public int getPreviewItemHeight() {
+    	int width = findViewById(R.id.frameLayout).getWidth();
+    	return (int) (width * getPreviewAspectRatio());
+    }
+    
+    private double getPreviewAspectRatio() {
+    	return getPreviewAspectRatio(getResources().getConfiguration().orientation);
+    }
+
+    private double getPreviewAspectRatio(int orientation) {
+    	double aspectRatio = 1.0;
+    	if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+    		return aspectRatio / 4;
+    	}
+    	return aspectRatio / 6;
+    }
+    
+    /**
+     * Get the mapping of preview IDs to loaded video providers
+     * @return video provider cache
+     */
+    public SparseArray<VideoProvider> getVideoProviderCache() {
+    	return previewVideoProviderCache;
+    }
+    
+    public BluetoothVideoService getBluetoothVideoService() {
+    	return videoSvc;
+    }
+    
+    public void togglePreviewVideo(Preview preview) {
+    	// Set the active preview.
+    	
+    	// Only reset the active preview if it differs from the currently set one.
+    	if (activePreview != null) {
+    		if (activePreview.getPreview().hashCode() != preview.hashCode()) {
+        		setActivePreview(preview);    			
+    		}
+    	} else {
+    		activePreview = new PreviewLoader();
+    		setActivePreview(preview);
+    	}
+    	
+    	Toast.makeText(this, "Toggled preview", Toast.LENGTH_SHORT).show();
+    	
+    	// Now that an active preview was set, play its video
+    	controller = new FrameController<VideoProvider, MultiheadController>(activePreview.getVideoProvider(), headController, videoSvc);
+        videoSvc.setConfigInstance(FrameController.CONFIG_INSTANCE_KEY, controller);
+        
+        // Bombs away
+        if (!controller.isAutoAdvancing()) {
+            controller.setAutoAdvance(true, controller.getAutoAdvanceInterval(), null);
+    	}
+    	else {
+            controller.setAutoAdvance(false);
+    	}
+    } 
+    	
+    private void setActivePreview(Preview p) {
+    	activePreview.attachPreview(p);
+    	activePreview.setVideoProvider(previewVideoProviderCache.get(p.hashCode()));
+    }
+    
+    /**
+     * Get an AlertDialog.Builder to construct the error dialog
+     * when no device configuration has been set.
+     * 
+     * Resulting Builder must have create() called on it.
+     * @return builder for alert dialog
+     */
+    private AlertDialog.Builder getConfigurationAlertBuilder() {
+    	AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+    	
+    	alertDialogBuilder.setTitle(getResources().getString(R.string.txtNoDevices));
+    	alertDialogBuilder
+	    	.setMessage(getResources().getString(R.string.txtExplainNoDevices))
+	    	.setCancelable(false)
+	    	.setPositiveButton(R.string.txtConnect, new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					Intent i = new Intent(MainActivity.this, MultiheadSetupActivity.class);
+					startActivityForResult(i, MainActivity.MULTIHEAD_SETUP_RESULT);					
+				}
+			})
+			.setNegativeButton(R.string.txtExit, new DialogInterface.OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					finish();
+				}
+			});
+	
+    	return alertDialogBuilder;
     }
 }

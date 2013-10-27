@@ -1,27 +1,41 @@
 package com.erogear.android.fos.views;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.drawable.AnimationDrawable;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
+import com.erogear.android.bluetooth.video.FrameController;
+import com.erogear.android.bluetooth.video.MultiheadController;
+import com.erogear.android.bluetooth.video.VideoProvider;
+import com.erogear.android.fos.Preview;
+import com.erogear.android.fos.PreviewAdapter;
 import com.erogear.android.fos.R;
 
 public class PreviewListItemLayoutView extends RelativeLayout {
+	private static final int UNSET_FRAME_ID = -1;
+	private Context context;
 	private boolean isActive;
 	public ImageView ivBtnPreview, ivBtnAccept;
+	private int lastFrameId;
 	
 	public PreviewListItemLayoutView(Context context) {
 		super(context);
+		this.context = context;
 	}
 
 	public PreviewListItemLayoutView(Context context, AttributeSet attrs) {
 		super(context, attrs);
+		this.context = context;
 	}
 
 	public PreviewListItemLayoutView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
+		this.context = context;
 	}
 	
 	@Override
@@ -36,16 +50,20 @@ public class PreviewListItemLayoutView extends RelativeLayout {
 		setIconState();
 	}
 	
-	public void toggleAnimation() {
-		ImageView iv = (ImageView) findViewById(R.id.ivPreview);
-		AnimationDrawable animation = (AnimationDrawable) iv.getBackground();
-		if (!animation.isRunning() && isActive) {
-			animation.start();
-		} else {
-			stopAndReset(animation);
-		}
+	public boolean isActive() {
+		return isActive;
 	}
 	
+	/** DEPRECATED
+	public void toggleAnimation(VideoProvider provider) {
+		
+//		if (!animation.isRunning() && isActive) {
+		startAnimation(provider);
+//		} else {
+//			stopAndReset(animation);
+//		}
+	}
+	*/
 	public void stopAnimation() {
 		ImageView iv = (ImageView) findViewById(R.id.ivPreview);
 		AnimationDrawable animation = (AnimationDrawable) iv.getBackground();
@@ -81,5 +99,33 @@ public class PreviewListItemLayoutView extends RelativeLayout {
 	private void deactivateImageButton(ImageView target, int resId) {
 		target.setImageResource(resId);
 		target.setClickable(false);
+	}
+	
+/** DEPRECATED
+	private void startAnimation(VideoProvider provider) {
+		if (lastFrameId == PreviewListItemLayoutView.UNSET_FRAME_ID) {
+			lastFrameId = 0;
+		}
+		
+		ImageView iv = (ImageView) findViewById(R.id.ivPreview);
+		
+		for (int i = lastFrameId; i < provider.getFrameCount(); i++) {
+			Bitmap bmp = Preview.FrameExtractor.getFrameBitmap(provider, i);
+			PreviewAdapter.setBackgroundImage(context, iv, bmp);			
+		}
+		
+		Log.d("PVLIV", "Done");
+	}
+	*/
+
+	/**
+	 * Set the height of the list item
+	 * and the background ImageView.
+	 * @param height
+	 */
+	public void setLayoutHeight(int height) {
+		ViewGroup.LayoutParams dims = this.getLayoutParams();
+		dims.height = height;
+		this.setLayoutParams(dims);
 	}
 }
