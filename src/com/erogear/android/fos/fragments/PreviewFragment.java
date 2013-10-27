@@ -6,17 +6,13 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.ImageView;
 import android.widget.ListView;
 
 import com.actionbarsherlock.app.SherlockListFragment;
-import com.erogear.android.bluetooth.video.FrameController;
-import com.erogear.android.bluetooth.video.MultiheadController;
-import com.erogear.android.bluetooth.video.VideoProvider;
+import com.erogear.android.bluetooth.video.ByteBufferFrame;
 import com.erogear.android.fos.MainActivity;
 import com.erogear.android.fos.Preview;
 import com.erogear.android.fos.PreviewAdapter;
-import com.erogear.android.fos.R;
 import com.erogear.android.fos.views.PreviewListItemLayoutView;
 
 public class PreviewFragment extends SherlockListFragment {
@@ -129,5 +125,22 @@ public class PreviewFragment extends SherlockListFragment {
     	}
     	
     	Log.d("PF", "Changing height ratio");
+    }
+    
+    /**
+     * Receives a ByteBufferFrame
+     * from the BluetoothVideoService callback handler in MainActivity,
+     * and pushes it to the currently selected Preview's layout view 
+     * to be drawn in the background.
+     * 
+     * @param frame
+     */
+    public void drawFrameInCurrentPreview(Object frame) {
+    	if (selectedPreviewIndex == PreviewFragment.PREVIEW_NOT_SET_INDEX) {
+    		Log.e("PF", "Can't draw a frame for an unselected preview");
+    	}
+    	
+    	PreviewListItemLayoutView layout = (PreviewListItemLayoutView) getListView().getChildAt(selectedPreviewIndex);
+    	layout.drawFrame((ByteBufferFrame) frame);
     }
 }

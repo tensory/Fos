@@ -15,14 +15,12 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
 import android.util.SparseArray;
-import android.view.View;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
@@ -34,6 +32,7 @@ import com.erogear.android.bluetooth.comm.BluetoothVideoService;
 import com.erogear.android.bluetooth.comm.DeviceConnection;
 import com.erogear.android.bluetooth.comm.FrameConsumer;
 import com.erogear.android.bluetooth.comm.MultiheadSetupActivity;
+import com.erogear.android.bluetooth.video.ByteBufferFrame;
 import com.erogear.android.bluetooth.video.FFMPEGVideoProvider;
 import com.erogear.android.bluetooth.video.FrameController;
 import com.erogear.android.bluetooth.video.MultiheadController;
@@ -108,7 +107,19 @@ public class MainActivity extends SherlockFragmentActivity {
 				}
 				break;
 			case BluetoothVideoService.MESSAGE_WRITE:
-				byte[] writeBuf = (byte[]) msg.obj;
+				// Get the current frame and video provider
+				if (controller != null) {
+					try {
+						int previewKey = list.getSelectedPreview().hashCode();
+						list.drawFrameInCurrentPreview(
+								previewVideoProviderCache.get(previewKey).getFrame(controller.getCurrentFrame()));
+					} catch (Exception e) {
+						Log.e(MainActivity.TAG, "No frame data available for index " + String.valueOf(controller.getCurrentFrame()));
+					}
+				}
+				
+				//byte[] writeBuf = (byte[]) msg.obj;
+				//previewFrame((ByteBufferFrame) msg.obj);
 				//addConversationLine("Me: " + byteArrayToHex(writeBuf));
 				break;
 			case BluetoothVideoService.MESSAGE_READ:
@@ -117,13 +128,7 @@ public class MainActivity extends SherlockFragmentActivity {
 				addConversationLine(((FrameConsumer)msg.obj).getName() + ":  " + msg.arg1 + " " + msg.arg2);
 				break;
 			case BluetoothVideoService.MESSAGE_NEW_FRAME:
-				/*
-	                previewFrame((ByteBufferFrame)msg.obj);
-
-				 */
-				
-				// Figure out which preview the frame belongs to, and send the frame to it
-				Log.d("VIDEOFRAME", msg.toString());
+				// New frame loaded
 				break;
 			case BluetoothVideoService.MESSAGE_VIDEO_LOADED:
 				Toast.makeText(getApplicationContext(), "Video loaded!", Toast.LENGTH_SHORT).show();
@@ -411,11 +416,6 @@ public class MainActivity extends SherlockFragmentActivity {
     private void addConversationLine(String str) {
     	Log.d("BluetoothServiceConnection", str);
     }
-    
-	public void onClickPreview(View v) {
-		Preview selected = list.getSelectedPreview();
-		this.togglePreviewVideo(selected);
-	}
 	
     private void initializePreviews() throws Exception {
     	if (previews.size() == 0) {
@@ -575,5 +575,9 @@ public class MainActivity extends SherlockFragmentActivity {
     
     public boolean getPanelDimensionsChanged() {
     	return panelDimensionsChanged;
+    }
+    
+    private void previewFrame(ByteBufferFrame bbf) {
+    	list.drawFrameInCurrentPreview(bbf);
     }
 }
