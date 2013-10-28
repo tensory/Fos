@@ -76,6 +76,7 @@ public class MainActivity extends SherlockFragmentActivity {
 	private BluetoothVideoService videoSvc;
 	private ServiceConnection svcConn;
     private MultiheadController headController;
+    private FrameController<VideoProvider, MultiheadController> controller;
     
     // false = see data as sent to panel. true = see color data from video file.
     private static final boolean COLOR_PREVIEW = false;
@@ -603,4 +604,66 @@ public class MainActivity extends SherlockFragmentActivity {
     	list.drawFrameInCurrentPreview(bbf);
     }
     */
+    
+    /**
+     * When called, this method promotes the identified preview
+     * and deselects any previous setting.
+     */
+    public void setCurrentPreview(int index) {
+    	// Deactivate any formerly selected preview
+    	if (activePreview == null) {
+    		activePreview = new PreviewLoader();
+    	}
+    	
+    	if (activePreview.hasListIndex() && activePreview.getListIndex() != index) {
+    		deactivate(activePreview);
+    	}
+    	
+    	Log.i("MAIN", "ActivePreview SHOULD be dead now: " + activePreview.toString());
+    	
+    	Preview newPreview = list.getSelectedPreview(index);
+    	activePreview.attachPreview(newPreview);
+    	activePreview.setVideoProvider(previewVideoProviderCache.get(newPreview.hashCode()));
+    	activePreview.setListIndex(index);
+    	
+    	Log.i("MAIN", "ActivePreview replaced by shiny new prev: " + activePreview.getPreview().hashCode());
+    	
+    	list.activateItem(index);
+    	activePreview.setHighlighted(true);
+    	
+    	// Set controller to correspond to this preview
+    	controller = new FrameController<VideoProvider, MultiheadController>(activePreview.getVideoProvider(), headController, videoSvc);
+        videoSvc.setConfigInstance(FrameController.CONFIG_INSTANCE_KEY, controller);
+        
+        /*
+        // Start up video
+        
+        
+        if (!controller.isAutoAdvancing()) {
+            controller.setAutoAdvance(true, controller.getAutoAdvanceInterval(), null);
+    	} else {
+            controller.setAutoAdvance(false);
+    	}
+        */
+    	
+        // Bombs away
+    	if (!controller.isAutoAdvancing()) {
+            controller.setAutoAdvance(true, controller.getAutoAdvanceInterval(), null);
+    	}
+    	
+    	activePreview.setPlaying(true);
+    }
+    
+    private void deactivate(PreviewLoader active) {
+    	// Turn off video play
+    	if (controller != null) {
+    		controller.setAutoAdvance(false);
+    	}
+    	
+    	// Tell the PreviewLoader's preview state to deactivate
+    	list.deactivateItem(active.getListIndex());
+    	
+    	// Finally, destroy the PreviewLoader
+    	active = new PreviewLoader();
+    }
 }

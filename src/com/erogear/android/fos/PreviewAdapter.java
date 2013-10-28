@@ -39,6 +39,9 @@ public class PreviewAdapter extends ArrayAdapter<Preview> {
 		title.setText(p.getName());
 		ImageView previewImage = (ImageView) view.findViewById(R.id.ivPreview);
 		
+		// Set the list position on the view
+		view.setListIndex(position);
+		
 		// Fetch background image
 		String pvImagePath = new File(getContext().getFilesDir(), p.getResourceName() + Preview.IMAGE_EXTENSION).getPath();
 		Bitmap bitmap = BitmapFactory.decodeFile(pvImagePath);

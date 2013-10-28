@@ -4,8 +4,17 @@ import com.erogear.android.fos.Preview;
 
 
 public class PreviewLoader {
+	private static final int UNSET_INDEX = -1;
 	private Preview preview;
 	private VideoProvider provider;
+	private int listIndex;
+	private boolean selected, playing;
+	
+	public PreviewLoader() {
+		listIndex = PreviewLoader.UNSET_INDEX;
+		selected = false;
+		playing = false;
+	}
 	
 	public void attachPreview(Preview p) {
 		preview = p;
@@ -21,5 +30,25 @@ public class PreviewLoader {
 	
 	public VideoProvider getVideoProvider() {
 		return provider;
+	}
+	
+	public boolean hasListIndex() {
+		return (listIndex != PreviewLoader.UNSET_INDEX);
+	}
+	
+	public int getListIndex() {
+		return listIndex;
+	}
+	
+	public void setListIndex(int idx) {
+		listIndex = idx;
+	}
+	
+	public void setHighlighted(boolean isSelected) {
+		selected = isSelected;
+	}
+	
+	public void setPlaying(boolean isPlaying) {
+		playing = isPlaying;
 	}
 }
