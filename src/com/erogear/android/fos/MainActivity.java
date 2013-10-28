@@ -606,7 +606,7 @@ public class MainActivity extends SherlockFragmentActivity {
     */
     
     /**
-     * When called, this method promotes the identified preview
+     * Promotes the identified preview to active and playing video
      * and deselects any previous setting.
      */
     public void setCurrentPreview(int index) {
@@ -652,6 +652,15 @@ public class MainActivity extends SherlockFragmentActivity {
     	}
     	
     	activePreview.setPlaying(true);
+    }
+    
+    /**
+     * Deactivates the identified preview.
+     */
+    public void deactivatePreview(int index) {
+    	if (activePreview.hasListIndex() && activePreview.getListIndex() == index) {
+    		deactivate(activePreview);
+    	}
     }
     
     private void deactivate(PreviewLoader active) {

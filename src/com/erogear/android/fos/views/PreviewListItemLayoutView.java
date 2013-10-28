@@ -48,8 +48,11 @@ public class PreviewListItemLayoutView extends RelativeLayout {
 
 			@Override
 			public void onClick(View v) {
-				((MainActivity) context).setCurrentPreview(listIndex);
-
+				if (!isActive) {
+					((MainActivity) context).setCurrentPreview(listIndex);
+				} else {
+					((MainActivity) context).deactivatePreview(listIndex);
+				}
 			}
 		});
 	}
