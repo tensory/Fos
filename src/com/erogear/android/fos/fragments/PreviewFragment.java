@@ -113,7 +113,7 @@ public class PreviewFragment extends SherlockListFragment {
     public void deactivateItem(int index) {
     	selectedPreviewIndex = PreviewFragment.PREVIEW_NOT_SET_INDEX;
     	PreviewListItemLayoutView layout = (PreviewListItemLayoutView) getListView().getChildAt(index);
-    	layout.activate();
+    	layout.deactivate();
     }
     
     public void activateItem(int index) {
