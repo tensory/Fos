@@ -1,21 +1,20 @@
 package com.erogear.android.fos;
 
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.preference.DialogPreference;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 
 public class NumberPickerDialogPreference extends DialogPreference {
-	private static final int DEFAULT_MIN_VALUE = 1;
-	private static final int DEFAULT_MAX_VALUE = 100;
 	private static final int DEFAULT_VALUE = 30;
 	
 	private int mMinValue;
 	private int mMaxValue;
 	private int mValue;
+	private String[] mValues;
 	private NumberPicker mNumberPicker;
 	
 	public NumberPickerDialogPreference(Context context) {
@@ -25,21 +24,14 @@ public class NumberPickerDialogPreference extends DialogPreference {
 	public NumberPickerDialogPreference(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		
-		TypedArray array = context.getTheme().obtainStyledAttributes(attrs, R.styleable.NumberPickerDialogPreference, 0, 0);
+		// Set up values
+		mValue = NumberPickerDialogPreference.DEFAULT_VALUE;
+		mValues = context.getResources().getStringArray(R.array.valuesFrameRate);
 		
-		try {
-			setMinValue(array.getInteger(R.styleable.NumberPickerDialogPreference_min, DEFAULT_MIN_VALUE));
-			setMaxValue(array.getInteger(R.styleable.NumberPickerDialogPreference_android_max, DEFAULT_MAX_VALUE));
-		} finally {
-			array.recycle();
-		}
-		
-		// set layout   
-
+		// Set layout
 		setDialogLayoutResource(R.layout.preference_number_picker_dialog);
-		
 	}
-	
+	 
 	@Override
 	protected void onBindDialogView(View view) {
 		super.onBindDialogView(view);
@@ -48,8 +40,8 @@ public class NumberPickerDialogPreference extends DialogPreference {
 		dialogMessageText.setText(getDialogMessage());
 		
 		mNumberPicker = (NumberPicker) view.findViewById(R.id.prefNumberPicker);
-		mNumberPicker.setMinValue(mMinValue);
-		mNumberPicker.setMaxValue(mMaxValue);
+		mNumberPicker.setMaxValue(mValues.length - 1);
+		mNumberPicker.setDisplayedValues(mValues);
 		mNumberPicker.setValue(mValue);
 	}
 	
@@ -65,16 +57,6 @@ public class NumberPickerDialogPreference extends DialogPreference {
 			}
 		}
 	}
-	
-	public void setMinValue(int minValue) {
-        mMinValue = minValue;
-        setValue(Math.max(mValue, mMinValue));
-    }
-	
-	public void setMaxValue(int maxValue) {
-        mMaxValue = maxValue;
-        setValue(Math.min(mValue, mMaxValue));
-    }
 	
 	public void setValue(int value) {
         value = Math.max(Math.min(value, mMaxValue), mMinValue);
