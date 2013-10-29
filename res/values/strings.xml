@@ -13,12 +13,9 @@
 	<string name="txtExit">Exit</string>
 	<string name="txtExplainNoDevices">No EroGear devices have been paired. Please pair a device now.</string>
 	
-    
-    <string-array name="entriesFrameRate">
-        <item>0.5</item>
-        <item>1.0</item>
-        <item>1.2</item>
+    <string-array name="valuesFrameRate">
+        <item>15</item>
+        <item>24</item>
+        <item>30</item>
     </string-array>
-    
-    
 </resources>
