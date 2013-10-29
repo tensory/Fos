@@ -308,6 +308,9 @@ public class MainActivity extends SherlockFragmentActivity {
                 }
                 
                 /* Bluetooth Service init finished */
+                
+                /* TODO
+                 * DISABLED FOR TESTING, DO NOT PUSH THIS
                 // Prompt user to set up device controllers if none found
                 if (headController.getHeads().size() == 0) {
                 	AlertDialog alertDialog = getConfigurationAlertBuilder().create();
@@ -315,7 +318,7 @@ public class MainActivity extends SherlockFragmentActivity {
                 } else {
                 	Log.i(MainActivity.TAG, headController.getHeads().size() + " heads attached");
                 }
-                
+                */
                 /*
                  * Restart video loading with new dimensions 
                  * if panel dimensions have changed on this resume.
