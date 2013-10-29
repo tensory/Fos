@@ -1,15 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:custom="http://schemas.android.com/apk/res-auto">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 
-    	<com.erogear.android.fos.NumberPickerDialogPreference
-    	    android:defaultValue="30" 
-    	    android:dialogMessage="@string/prefFrameRateDialogTitle" 
-    	    android:max="60" 
-    	    custom:min="15"
-    	    android:title="@string/prefFrameRate" />
+	<com.erogear.android.fos.NumberPickerDialogPreference
+		android:defaultValue="30" 
+		android:dialogMessage="@string/prefFrameRateDialogTitle"
+		android:title="@string/prefFrameRate" />
 
-	<!-- <ListPreference android:key="list_preference" android:title="@string/prefFrameRate" 
-		android:entries="@array/entriesFrameRate" android:entryValues="@array/entriesFrameRate" 
-		android:dialogTitle="@string/prefFrameRate" /> -->
 </PreferenceScreen>

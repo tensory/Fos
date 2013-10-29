@@ -1,6 +1,7 @@
 package com.erogear.android.fos;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.preference.DialogPreference;
 import android.util.AttributeSet;
 import android.view.View;
@@ -24,7 +25,6 @@ public class NumberPickerDialogPreference extends DialogPreference {
 		super(context, attrs);
 		
 		// Set up values
-		mValue = NumberPickerDialogPreference.DEFAULT_VALUE;
 		mValues = context.getResources().getStringArray(R.array.valuesFrameRate);
 		
 		// Set layout
@@ -55,6 +55,16 @@ public class NumberPickerDialogPreference extends DialogPreference {
 				setValue(numberPickerValue);
 			}
 		}
+	}
+	
+	@Override
+    protected void onSetInitialValue(boolean restore, Object defaultValue) {
+        setValue(restore ? getPersistedInt(DEFAULT_VALUE) : (Integer) defaultValue);
+    }
+	
+	@Override
+	protected Object onGetDefaultValue(TypedArray array, int index) {
+		return array.getInt(index, DEFAULT_VALUE);
 	}
 	
 	public void setValue(int value) {
