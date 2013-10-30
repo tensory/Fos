@@ -99,16 +99,5 @@ public class NumberPickerDialogPreference extends DialogPreference {
 		persistInt(mValue);
         notifyChanged();
     }
-	
-	private int getListIndexForLiteralValue(int value) {
-		return Arrays.asList(mValues).indexOf(String.valueOf(value));
-	}
-	
-	private int getLiteralValueForListIndex(int index) {
-		try {
-			return Integer.valueOf(mValues[index]);
-		} catch (ArrayIndexOutOfBoundsException e) {
-			return 0;
-		}
-	}
+
 }
