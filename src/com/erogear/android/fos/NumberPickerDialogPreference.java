@@ -1,6 +1,9 @@
 package com.erogear.android.fos;
 
+import java.util.Arrays;
+
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.res.TypedArray;
 import android.preference.DialogPreference;
 import android.util.AttributeSet;
@@ -11,9 +14,6 @@ import android.widget.TextView;
 
 public class NumberPickerDialogPreference extends DialogPreference {
 	private static final int DEFAULT_VALUE = 30;
-	
-	private int mMinValue;
-	private int mMaxValue;
 	private int mValue;
 	private int mDefaultValueIndex;
 	private String[] mValues;
@@ -27,8 +27,7 @@ public class NumberPickerDialogPreference extends DialogPreference {
 		super(context, attrs);
 		
 		// Set up values
-		mValues = context.getResources().getStringArray(R.array.valuesFrameRate);
-		
+		mValues = context.getResources().getStringArray(R.array.valuesFrameRate);	
 		for (int i = 0; i < mValues.length; i++) {
 			if (NumberPickerDialogPreference.DEFAULT_VALUE == Integer.valueOf(mValues[i])) {
 				mDefaultValueIndex = i;
@@ -49,9 +48,10 @@ public class NumberPickerDialogPreference extends DialogPreference {
 		mNumberPicker = (NumberPicker) view.findViewById(R.id.prefNumberPicker);
 		mNumberPicker.setMinValue(0);
 		mNumberPicker.setMaxValue(mValues.length - 1);
-		
 		mNumberPicker.setDisplayedValues(mValues);
-		mNumberPicker.setValue(mDefaultValueIndex);
+		mNumberPicker.setValue(mValue);
+		
+		
 	}
 	
 	@Override
@@ -61,35 +61,54 @@ public class NumberPickerDialogPreference extends DialogPreference {
 		// when the user selects OK, persist the new value
 		if (positiveResult) {
 			int numberPickerValue = mNumberPicker.getValue();
-			if (callChangeListener(numberPickerValue)) {
-				setValue(numberPickerValue);
-			}
+			setValue(numberPickerValue);
 		}
+		
+		Log.e("PREFERENCE_STORED", "index stored : " + getPersistedInt(mDefaultValueIndex));
 	}
 	
 	@Override
     protected void onSetInitialValue(boolean restore, Object defaultValue) {
-		mValue = (restore) ? getPersistedInt(mValue) : (Integer) defaultValue;
-		// Attempting to set default value 
-		Log.d("NUMBER_PICKER", "restoring preference value" + String.valueOf(mValue));
-        setValue(mValue);
+		if (restore) {
+			setValue(getPersistedInt(mDefaultValueIndex));
+		} else {
+			setValue(mDefaultValueIndex);
+		}
     }
+	
+	
 	
 	@Override
 	protected Object onGetDefaultValue(TypedArray array, int index) {
-		return array.getInt(index, DEFAULT_VALUE);
+		Log.d("PREFERENCE", "onGetDefaultValue " + index);
+		return array.getInt(index, NumberPickerDialogPreference.DEFAULT_VALUE);
 	}
 	
+	@Override
+	  public void onDismiss(DialogInterface dialog) {
+	    mValue = mNumberPicker.getValue();
+	    super.onDismiss(dialog);
+	  }
+	
+	/**
+	 * @param value The integer array index of the value to store.
+	 */
 	public void setValue(int value) {
-        value = Math.max(Math.min(value, mMaxValue), mMinValue);
- 
-        if (value != mValue) {
-            mValue = value;
-            persistInt(value);
-
-            Log.d("NUMBER_PICKER", "Setting new preference value");
-            notifyChanged();
-        }
+		mValue = value;	
+		
+		persistInt(mValue);
+        notifyChanged();
     }
 	
+	private int getListIndexForLiteralValue(int value) {
+		return Arrays.asList(mValues).indexOf(String.valueOf(value));
+	}
+	
+	private int getLiteralValueForListIndex(int index) {
+		try {
+			return Integer.valueOf(mValues[index]);
+		} catch (ArrayIndexOutOfBoundsException e) {
+			return 0;
+		}
+	}
 }

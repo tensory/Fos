@@ -4,6 +4,7 @@
 	<com.erogear.android.fos.NumberPickerDialogPreference
 		android:defaultValue="30" 
 		android:dialogMessage="@string/prefFrameRateDialogTitle"
-		android:title="@string/prefFrameRate" />
+		android:title="@string/prefFrameRate" 
+		android:key="prefFrameRate" />
 
 </PreferenceScreen>
