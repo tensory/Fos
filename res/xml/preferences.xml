@@ -5,6 +5,6 @@
 		android:defaultValue="30" 
 		android:dialogMessage="@string/prefFrameRateDialogTitle"
 		android:title="@string/prefFrameRate" 
-		android:key="prefFrameRate" />
+		android:key="@string/prefkeyFrameRate" />
 
 </PreferenceScreen>

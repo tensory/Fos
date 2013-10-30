@@ -6,8 +6,12 @@
     <string name="action_settings">Settings</string>
     <string name="txtAnimName_Heartbeat">Heartbeat</string>
     <string name="txtAnimName_Safety1">Safety</string>
+    
+    <string name="prefkeyFrameRate">FRAME_RATE</string>
+    <string name="txtFramesPerSecond">frames per second</string>
     <string name="prefFrameRate">Frame rate</string>
     <string name="prefFrameRateDialogTitle">Select frames per second to display.</string>
+    
     <string name="txtNoDevices">Connect device</string>
 	<string name="txtConnect">Connect</string>
 	<string name="txtExit">Exit</string>
