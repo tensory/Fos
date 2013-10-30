@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.ListView;
 
 import com.actionbarsherlock.app.SherlockListFragment;
@@ -32,6 +31,7 @@ public class PreviewFragment extends SherlockListFragment {
 
 	@Override
 	public void onListItemClick(ListView l, View view, int position, long id) {
+		((MainActivity) getActivity()).togglePreviewUpState(position);
 		/*
 		int lastSelectedIndex = selectedPreviewIndex;
 		PreviewListItemLayoutView pvView = (PreviewListItemLayoutView) view;
