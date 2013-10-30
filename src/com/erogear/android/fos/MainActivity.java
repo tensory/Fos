@@ -15,6 +15,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
@@ -41,7 +42,7 @@ import com.erogear.android.bluetooth.video.MultiheadController;
 import com.erogear.android.bluetooth.video.VideoProvider;
 import com.erogear.android.fos.fragments.PreviewFragment;
 
-public class MainActivity extends SherlockFragmentActivity {
+public class MainActivity extends SherlockFragmentActivity implements OnSharedPreferenceChangeListener {
 	// Intent request codes
 	public static final int PREFERENCE_INTENT_RESULT = 1;
 	private static final int REQUEST_ENABLE_BT = 2;
@@ -49,6 +50,7 @@ public class MainActivity extends SherlockFragmentActivity {
 	
 	// Preferences
 	private SharedPreferences controllerPrefs;
+	private String[] frameRates;
 	
 	// Tags
 	public static final String TAG = "MAIN";
@@ -232,6 +234,7 @@ public class MainActivity extends SherlockFragmentActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		initControllerPreferences();
+		frameRates = getResources().getStringArray(R.array.valuesFrameRate);
 		
 		/*
 		 * Initialize previews
@@ -312,8 +315,6 @@ public class MainActivity extends SherlockFragmentActivity {
                 
                 /* Bluetooth Service init finished */
                 
-                /* TODO
-                 * DISABLED FOR TESTING, DO NOT PUSH THIS
                 // Prompt user to set up device controllers if none found
                 if (headController.getHeads().size() == 0) {
                 	AlertDialog alertDialog = getConfigurationAlertBuilder().create();
@@ -321,7 +322,7 @@ public class MainActivity extends SherlockFragmentActivity {
                 } else {
                 	Log.i(MainActivity.TAG, headController.getHeads().size() + " heads attached");
                 }
-                */
+
                 /*
                  * Restart video loading with new dimensions 
                  * if panel dimensions have changed on this resume.
@@ -453,6 +454,9 @@ public class MainActivity extends SherlockFragmentActivity {
     }
     
     public void displayPreviews() {
+    	Log.e(MainActivity.TAG, "Running displayPreviews");
+    	
+    	// TODO prevent double flash
     	list = new PreviewFragment();
     	Bundle fragmentData = new Bundle();
     	fragmentData.putParcelableArrayList(MainActivity.PREVIEWS_DATA_TAG, previews);
@@ -617,4 +621,30 @@ public class MainActivity extends SherlockFragmentActivity {
     	Log.i("PREFERENCE", "prefHeight: " + controllerPrefs.getInt(MainActivity.PREFS_HEIGHT, 0));
     	
     }
+
+	@Override
+	public void onSharedPreferenceChanged(SharedPreferences sp, String key) {
+		// Alter the frame rate of the running animation if the frame rate preference was changed
+		if (key.equals(getString(R.string.prefkeyFrameRate))) {
+			if (controller == null) return;
+			
+			int newFrameRate = Integer.valueOf(frameRates[sp.getInt(getString(R.string.prefkeyFrameRate), 0)]);
+
+			boolean wasPlaying = controller.isAutoAdvancing();
+			Log.e("PREFERENCE_CHANGED", "was playing " + (wasPlaying ? "TRUE" : "FALSE"));
+			controller.setAutoAdvance(false, newFrameRate, null);
+			
+			if (wasPlaying) {
+				controller.setAutoAdvance(true);
+			}
+		}
+	}
+	
+	@Override
+	public void onSaveInstanceState(Bundle savedInstanceState) {
+	    Log.e(MainActivity.TAG, "SAVING INSTANCE STATE");
+	    
+	    // Always call the superclass so it can save the view hierarchy state
+	    super.onSaveInstanceState(savedInstanceState);
+	}
 }
