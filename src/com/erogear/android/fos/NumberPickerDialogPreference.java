@@ -1,7 +1,5 @@
 package com.erogear.android.fos;
 
-import java.util.Arrays;
-
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.TypedArray;
@@ -46,12 +44,11 @@ public class NumberPickerDialogPreference extends DialogPreference {
 		dialogMessageText.setText(getDialogMessage());
 		
 		mNumberPicker = (NumberPicker) view.findViewById(R.id.prefNumberPicker);
+		// Set list indices of displayable values
 		mNumberPicker.setMinValue(0);
 		mNumberPicker.setMaxValue(mValues.length - 1);
 		mNumberPicker.setDisplayedValues(mValues);
 		mNumberPicker.setValue(mValue);
-		
-		
 	}
 	
 	@Override
@@ -76,8 +73,6 @@ public class NumberPickerDialogPreference extends DialogPreference {
 		}
     }
 	
-	
-	
 	@Override
 	protected Object onGetDefaultValue(TypedArray array, int index) {
 		Log.d("PREFERENCE", "onGetDefaultValue " + index);
@@ -95,9 +90,7 @@ public class NumberPickerDialogPreference extends DialogPreference {
 	 */
 	public void setValue(int value) {
 		mValue = value;	
-		
 		persistInt(mValue);
-        notifyChanged();
-    }
-
+		notifyChanged();
+	}
 }
