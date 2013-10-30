@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
-    <ListPreference
-                android:key="list_preference"
-                android:title="@string/prefFrameRate"
-                android:entries="@array/entriesFrameRate"
-                android:entryValues="@array/entriesFrameRate"
-                android:dialogTitle="@string/prefFrameRate" />
+
+	<com.erogear.android.fos.NumberPickerDialogPreference
+		android:defaultValue="30" 
+		android:dialogMessage="@string/prefFrameRateDialogTitle"
+		android:title="@string/prefFrameRate" 
+		android:key="@string/prefkeyFrameRate" />
 
 </PreferenceScreen>
