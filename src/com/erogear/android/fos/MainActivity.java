@@ -665,6 +665,10 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
     	activePreview.setPlaying(true);
     }
     
+    public void togglePreviewUpState(int index) {
+    	
+    }
+    
     /**
      * Deactivates the identified preview.
      */
