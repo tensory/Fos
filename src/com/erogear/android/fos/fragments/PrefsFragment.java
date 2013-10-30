@@ -1,13 +1,16 @@
 package com.erogear.android.fos.fragments;
 
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
+import android.preference.Preference;
 import android.preference.PreferenceFragment;
+import android.util.Log;
 
 import com.erogear.android.fos.NumberPickerDialogPreference;
 import com.erogear.android.fos.R;
 
-public class PrefsFragment extends PreferenceFragment {
+public class PrefsFragment extends PreferenceFragment implements OnSharedPreferenceChangeListener {
 	SharedPreferences sp;
 
 	@Override
@@ -16,8 +19,8 @@ public class PrefsFragment extends PreferenceFragment {
         
         // Inflate preferences
         addPreferencesFromResource(R.xml.preferences);
-
-        sp = getPreferenceScreen().getSharedPreferences();
+        sp = getPreferenceManager().getSharedPreferences();
+        
         String prefkeyFrameRate = getResources().getString(R.string.prefkeyFrameRate);
         NumberPickerDialogPreference frameRate = (NumberPickerDialogPreference) findPreference(prefkeyFrameRate);
         
@@ -37,4 +40,23 @@ public class PrefsFragment extends PreferenceFragment {
     	}
     	return summary;    	
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        sp.registerOnSharedPreferenceChangeListener(this);
+    }
+
+    @Override
+    public void onPause() {
+        sp.unregisterOnSharedPreferenceChangeListener(this);
+        super.onPause();
+    }
+
+	@Override
+	public void onSharedPreferenceChanged(SharedPreferences sharedPrefs, String key) {
+		Log.e("PREFERENCE_CHANGED", key);
+		Preference pref = findPreference(key);
+		pref.setSummary(constructSummaryText(key));
+	}
 }
