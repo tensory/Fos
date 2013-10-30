@@ -19,6 +19,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.SparseArray;
 import android.widget.Toast;
@@ -228,12 +229,12 @@ public class MainActivity extends SherlockFragmentActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		prefs = getSharedPreferences(getResources().getString(R.string.app_name), android.content.Context.MODE_PRIVATE);
+		prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		loadPanelDimensionsFromPreferences();
 		
 		/*
 		 * Initialize previews
-		 * 
+		 * 	
 		 * Previews are not yet ready when Preview.getAll returns: 
 		 * each must be assigned a VideoProvider
 		 * 
