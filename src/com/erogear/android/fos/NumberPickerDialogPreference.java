@@ -5,7 +5,6 @@ import android.content.DialogInterface;
 import android.content.res.TypedArray;
 import android.preference.DialogPreference;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.widget.NumberPicker;
 import android.widget.TextView;
@@ -35,7 +34,8 @@ public class NumberPickerDialogPreference extends DialogPreference {
 		// Set layout
 		setDialogLayoutResource(R.layout.preference_number_picker_dialog);
 	}
-	 
+
+
 	@Override
 	protected void onBindDialogView(View view) {
 		super.onBindDialogView(view);
@@ -51,6 +51,7 @@ public class NumberPickerDialogPreference extends DialogPreference {
 		mNumberPicker.setValue(mValue);
 	}
 	
+	
 	@Override
 	protected void onDialogClosed(boolean positiveResult) {
 		super.onDialogClosed(positiveResult);
@@ -60,9 +61,8 @@ public class NumberPickerDialogPreference extends DialogPreference {
 			int numberPickerValue = mNumberPicker.getValue();
 			setValue(numberPickerValue);
 		}
-		
-		Log.e("PREFERENCE_STORED", "index stored : " + getPersistedInt(mDefaultValueIndex));
 	}
+	
 	
 	@Override
     protected void onSetInitialValue(boolean restore, Object defaultValue) {
@@ -73,17 +73,19 @@ public class NumberPickerDialogPreference extends DialogPreference {
 		}
     }
 	
-	@Override
-	protected Object onGetDefaultValue(TypedArray array, int index) {
-		Log.d("PREFERENCE", "onGetDefaultValue " + index);
-		return array.getInt(index, NumberPickerDialogPreference.DEFAULT_VALUE);
-	}
 	
 	@Override
-	  public void onDismiss(DialogInterface dialog) {
-	    mValue = mNumberPicker.getValue();
-	    super.onDismiss(dialog);
-	  }
+	protected Object onGetDefaultValue(TypedArray array, int index) {
+		return array.getInt(index, NumberPickerDialogPreference.DEFAULT_VALUE);
+	}
+
+	
+	@Override
+	public void onDismiss(DialogInterface dialog) {
+		mValue = mNumberPicker.getValue();
+		super.onDismiss(dialog);
+	}
+
 	
 	/**
 	 * @param value The integer array index of the value to store.
