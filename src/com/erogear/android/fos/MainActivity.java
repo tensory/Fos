@@ -613,7 +613,7 @@ public class MainActivity extends SherlockFragmentActivity {
     }
     
     public void dumpPreferences() {
-    	//Log.i("PREFERENCE", "prefFrameRate: " + prefs.getInt("prefFrameRate", 0));
+    	Log.i("PREFERENCE", "prefFrameRate: " + PreferenceManager.getDefaultSharedPreferences(this).getInt("prefFrameRate", -1));
     	Log.i("PREFERENCE", "prefHeight: " + controllerPrefs.getInt(MainActivity.PREFS_HEIGHT, 0));
     	
     }
