@@ -57,4 +57,8 @@ public class PreviewLoader {
 	public void setPlaying(boolean isPlaying) {
 		playing = isPlaying;
 	}
+	
+	public boolean isHighlighted() {
+		return selected;
+	}
 }

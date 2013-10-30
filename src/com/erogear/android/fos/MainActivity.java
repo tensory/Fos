@@ -113,19 +113,15 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
 				break;
 			case BluetoothVideoService.MESSAGE_WRITE:
 				// Get the current frame and video provider
-				
-				//TODO
-				/*
 				if (controller != null) {
 					try {
-						int previewKey = list.getSelectedPreview().hashCode();
+						int previewKey = activePreview.getPreview().hashCode();
 						list.drawFrameInCurrentPreview(
 								previewVideoProviderCache.get(previewKey).getFrame(controller.getCurrentFrame()));
 					} catch (Exception e) {
 						Log.e(MainActivity.TAG, "No frame data available for index " + String.valueOf(controller.getCurrentFrame()));
 					}
 				}
-				*/
 				
 				//byte[] writeBuf = (byte[]) msg.obj;
 				//addConversationLine("Me: " + byteArrayToHex(writeBuf));
@@ -600,16 +596,14 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
     		setCurrentPreview(index);
     		return;
     	}
-    	
-    	if (activePreview != null) {
-    		if (activePreview.getListIndex() != index) {
-    			setCurrentPreview(index);
-    		} else {
-    			deactivatePreview(index);
-    		}    		
-    	} 
+
+    	if (activePreview.isHighlighted() && activePreview.getListIndex() == index) {
+    		deactivatePreview(index);
+    	} else {
+    		setCurrentPreview(index);
+    	}
     }
-    
+
     /**
      * Deactivates the identified preview.
      */
