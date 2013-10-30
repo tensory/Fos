@@ -633,12 +633,8 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
     	Log.i("MAIN", "ActivePreview SHOULD be dead now: " + activePreview.toString());
     	
     	Preview newPreview = list.getSelectedPreview(index);
-    	activePreview.attachPreview(newPreview);
-    	activePreview.setVideoProvider(previewVideoProviderCache.get(newPreview.hashCode()));
-    	activePreview.setListIndex(index);
-    	
-    	Log.i("MAIN", "ActivePreview replaced by shiny new prev: " + activePreview.getPreview().hashCode());
-    	
+    	activePreview = new PreviewLoader(newPreview, previewVideoProviderCache.get(newPreview.hashCode()), index);
+
     	list.activateItem(index);
     	activePreview.setHighlighted(true);
     	
@@ -647,26 +643,34 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
         videoSvc.setConfigInstance(FrameController.CONFIG_INSTANCE_KEY, controller);
         
         /*
-        // Start up video
         
-        
-        if (!controller.isAutoAdvancing()) {
-            controller.setAutoAdvance(true, controller.getAutoAdvanceInterval(), null);
-    	} else {
-            controller.setAutoAdvance(false);
-    	}
-        */
     	
         // Bombs away
     	if (!controller.isAutoAdvancing()) {
             controller.setAutoAdvance(true, controller.getAutoAdvanceInterval(), null);
     	}
     	
-    	activePreview.setPlaying(true);
+    	activePreview.setPlaying(true);*/
     }
     
     public void togglePreviewUpState(int index) {
+    	Log.e("LISTITEM", "hit index" + index);
+    	if (activePreview == null) {
+    		setCurrentPreview(index);
+    		return;
+    	}
     	
+    	if (activePreview != null) {
+    		if (activePreview.getListIndex() != index) {
+    			setCurrentPreview(index);
+        		Log.e("LISTITEM", "active preview is " + activePreview.getListIndex());
+
+    		} else {
+    			deactivatePreview(index);
+    		}    		
+    	} 
+    	
+    	Log.e("LISTITEM", "end toggle preview up state");
     }
     
     /**

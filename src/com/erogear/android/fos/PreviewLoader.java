@@ -16,6 +16,12 @@ public class PreviewLoader {
 		playing = false;
 	}
 	
+	public PreviewLoader(Preview preview, VideoProvider videoProvider, int index) {
+		this.preview = preview;
+		provider = videoProvider;
+		listIndex = index;
+	}
+	
 	public void attachPreview(Preview p) {
 		preview = p;
 	}
