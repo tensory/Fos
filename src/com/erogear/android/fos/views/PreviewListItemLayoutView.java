@@ -50,6 +50,7 @@ public class PreviewListItemLayoutView extends RelativeLayout {
 			public void onClick(View v) {
 				if (!isActive) {
 					((MainActivity) context).setCurrentPreview(listIndex);
+					((MainActivity) context).toggleVideoPlay(true);
 				} else {
 					((MainActivity) context).deactivatePreview(listIndex);
 				}

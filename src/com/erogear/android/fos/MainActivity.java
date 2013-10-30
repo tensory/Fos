@@ -653,8 +653,14 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
     	activePreview.setPlaying(true);*/
     }
     
+    public void toggleVideoPlay(boolean startPlaying) {
+    	if (controller != null) {
+    		controller.setAutoAdvance(startPlaying, controller.getAutoAdvanceInterval(), null);
+    		activePreview.setPlaying(startPlaying);
+    	}
+    }
+    
     public void togglePreviewUpState(int index) {
-    	Log.e("LISTITEM", "hit index" + index);
     	if (activePreview == null) {
     		setCurrentPreview(index);
     		return;
@@ -663,14 +669,10 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
     	if (activePreview != null) {
     		if (activePreview.getListIndex() != index) {
     			setCurrentPreview(index);
-        		Log.e("LISTITEM", "active preview is " + activePreview.getListIndex());
-
     		} else {
     			deactivatePreview(index);
     		}    		
     	} 
-    	
-    	Log.e("LISTITEM", "end toggle preview up state");
     }
     
     /**
