@@ -10,6 +10,7 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -19,6 +20,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.SparseArray;
 import android.widget.Toast;
@@ -46,15 +48,16 @@ public class MainActivity extends SherlockFragmentActivity {
 	private static final int MULTIHEAD_SETUP_RESULT = 3;
 	
 	// Preferences
-	private SharedPreferences prefs;
+	private SharedPreferences controllerPrefs;
 	
 	// Tags
 	public static final String TAG = "MAIN";
 	public static final String PREVIEWS_DATA_TAG = "previews";
 	
 	// Video dimensions
-	private static final String PREFS_WIDTH = "PANEL_WIDTH";
-	private static final String PREFS_HEIGHT = "PANEL_HEIGHT";
+	// These are persisted as preferences, but not set through common app settings.
+	private static final String PREFS_WIDTH = "panelWidth";
+	private static final String PREFS_HEIGHT = "panelHeight";
 	private int panelWidth = 32;
 	private int panelHeight = 24;
 	private boolean panelDimensionsChanged = false;
@@ -228,8 +231,7 @@ public class MainActivity extends SherlockFragmentActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		prefs = getSharedPreferences(getResources().getString(R.string.app_name), android.content.Context.MODE_PRIVATE);
-		loadPanelDimensionsFromPreferences();
+		initControllerPreferences();
 		
 		/*
 		 * Initialize previews
@@ -265,7 +267,8 @@ public class MainActivity extends SherlockFragmentActivity {
 		super.onResume();
 
         Log.i(TAG, "--- ONRESUME ---");
-
+		
+        dumpPreferences();
         
 		// Resume state indicating that MainActivity is running.
 		mainActivityRunning = true;
@@ -577,13 +580,13 @@ public class MainActivity extends SherlockFragmentActivity {
     }
     
     private void loadPanelDimensionsFromPreferences() {
-    	panelWidth = prefs.getInt(MainActivity.PREFS_WIDTH, panelWidth);
-    	panelHeight = prefs.getInt(MainActivity.PREFS_HEIGHT, panelHeight);
+    	panelWidth = controllerPrefs.getInt(MainActivity.PREFS_WIDTH, panelWidth);
+    	panelHeight = controllerPrefs.getInt(MainActivity.PREFS_HEIGHT, panelHeight);
     	panelDimensionsChanged = false;
     }
     
     private void setPanelDimensionsPreferences(int w, int h) {
-    	SharedPreferences.Editor editor = prefs.edit();
+    	SharedPreferences.Editor editor = controllerPrefs.edit();
 		editor.putInt(MainActivity.PREFS_WIDTH, w);
 		editor.putInt(MainActivity.PREFS_HEIGHT, h);
 		editor.commit();
@@ -596,5 +599,22 @@ public class MainActivity extends SherlockFragmentActivity {
     
     private void previewFrame(ByteBufferFrame bbf) {
     	list.drawFrameInCurrentPreview(bbf);
+    }
+    
+    private void initControllerPreferences() {
+		controllerPrefs = getSharedPreferences("controller", Context.MODE_PRIVATE);
+		
+		if (controllerPrefs.getInt(MainActivity.PREFS_WIDTH, 0) == 0 
+				|| controllerPrefs.getInt(MainActivity.PREFS_HEIGHT, 0) == 0) {
+			setPanelDimensionsPreferences(panelWidth, panelHeight);
+		}
+		
+		loadPanelDimensionsFromPreferences();
+    }
+    
+    public void dumpPreferences() {
+    	//Log.i("PREFERENCE", "prefFrameRate: " + prefs.getInt("prefFrameRate", 0));
+    	Log.i("PREFERENCE", "prefHeight: " + controllerPrefs.getInt(MainActivity.PREFS_HEIGHT, 0));
+    	
     }
 }
