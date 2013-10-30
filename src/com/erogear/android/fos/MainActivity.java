@@ -506,60 +506,7 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
     public BluetoothVideoService getBluetoothVideoService() {
     	return videoSvc;
     }
-    
-    // TODO cleanup
-    /*
-    public void togglePreviewVideo(Preview preview) {
-    	// Set the active preview.
-    	
-    	// Only reset the active preview if it differs from the currently set one.
-    	if (activePreview != null) {
-    		if (activePreview.getPreview().hashCode() != preview.hashCode()) {
-        		setActivePreview(preview);
-        		
-        		controller.setAutoAdvance(false);
-        		controller = null;
-    		}
-    	} else {
-    		activePreview = new PreviewLoader();
-    		setActivePreview(preview);
-    	}
-    	
-    	/*
-    	Toast.makeText(this, "Toggled preview", Toast.LENGTH_SHORT).show();
-    	
-    	// Now that an active preview was set, play its video
-    	controller = new FrameController<VideoProvider, MultiheadController>(activePreview.getVideoProvider(), headController, videoSvc);
-        videoSvc.setConfigInstance(FrameController.CONFIG_INSTANCE_KEY, controller);
-        
-        // Bombs away
-        if (!controller.isAutoAdvancing()) {
-            controller.setAutoAdvance(true, controller.getAutoAdvanceInterval(), null);
-    	} else {
-            controller.setAutoAdvance(false);
-    	}
-        
-        if (controller == null) {
-        	controller = new FrameController<VideoProvider, MultiheadController>(activePreview.getVideoProvider(), headController, videoSvc);
-        	videoSvc.setConfigInstance(FrameController.CONFIG_INSTANCE_KEY, controller);
-        }
-        
-        if (!controller.isAutoAdvancing()) {
-            controller.setAutoAdvance(true, controller.getAutoAdvanceInterval(), null);
-    	} else {
-            controller.setAutoAdvance(false);
-    	}
-    } 
-    	*/
-    //TODO remove if never used
-    /*
-    private void setActivePreview(Preview p) {
-    	activePreview.attachPreview(p);
-    	activePreview.setVideoProvider(previewVideoProviderCache.get(p.hashCode()));
-    }
-    */
-    
-    
+     
     /**
      * Get an AlertDialog.Builder to construct the error dialog
      * when no device configuration has been set.
@@ -630,8 +577,6 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
     		deactivate(activePreview);
     	}
     	
-    	Log.i("MAIN", "ActivePreview SHOULD be dead now: " + activePreview.toString());
-    	
     	Preview newPreview = list.getSelectedPreview(index);
     	activePreview = new PreviewLoader(newPreview, previewVideoProviderCache.get(newPreview.hashCode()), index);
 
@@ -641,16 +586,6 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
     	// Set controller to correspond to this preview
     	controller = new FrameController<VideoProvider, MultiheadController>(activePreview.getVideoProvider(), headController, videoSvc);
         videoSvc.setConfigInstance(FrameController.CONFIG_INSTANCE_KEY, controller);
-        
-        /*
-        
-    	
-        // Bombs away
-    	if (!controller.isAutoAdvancing()) {
-            controller.setAutoAdvance(true, controller.getAutoAdvanceInterval(), null);
-    	}
-    	
-    	activePreview.setPlaying(true);*/
     }
     
     public void toggleVideoPlay(boolean startPlaying) {
