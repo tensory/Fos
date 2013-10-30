@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.preference.DialogPreference;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.widget.NumberPicker;
 import android.widget.TextView;
@@ -14,6 +15,7 @@ public class NumberPickerDialogPreference extends DialogPreference {
 	private int mMinValue;
 	private int mMaxValue;
 	private int mValue;
+	private int mDefaultValueIndex;
 	private String[] mValues;
 	private NumberPicker mNumberPicker;
 	
@@ -27,6 +29,12 @@ public class NumberPickerDialogPreference extends DialogPreference {
 		// Set up values
 		mValues = context.getResources().getStringArray(R.array.valuesFrameRate);
 		
+		for (int i = 0; i < mValues.length; i++) {
+			if (NumberPickerDialogPreference.DEFAULT_VALUE == Integer.valueOf(mValues[i])) {
+				mDefaultValueIndex = i;
+			}
+		}
+		
 		// Set layout
 		setDialogLayoutResource(R.layout.preference_number_picker_dialog);
 	}
@@ -39,9 +47,11 @@ public class NumberPickerDialogPreference extends DialogPreference {
 		dialogMessageText.setText(getDialogMessage());
 		
 		mNumberPicker = (NumberPicker) view.findViewById(R.id.prefNumberPicker);
+		mNumberPicker.setMinValue(0);
 		mNumberPicker.setMaxValue(mValues.length - 1);
+		
 		mNumberPicker.setDisplayedValues(mValues);
-		mNumberPicker.setValue(mValue);
+		mNumberPicker.setValue(mDefaultValueIndex);
 	}
 	
 	@Override
@@ -59,7 +69,10 @@ public class NumberPickerDialogPreference extends DialogPreference {
 	
 	@Override
     protected void onSetInitialValue(boolean restore, Object defaultValue) {
-        setValue(restore ? getPersistedInt(DEFAULT_VALUE) : (Integer) defaultValue);
+		mValue = (restore) ? getPersistedInt(mValue) : (Integer) defaultValue;
+		// Attempting to set default value 
+		Log.d("NUMBER_PICKER", "restoring preference value" + String.valueOf(mValue));
+        setValue(mValue);
     }
 	
 	@Override
@@ -73,6 +86,8 @@ public class NumberPickerDialogPreference extends DialogPreference {
         if (value != mValue) {
             mValue = value;
             persistInt(value);
+
+            Log.d("NUMBER_PICKER", "Setting new preference value");
             notifyChanged();
         }
     }
