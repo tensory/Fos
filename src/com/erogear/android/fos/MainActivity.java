@@ -511,9 +511,32 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
     
     public void setSelectedPreview(int index) {
     	if (index == PreviewFragment.PREVIEW_NOT_SET_INDEX) {
+    		
     		Log.e("MAIN", "Deactivating any active preview");
+    		int oldListIndex = activePreview.getListIndex();
+    		list.deactivateItem(oldListIndex);
+    		activePreview.setListIndex(PreviewFragment.PREVIEW_NOT_SET_INDEX);
+    		
     	} else {
     		Log.e("MAIN", "Testing to see if any preview must be deselected");
+    		if (activePreview == null) {
+    			activePreview = new PreviewLoader(index);
+    		} else {
+    			int oldListIndex = activePreview.getListIndex();
+    			if (oldListIndex != PreviewFragment.PREVIEW_NOT_SET_INDEX) list.deactivateItem(oldListIndex);
+    			
+    			activePreview.setListIndex(index);
+    		}
+    		
+    		Preview currentPreview = list.getPreviewAt(index);
+			activePreview.attachPreview(currentPreview);
+			activePreview.setVideoProvider(previewVideoProviderCache.get(currentPreview.hashCode()));
+			
+	    	controller = new FrameController<VideoProvider, MultiheadController>(activePreview.getVideoProvider(), headController, videoSvc);
+	        videoSvc.setConfigInstance(FrameController.CONFIG_INSTANCE_KEY, controller);
+	        
+	        list.activateItem(index);
+	        Log.e("MAIN", index + " should now be active");
     	}
     }
     // TODO cleanup

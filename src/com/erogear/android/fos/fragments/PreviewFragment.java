@@ -60,8 +60,8 @@ public class PreviewFragment extends SherlockListFragment {
 		*/
 	}
 
-	public Preview getSelectedPreview() {
-		return (Preview) getListAdapter().getItem(selectedPreviewIndex);
+	public Preview getPreviewAt(int index) {
+		return (Preview) getListAdapter().getItem(index);
 	}
 	/*
 	public void toggleControlsClickable(PreviewListItemLayoutView v) {
@@ -113,5 +113,15 @@ public class PreviewFragment extends SherlockListFragment {
     	
     	PreviewListItemLayoutView layout = (PreviewListItemLayoutView) getListView().getChildAt(selectedPreviewIndex);
     	layout.drawFrame((ByteBufferFrame) frame);
+    }
+    
+    public void activateItem(int index) {
+    	PreviewListItemLayoutView layout = (PreviewListItemLayoutView) getListView().getChildAt(index);
+    	layout.activate();
+    }
+
+    public void deactivateItem(int index) {
+    	PreviewListItemLayoutView layout = (PreviewListItemLayoutView) getListView().getChildAt(index);
+    	layout.deactivate();
     }
 }

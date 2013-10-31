@@ -37,6 +37,28 @@ public class PreviewListItemLayoutView extends RelativeLayout {
 		ivBtnPreview = (ImageView) findViewById(R.id.ivBtnPreview);
 		ivBtnAccept = (ImageView) findViewById(R.id.ivBtnAccept);
 	}
+	
+	public void activate() {
+		isActive = true;
+		setIconState();
+	}
+	
+	public void deactivate() {
+		isActive = false;
+		setIconState();
+	}
+	
+	private void setIconState() {
+		if (this.isActive) {
+			//TODO: replace this pair of calls with a pair of Drawables with highlight state
+			ivBtnPreview.setImageResource(R.drawable.ic_active_preview);
+			ivBtnAccept.setImageResource(R.drawable.ic_active_send);
+		} else {
+			ivBtnPreview.setImageResource(R.drawable.ic_inactive_preview);
+			ivBtnAccept.setImageResource(R.drawable.ic_inactive_send);
+		}	
+	};
+	
 	/*
 	public void toggleActive() {
 		isActive = !isActive;
@@ -63,16 +85,7 @@ public class PreviewListItemLayoutView extends RelativeLayout {
 		d.selectDrawable(0);
 	}
 	
-	private void setIconState() {
-		if (this.isActive) {
-			//TODO: replace this pair of calls with a pair of Drawables with highlight state
-			activateImageButton(ivBtnPreview, R.drawable.ic_active_preview);
-			activateImageButton(ivBtnAccept, R.drawable.ic_active_send);
-		} else {
-			deactivateImageButton(ivBtnPreview, R.drawable.ic_inactive_preview);
-			deactivateImageButton(ivBtnAccept, R.drawable.ic_inactive_send);
-		}	
-	};
+	
 	
 	private void activateImageButton(ImageView target, int resId) {
 		target.setImageResource(resId);
