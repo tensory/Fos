@@ -113,6 +113,7 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
 				break;
 			case BluetoothVideoService.MESSAGE_WRITE:
 				// Get the current frame and video provider
+				Log.e("HANDLER", "Wrote frame " + msg.obj.toString());
 				
 				//TODO
 				/*
