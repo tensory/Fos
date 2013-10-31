@@ -317,7 +317,8 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
                 }
                 
                 /* Bluetooth Service init finished */
-                
+                /* Do not push with this missing
+                 * TODO
                 // Prompt user to set up device controllers if none found
                 if (headController.getHeads().size() == 0) {
                 	AlertDialog alertDialog = getConfigurationAlertBuilder().create();
@@ -325,6 +326,7 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
                 } else {
                 	Log.i(MainActivity.TAG, headController.getHeads().size() + " heads attached");
                 }
+                */
 
                 /*
                  * Restart video loading with new dimensions 
@@ -507,6 +509,13 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
     	return videoSvc;
     }
     
+    public void setSelectedPreview(int index) {
+    	if (index == PreviewFragment.PREVIEW_NOT_SET_INDEX) {
+    		Log.e("MAIN", "Deactivating any active preview");
+    	} else {
+    		Log.e("MAIN", "Testing to see if any preview must be deselected");
+    	}
+    }
     // TODO cleanup
     /*
     public void togglePreviewVideo(Preview preview) {
