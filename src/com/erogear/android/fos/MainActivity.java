@@ -10,15 +10,18 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.SparseArray;
 import android.widget.Toast;
@@ -39,22 +42,24 @@ import com.erogear.android.bluetooth.video.MultiheadController;
 import com.erogear.android.bluetooth.video.VideoProvider;
 import com.erogear.android.fos.fragments.PreviewFragment;
 
-public class MainActivity extends SherlockFragmentActivity {
+public class MainActivity extends SherlockFragmentActivity implements OnSharedPreferenceChangeListener {
 	// Intent request codes
 	public static final int PREFERENCE_INTENT_RESULT = 1;
 	private static final int REQUEST_ENABLE_BT = 2;
 	private static final int MULTIHEAD_SETUP_RESULT = 3;
 	
 	// Preferences
-	private SharedPreferences prefs;
+	private SharedPreferences controllerPrefs;
+	private String[] frameRates;
 	
 	// Tags
 	public static final String TAG = "MAIN";
 	public static final String PREVIEWS_DATA_TAG = "previews";
 	
 	// Video dimensions
-	private static final String PREFS_WIDTH = "PANEL_WIDTH";
-	private static final String PREFS_HEIGHT = "PANEL_HEIGHT";
+	// These are persisted as preferences, but not set through common app settings.
+	private static final String PREFS_WIDTH = "panelWidth";
+	private static final String PREFS_HEIGHT = "panelHeight";
 	private int panelWidth = 32;
 	private int panelHeight = 24;
 	private boolean panelDimensionsChanged = false;
@@ -76,6 +81,7 @@ public class MainActivity extends SherlockFragmentActivity {
 	private BluetoothVideoService videoSvc;
 	private ServiceConnection svcConn;
     private MultiheadController headController;
+    private FrameController<VideoProvider, MultiheadController> controller;
     
     // false = see data as sent to panel. true = see color data from video file.
     private static final boolean COLOR_PREVIEW = false;
@@ -230,8 +236,8 @@ public class MainActivity extends SherlockFragmentActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		prefs = getSharedPreferences(getResources().getString(R.string.app_name), android.content.Context.MODE_PRIVATE);
-		loadPanelDimensionsFromPreferences();
+		initControllerPreferences();
+		frameRates = getResources().getStringArray(R.array.valuesFrameRate);
 		
 		/*
 		 * Initialize previews
@@ -267,7 +273,8 @@ public class MainActivity extends SherlockFragmentActivity {
 		super.onResume();
 
         Log.i(TAG, "--- ONRESUME ---");
-
+		
+        dumpPreferences();
         
 		// Resume state indicating that MainActivity is running.
 		mainActivityRunning = true;
@@ -310,6 +317,7 @@ public class MainActivity extends SherlockFragmentActivity {
                 }
                 
                 /* Bluetooth Service init finished */
+                
                 // Prompt user to set up device controllers if none found
                 if (headController.getHeads().size() == 0) {
                 	AlertDialog alertDialog = getConfigurationAlertBuilder().create();
@@ -317,7 +325,7 @@ public class MainActivity extends SherlockFragmentActivity {
                 } else {
                 	Log.i(MainActivity.TAG, headController.getHeads().size() + " heads attached");
                 }
-                
+
                 /*
                  * Restart video loading with new dimensions 
                  * if panel dimensions have changed on this resume.
@@ -449,6 +457,9 @@ public class MainActivity extends SherlockFragmentActivity {
     }
     
     public void displayPreviews() {
+    	Log.e(MainActivity.TAG, "Running displayPreviews");
+    	
+    	// TODO prevent double flash
     	list = new PreviewFragment();
     	Bundle fragmentData = new Bundle();
     	fragmentData.putParcelableArrayList(MainActivity.PREVIEWS_DATA_TAG, previews);
@@ -581,13 +592,13 @@ public class MainActivity extends SherlockFragmentActivity {
     }
     
     private void loadPanelDimensionsFromPreferences() {
-    	panelWidth = prefs.getInt(MainActivity.PREFS_WIDTH, panelWidth);
-    	panelHeight = prefs.getInt(MainActivity.PREFS_HEIGHT, panelHeight);
+    	panelWidth = controllerPrefs.getInt(MainActivity.PREFS_WIDTH, panelWidth);
+    	panelHeight = controllerPrefs.getInt(MainActivity.PREFS_HEIGHT, panelHeight);
     	panelDimensionsChanged = false;
     }
     
     private void setPanelDimensionsPreferences(int w, int h) {
-    	SharedPreferences.Editor editor = prefs.edit();
+    	SharedPreferences.Editor editor = controllerPrefs.edit();
 		editor.putInt(MainActivity.PREFS_WIDTH, w);
 		editor.putInt(MainActivity.PREFS_HEIGHT, h);
 		editor.commit();
@@ -603,4 +614,48 @@ public class MainActivity extends SherlockFragmentActivity {
     	list.drawFrameInCurrentPreview(bbf);
     }
     */
+
+    
+    private void initControllerPreferences() {
+		controllerPrefs = getSharedPreferences("controller", Context.MODE_PRIVATE);
+		
+		if (controllerPrefs.getInt(MainActivity.PREFS_WIDTH, 0) == 0 
+				|| controllerPrefs.getInt(MainActivity.PREFS_HEIGHT, 0) == 0) {
+			setPanelDimensionsPreferences(panelWidth, panelHeight);
+		}
+		
+		loadPanelDimensionsFromPreferences();
+    }
+    
+    public void dumpPreferences() {
+    	Log.i("PREFERENCE", "prefFrameRate: " + PreferenceManager.getDefaultSharedPreferences(this).getInt(getString(R.string.prefkeyFrameRate), -1));
+    	Log.i("PREFERENCE", "prefHeight: " + controllerPrefs.getInt(MainActivity.PREFS_HEIGHT, 0));
+    	
+    }
+
+	@Override
+	public void onSharedPreferenceChanged(SharedPreferences sp, String key) {
+		// Alter the frame rate of the running animation if the frame rate preference was changed
+		if (key.equals(getString(R.string.prefkeyFrameRate))) {
+			if (controller == null) return;
+			
+			int newFrameRate = Integer.valueOf(frameRates[sp.getInt(getString(R.string.prefkeyFrameRate), 0)]);
+
+			boolean wasPlaying = controller.isAutoAdvancing();
+			Log.e("PREFERENCE_CHANGED", "was playing " + (wasPlaying ? "TRUE" : "FALSE"));
+			controller.setAutoAdvance(false, newFrameRate, null);
+			
+			if (wasPlaying) {
+				controller.setAutoAdvance(true);
+			}
+		}
+	}
+	
+	@Override
+	public void onSaveInstanceState(Bundle savedInstanceState) {
+	    Log.e(MainActivity.TAG, "SAVING INSTANCE STATE");
+	    
+	    // Always call the superclass so it can save the view hierarchy state
+	    super.onSaveInstanceState(savedInstanceState);
+	}
 }
