@@ -113,6 +113,9 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
 				break;
 			case BluetoothVideoService.MESSAGE_WRITE:
 				// Get the current frame and video provider
+				if (activePreview == null) {
+					return false;
+				}
 				
 				if (activePreview.hasListIndex() && controller != null) {
 					try {
@@ -665,7 +668,8 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
 	public void onSaveInstanceState(Bundle savedInstanceState) {
 	    Log.e(MainActivity.TAG, "SAVING INSTANCE STATE");
 	    
-	    // Stop any currently playing video.
+	    // Stop any currently playing video?
+	    
 	    
 	    
 	    // Always call the superclass so it can save the view hierarchy state
