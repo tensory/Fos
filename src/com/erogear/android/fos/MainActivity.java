@@ -318,8 +318,6 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
                 }
                 
                 /* Bluetooth Service init finished */
-                /* Do not push with this missing
-                 * TODO
                 // Prompt user to set up device controllers if none found
                 if (headController.getHeads().size() == 0) {
                 	AlertDialog alertDialog = getConfigurationAlertBuilder().create();
@@ -327,7 +325,6 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
                 } else {
                 	Log.i(MainActivity.TAG, headController.getHeads().size() + " heads attached");
                 }
-                */
 
                 /*
                  * Restart video loading with new dimensions 
@@ -513,19 +510,30 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
     public void setSelectedPreview(int index) {
     	if (index == PreviewFragment.PREVIEW_NOT_SET_INDEX) {
     		
-    		Log.e("MAIN", "Deactivating any active preview");
+    		// Log.e("MAIN", "Deactivating any active preview");
     		int oldListIndex = activePreview.getListIndex();
     		list.deactivateItem(oldListIndex);
     		activePreview.setListIndex(PreviewFragment.PREVIEW_NOT_SET_INDEX);
     		
+    		if (controller != null) {
+    			toggleVideoPlaying(false);
+    		}
+    		
     	} else {
-    		Log.e("MAIN", "Testing to see if any preview must be deselected");
+    		
+    		//Log.e("MAIN", "Testing to see if any preview must be deselected");
     		if (activePreview == null) {
     			activePreview = new PreviewLoader(index);
     		} else {
     			int oldListIndex = activePreview.getListIndex();
-    			if (oldListIndex != PreviewFragment.PREVIEW_NOT_SET_INDEX) list.deactivateItem(oldListIndex);
-    			
+    			if (oldListIndex != PreviewFragment.PREVIEW_NOT_SET_INDEX) {
+    				list.deactivateItem(oldListIndex);
+        			
+    				if (controller != null) {
+    					toggleVideoPlaying(false);
+    	    		}
+    			}
+    				
     			activePreview.setListIndex(index);
     		}
     		
@@ -537,7 +545,6 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
 	        videoSvc.setConfigInstance(FrameController.CONFIG_INSTANCE_KEY, controller);
 	        
 	        list.activateItem(index);
-	        Log.e("MAIN", index + " should now be active");
     	}
     }
     
@@ -549,7 +556,7 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
     	if (activePreview == null) {
     		setSelectedPreview(index);
     		list.setSelectedItem(index);
-    		Log.e("TOGGLE", "Create new and start playing video at index " + index);
+    		// Log.e("TOGGLE", "Create new and start playing video at index " + index);
     	}
     	
     	if (controller == null) {
@@ -558,26 +565,24 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
     	}
     	
     	if (activePreview.getListIndex() == index) {
-    		if (activePreview.isPlaying()) {
-    			controller.setAutoAdvance(false);
-    			activePreview.setPlaying(false);
-    		} else {
-    			controller.setAutoAdvance(true);
-    			activePreview.setPlaying(false);
-    		}
-    		Log.e("TOGGLE", "Start playing video at index " + index);
+    		toggleVideoPlaying(!(activePreview.isPlaying()));
+    		// Log.e("TOGGLE", "Start playing video at index " + index);
     	} else {
-			controller.setAutoAdvance(false);
-			activePreview.setPlaying(false);
+    		// Turn off old video
+    		toggleVideoPlaying(false);
 			
     		setSelectedPreview(index);
     		list.setSelectedItem(index);
 
-			controller.setAutoAdvance(true);
-			activePreview.setPlaying(true);
-    	}
-    	
+    		toggleVideoPlaying(true);
+    	}	
     }
+    
+    private void toggleVideoPlaying(boolean shouldPlay) {
+    	controller.setAutoAdvance(shouldPlay);
+		activePreview.setPlaying(shouldPlay);
+    }
+    
     // TODO cleanup
     /*
     public void togglePreviewVideo(Preview preview) {
