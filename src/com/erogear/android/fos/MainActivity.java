@@ -509,9 +509,7 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
     		list.deactivateItem(oldListIndex);
     		activePreview.setListIndex(PreviewFragment.PREVIEW_NOT_SET_INDEX);
     		
-    		if (controller != null) {
-    			toggleVideoPlaying(false);
-    		}
+    		toggleVideoPlaying(false);
     		
     	} else {
     		
@@ -523,9 +521,7 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
     			if (oldListIndex != PreviewFragment.PREVIEW_NOT_SET_INDEX) {
     				list.deactivateItem(oldListIndex);
         			
-    				if (controller != null) {
-    					toggleVideoPlaying(false);
-    	    		}
+    				toggleVideoPlaying(false);
     			}
     				
     			activePreview.setListIndex(index);
@@ -568,13 +564,16 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
     		setSelectedPreview(index);
     		list.setSelectedItem(index);
 
+    		// Start new video
     		toggleVideoPlaying(true);
     	}	
     }
     
     private void toggleVideoPlaying(boolean shouldPlay) {
-    	controller.setAutoAdvance(shouldPlay);
-		activePreview.setPlaying(shouldPlay);
+    	if (controller != null) {
+	    	controller.setAutoAdvance(shouldPlay);
+			activePreview.setPlaying(shouldPlay);
+    	}
     }
     
     /**
@@ -665,6 +664,9 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
 	@Override
 	public void onSaveInstanceState(Bundle savedInstanceState) {
 	    Log.e(MainActivity.TAG, "SAVING INSTANCE STATE");
+	    
+	    // Stop any currently playing video.
+	    
 	    
 	    // Always call the superclass so it can save the view hierarchy state
 	    super.onSaveInstanceState(savedInstanceState);
