@@ -113,23 +113,17 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
 				break;
 			case BluetoothVideoService.MESSAGE_WRITE:
 				// Get the current frame and video provider
-				Log.e("HANDLER", "Wrote frame " + msg.obj.toString());
 				
-				//TODO
-				/*
-				if (controller != null) {
+				if (activePreview.hasListIndex() && controller != null) {
 					try {
-						int previewKey = list.getSelectedPreview().hashCode();
+						int previewKey = activePreview.getPreview().hashCode();
 						list.drawFrameInCurrentPreview(
 								previewVideoProviderCache.get(previewKey).getFrame(controller.getCurrentFrame()));
 					} catch (Exception e) {
 						Log.e(MainActivity.TAG, "No frame data available for index " + String.valueOf(controller.getCurrentFrame()));
 					}
 				}
-				*/
-				
-				//byte[] writeBuf = (byte[]) msg.obj;
-				//addConversationLine("Me: " + byteArrayToHex(writeBuf));
+
 				break;
 			case BluetoothVideoService.MESSAGE_READ:
 				//byte[] readBuf = (byte[]) msg.obj;
