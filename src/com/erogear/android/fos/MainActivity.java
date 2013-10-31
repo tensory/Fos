@@ -540,6 +540,44 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
 	        Log.e("MAIN", index + " should now be active");
     	}
     }
+    
+    /**
+     * Click handler for preview icon presses.
+     * @param index
+     */
+    public void togglePlayPreview(int index) {
+    	if (activePreview == null) {
+    		setSelectedPreview(index);
+    		list.setSelectedItem(index);
+    		Log.e("TOGGLE", "Create new and start playing video at index " + index);
+    	}
+    	
+    	if (controller == null) {
+    		controller = new FrameController<VideoProvider, MultiheadController>(activePreview.getVideoProvider(), headController, videoSvc);
+	        videoSvc.setConfigInstance(FrameController.CONFIG_INSTANCE_KEY, controller);
+    	}
+    	
+    	if (activePreview.getListIndex() == index) {
+    		if (activePreview.isPlaying()) {
+    			controller.setAutoAdvance(false);
+    			activePreview.setPlaying(false);
+    		} else {
+    			controller.setAutoAdvance(true);
+    			activePreview.setPlaying(false);
+    		}
+    		Log.e("TOGGLE", "Start playing video at index " + index);
+    	} else {
+			controller.setAutoAdvance(false);
+			activePreview.setPlaying(false);
+			
+    		setSelectedPreview(index);
+    		list.setSelectedItem(index);
+
+			controller.setAutoAdvance(true);
+			activePreview.setPlaying(true);
+    	}
+    	
+    }
     // TODO cleanup
     /*
     public void togglePreviewVideo(Preview preview) {

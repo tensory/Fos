@@ -115,6 +115,10 @@ public class PreviewFragment extends SherlockListFragment {
     	layout.drawFrame((ByteBufferFrame) frame);
     }
     
+    public void setSelectedItem(int index) {
+    	selectedPreviewIndex = index;
+    }
+    
     public void activateItem(int index) {
     	PreviewListItemLayoutView layout = (PreviewListItemLayoutView) getListView().getChildAt(index);
     	layout.activate();

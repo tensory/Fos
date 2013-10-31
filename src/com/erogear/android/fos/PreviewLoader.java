@@ -8,13 +8,16 @@ public class PreviewLoader {
 	private Preview preview;
 	private VideoProvider provider;
 	private int listIndex;
+	private boolean playing;
 	
 	public PreviewLoader() {
 		listIndex = UNSET_INDEX;
+		playing = false;
 	}
 	
 	public PreviewLoader(int index) {
 		listIndex = index;
+		playing = false;
 	}
 	
 	public void attachPreview(Preview p) {
@@ -43,5 +46,13 @@ public class PreviewLoader {
 	
 	public int getListIndex() {
 		return listIndex;
+	}
+	
+	public void setPlaying(boolean shouldBePlaying) {
+		playing = shouldBePlaying;
+	}
+	
+	public boolean isPlaying() {
+		return playing;
 	}
 }
