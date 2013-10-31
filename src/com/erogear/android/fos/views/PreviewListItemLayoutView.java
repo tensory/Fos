@@ -2,22 +2,23 @@ package com.erogear.android.fos.views;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.util.AttributeSet;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.erogear.android.bluetooth.video.ByteBufferFrame;
 import com.erogear.android.bluetooth.video.VideoProvider;
+import com.erogear.android.fos.MainActivity;
 import com.erogear.android.fos.R;
 
 public class PreviewListItemLayoutView extends RelativeLayout {
-	private static final int UNSET_FRAME_ID = -1;
+	public ImageView ivBtnPreview, ivBtnAccept;
+	private int listIndex;
 	private Context context;
 	private boolean isActive;
-	public ImageView ivBtnPreview, ivBtnAccept;
 	public Bitmap bm;
 	public BitmapDrawable bmd;
 	
@@ -41,8 +42,40 @@ public class PreviewListItemLayoutView extends RelativeLayout {
 		isActive = false;
 		ivBtnPreview = (ImageView) findViewById(R.id.ivBtnPreview);
 		ivBtnAccept = (ImageView) findViewById(R.id.ivBtnAccept);
+		
+		// Set up click handlers
+		ivBtnPreview.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				((MainActivity) context).togglePlayPreview(listIndex);
+				
+			}});
 	}
 	
+	public void activate() {
+		isActive = true;
+		setIconState();
+	}
+	
+	public void deactivate() {
+		isActive = false;
+		setIconState();
+	}
+	
+	private void setIconState() {
+		if (this.isActive) {
+			//TODO: replace this pair of calls with a pair of Drawables with highlight state
+			ivBtnPreview.setImageResource(R.drawable.ic_active_preview);
+			ivBtnAccept.setImageResource(R.drawable.ic_active_send);
+		} else {
+			ivBtnPreview.setImageResource(R.drawable.ic_inactive_preview);
+			ivBtnAccept.setImageResource(R.drawable.ic_inactive_send);
+		}	
+	};
+	
+	/*
 	public void toggleActive() {
 		isActive = !isActive;
 		setIconState();
@@ -52,16 +85,6 @@ public class PreviewListItemLayoutView extends RelativeLayout {
 		return isActive;
 	}
 	
-	/** DEPRECATED
-	public void toggleAnimation(VideoProvider provider) {
-		
-//		if (!animation.isRunning() && isActive) {
-		startAnimation(provider);
-//		} else {
-//			stopAndReset(animation);
-//		}
-	}
-	*/
 	public void stopAnimation() {
 		ImageView iv = (ImageView) findViewById(R.id.ivPreview);
 		AnimationDrawable animation = (AnimationDrawable) iv.getBackground();
@@ -78,16 +101,7 @@ public class PreviewListItemLayoutView extends RelativeLayout {
 		d.selectDrawable(0);
 	}
 	
-	private void setIconState() {
-		if (this.isActive) {
-			//TODO: replace this pair of calls with a pair of Drawables with highlight state
-			activateImageButton(ivBtnPreview, R.drawable.ic_active_preview);
-			activateImageButton(ivBtnAccept, R.drawable.ic_active_send);
-		} else {
-			deactivateImageButton(ivBtnPreview, R.drawable.ic_inactive_preview);
-			deactivateImageButton(ivBtnAccept, R.drawable.ic_inactive_send);
-		}	
-	};
+	
 	
 	private void activateImageButton(ImageView target, int resId) {
 		target.setImageResource(resId);
@@ -98,24 +112,12 @@ public class PreviewListItemLayoutView extends RelativeLayout {
 		target.setImageResource(resId);
 		target.setClickable(false);
 	}
-	
-/** DEPRECATED
-	private void startAnimation(VideoProvider provider) {
-		if (lastFrameId == PreviewListItemLayoutView.UNSET_FRAME_ID) {
-			lastFrameId = 0;
-		}
-		
-		ImageView iv = (ImageView) findViewById(R.id.ivPreview);
-		
-		for (int i = lastFrameId; i < provider.getFrameCount(); i++) {
-			Bitmap bmp = Preview.FrameExtractor.getFrameBitmap(provider, i);
-			PreviewAdapter.setBackgroundImage(context, iv, bmp);			
-		}
-		
-		Log.d("PVLIV", "Done");
-	}
 	*/
-
+	
+	public void setListIndex(int idx) {
+		listIndex = idx;
+	}
+	
 	/**
 	 * Set the height of the list item
 	 * and the background ImageView.

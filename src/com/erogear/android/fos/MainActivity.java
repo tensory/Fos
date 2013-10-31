@@ -78,11 +78,11 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
 	// Boolean flag permitting the list fragment to be loaded.
 	boolean mainActivityRunning;
 	
-    private FrameController<VideoProvider, MultiheadController> controller;
 	private BluetoothVideoService videoSvc;
 	private ServiceConnection svcConn;
-    private MultiheadController headController;
-    
+	private MultiheadController headController;
+	private FrameController<VideoProvider, MultiheadController> controller;
+
     // false = see data as sent to panel. true = see color data from video file.
     private static final boolean COLOR_PREVIEW = false;
 	
@@ -113,19 +113,17 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
 				break;
 			case BluetoothVideoService.MESSAGE_WRITE:
 				// Get the current frame and video provider
-				if (controller != null) {
+				
+				if (activePreview.hasListIndex() && controller != null) {
 					try {
-						int previewKey = list.getSelectedPreview().hashCode();
+						int previewKey = activePreview.getPreview().hashCode();
 						list.drawFrameInCurrentPreview(
 								previewVideoProviderCache.get(previewKey).getFrame(controller.getCurrentFrame()));
 					} catch (Exception e) {
 						Log.e(MainActivity.TAG, "No frame data available for index " + String.valueOf(controller.getCurrentFrame()));
 					}
 				}
-				
-				//byte[] writeBuf = (byte[]) msg.obj;
-				//previewFrame((ByteBufferFrame) msg.obj);
-				//addConversationLine("Me: " + byteArrayToHex(writeBuf));
+
 				break;
 			case BluetoothVideoService.MESSAGE_READ:
 				//byte[] readBuf = (byte[]) msg.obj;
@@ -314,7 +312,6 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
                 }
                 
                 /* Bluetooth Service init finished */
-                
                 // Prompt user to set up device controllers if none found
                 if (headController.getHeads().size() == 0) {
                 	AlertDialog alertDialog = getConfigurationAlertBuilder().create();
@@ -504,6 +501,84 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
     	return videoSvc;
     }
     
+    public void setSelectedPreview(int index) {
+    	if (index == PreviewFragment.PREVIEW_NOT_SET_INDEX) {
+    		
+    		// Log.e("MAIN", "Deactivating any active preview");
+    		int oldListIndex = activePreview.getListIndex();
+    		list.deactivateItem(oldListIndex);
+    		activePreview.setListIndex(PreviewFragment.PREVIEW_NOT_SET_INDEX);
+    		
+    		if (controller != null) {
+    			toggleVideoPlaying(false);
+    		}
+    		
+    	} else {
+    		
+    		//Log.e("MAIN", "Testing to see if any preview must be deselected");
+    		if (activePreview == null) {
+    			activePreview = new PreviewLoader(index);
+    		} else {
+    			int oldListIndex = activePreview.getListIndex();
+    			if (oldListIndex != PreviewFragment.PREVIEW_NOT_SET_INDEX) {
+    				list.deactivateItem(oldListIndex);
+        			
+    				if (controller != null) {
+    					toggleVideoPlaying(false);
+    	    		}
+    			}
+    				
+    			activePreview.setListIndex(index);
+    		}
+    		
+    		Preview currentPreview = list.getPreviewAt(index);
+			activePreview.attachPreview(currentPreview);
+			activePreview.setVideoProvider(previewVideoProviderCache.get(currentPreview.hashCode()));
+			
+	    	controller = new FrameController<VideoProvider, MultiheadController>(activePreview.getVideoProvider(), headController, videoSvc);
+	        videoSvc.setConfigInstance(FrameController.CONFIG_INSTANCE_KEY, controller);
+	        
+	        list.activateItem(index);
+    	}
+    }
+    
+    /**
+     * Click handler for preview icon presses.
+     * @param index
+     */
+    public void togglePlayPreview(int index) {
+    	if (activePreview == null) {
+    		setSelectedPreview(index);
+    		list.setSelectedItem(index);
+    		// Log.e("TOGGLE", "Create new and start playing video at index " + index);
+    	}
+    	
+    	if (controller == null) {
+    		controller = new FrameController<VideoProvider, MultiheadController>(activePreview.getVideoProvider(), headController, videoSvc);
+	        videoSvc.setConfigInstance(FrameController.CONFIG_INSTANCE_KEY, controller);
+    	}
+    	
+    	if (activePreview.getListIndex() == index) {
+    		toggleVideoPlaying(!(activePreview.isPlaying()));
+    		// Log.e("TOGGLE", "Start playing video at index " + index);
+    	} else {
+    		// Turn off old video
+    		toggleVideoPlaying(false);
+			
+    		setSelectedPreview(index);
+    		list.setSelectedItem(index);
+
+    		toggleVideoPlaying(true);
+    	}	
+    }
+    
+    private void toggleVideoPlaying(boolean shouldPlay) {
+    	controller.setAutoAdvance(shouldPlay);
+		activePreview.setPlaying(shouldPlay);
+    }
+    
+    // TODO cleanup
+    /*
     public void togglePreviewVideo(Preview preview) {
     	// Set the active preview.
     	
@@ -533,7 +608,7 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
     	} else {
             controller.setAutoAdvance(false);
     	}
-        */
+        
         if (controller == null) {
         	controller = new FrameController<VideoProvider, MultiheadController>(activePreview.getVideoProvider(), headController, videoSvc);
         	videoSvc.setConfigInstance(FrameController.CONFIG_INSTANCE_KEY, controller);
@@ -545,11 +620,14 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
             controller.setAutoAdvance(false);
     	}
     } 
-    	
+    	*/
+    //TODO remove if never used
+    /*
     private void setActivePreview(Preview p) {
     	activePreview.attachPreview(p);
     	activePreview.setVideoProvider(previewVideoProviderCache.get(p.hashCode()));
     }
+    */
     
     /**
      * Get an AlertDialog.Builder to construct the error dialog
@@ -600,10 +678,13 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
     public boolean getPanelDimensionsChanged() {
     	return panelDimensionsChanged;
     }
-    
+    // TODO cleanup
+    /*
     private void previewFrame(ByteBufferFrame bbf) {
     	list.drawFrameInCurrentPreview(bbf);
     }
+    */
+
     
     private void initControllerPreferences() {
 		controllerPrefs = getSharedPreferences("controller", Context.MODE_PRIVATE);

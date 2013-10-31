@@ -16,8 +16,8 @@ import com.erogear.android.fos.PreviewAdapter;
 import com.erogear.android.fos.views.PreviewListItemLayoutView;
 
 public class PreviewFragment extends SherlockListFragment {
+	public static int PREVIEW_NOT_SET_INDEX = -1;
 	private ArrayList<Preview> previews;
-	private static int PREVIEW_NOT_SET_INDEX = -1;
 	private int selectedPreviewIndex;
 	private static final String TAG = "PF";
 	
@@ -32,6 +32,13 @@ public class PreviewFragment extends SherlockListFragment {
 
 	@Override
 	public void onListItemClick(ListView l, View view, int position, long id) {
+		if (selectedPreviewIndex == position) {
+			selectedPreviewIndex = PreviewFragment.PREVIEW_NOT_SET_INDEX;
+		} else {
+			selectedPreviewIndex = position;
+		}
+		((MainActivity) getActivity()).setSelectedPreview(selectedPreviewIndex);
+		/*
 		int lastSelectedIndex = selectedPreviewIndex;
 		PreviewListItemLayoutView pvView = (PreviewListItemLayoutView) view;
 		if (lastSelectedIndex > PreviewFragment.PREVIEW_NOT_SET_INDEX) {
@@ -50,12 +57,13 @@ public class PreviewFragment extends SherlockListFragment {
 		toggleControlsClickable(pvView);
 
 		selectedPreviewIndex = position;
+		*/
 	}
 
-	public Preview getSelectedPreview() {
-		return (Preview) getListAdapter().getItem(selectedPreviewIndex);
+	public Preview getPreviewAt(int index) {
+		return (Preview) getListAdapter().getItem(index);
 	}
-	
+	/*
 	public void toggleControlsClickable(PreviewListItemLayoutView v) {
 		if (v.isActive()) {
 			v.ivBtnPreview.setClickable(true);
@@ -63,14 +71,17 @@ public class PreviewFragment extends SherlockListFragment {
 
 				@Override
 				public void onClick(View arg0) {
+					/*
 					Log.e(PreviewFragment.TAG, "Clicked preview");
 					((MainActivity) getActivity()).togglePreviewVideo(getSelectedPreview());
+					
 				}});
 		} else {
 			v.ivBtnPreview.setClickable(false);
 			v.ivBtnPreview.setOnClickListener(null);
 		}	
 	}
+	*/
 	
 	/**
 	 * Reset the heights of all list items dynamically
@@ -102,5 +113,19 @@ public class PreviewFragment extends SherlockListFragment {
     	
     	PreviewListItemLayoutView layout = (PreviewListItemLayoutView) getListView().getChildAt(selectedPreviewIndex);
     	layout.drawFrame((ByteBufferFrame) frame);
+    }
+    
+    public void setSelectedItem(int index) {
+    	selectedPreviewIndex = index;
+    }
+    
+    public void activateItem(int index) {
+    	PreviewListItemLayoutView layout = (PreviewListItemLayoutView) getListView().getChildAt(index);
+    	layout.activate();
+    }
+
+    public void deactivateItem(int index) {
+    	PreviewListItemLayoutView layout = (PreviewListItemLayoutView) getListView().getChildAt(index);
+    	layout.deactivate();
     }
 }
