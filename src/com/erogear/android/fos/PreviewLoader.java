@@ -5,6 +5,7 @@ import com.erogear.android.fos.Preview;
 
 public class PreviewLoader {
 	public static final int UNSET_INDEX = -1;
+	public static final String PREVIEW_SELECTED_TAG = "SELECTED";
 	private Preview preview;
 	private VideoProvider provider;
 	private int listIndex;
