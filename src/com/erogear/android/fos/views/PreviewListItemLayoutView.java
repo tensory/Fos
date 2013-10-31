@@ -75,45 +75,6 @@ public class PreviewListItemLayoutView extends RelativeLayout {
 		}	
 	};
 	
-	/*
-	public void toggleActive() {
-		isActive = !isActive;
-		setIconState();
-	}
-	
-	public boolean isActive() {
-		return isActive;
-	}
-	
-	public void stopAnimation() {
-		ImageView iv = (ImageView) findViewById(R.id.ivPreview);
-		AnimationDrawable animation = (AnimationDrawable) iv.getBackground();
-		stopAndReset(animation);
-	}
-	
-	public void deactivate() {
-		isActive = false;
-		setIconState();
-	}
-	
-	private void stopAndReset(AnimationDrawable d) {
-		d.stop();
-		d.selectDrawable(0);
-	}
-	
-	
-	
-	private void activateImageButton(ImageView target, int resId) {
-		target.setImageResource(resId);
-		target.setClickable(true);
-	}
-	
-	private void deactivateImageButton(ImageView target, int resId) {
-		target.setImageResource(resId);
-		target.setClickable(false);
-	}
-	*/
-	
 	public void setListIndex(int idx) {
 		listIndex = idx;
 	}

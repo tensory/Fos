@@ -38,51 +38,12 @@ public class PreviewFragment extends SherlockListFragment {
 			selectedPreviewIndex = position;
 		}
 		((MainActivity) getActivity()).setSelectedPreview(selectedPreviewIndex);
-		/*
-		int lastSelectedIndex = selectedPreviewIndex;
-		PreviewListItemLayoutView pvView = (PreviewListItemLayoutView) view;
-		if (lastSelectedIndex > PreviewFragment.PREVIEW_NOT_SET_INDEX) {
-			// A preview was selected before this event fired
-
-			if (lastSelectedIndex != position) {
-				// New selection.
-				// Stop the animation on the last active preview, 
-				// and start it on the current one.
-
-				PreviewListItemLayoutView oldView = (PreviewListItemLayoutView) l.getChildAt(lastSelectedIndex);
-				oldView.deactivate();
-			}
-		} 
-		pvView.toggleActive();
-		toggleControlsClickable(pvView);
-
-		selectedPreviewIndex = position;
-		*/
 	}
 
 	public Preview getPreviewAt(int index) {
 		return (Preview) getListAdapter().getItem(index);
 	}
-	/*
-	public void toggleControlsClickable(PreviewListItemLayoutView v) {
-		if (v.isActive()) {
-			v.ivBtnPreview.setClickable(true);
-			v.ivBtnPreview.setOnClickListener(new OnClickListener() {
 
-				@Override
-				public void onClick(View arg0) {
-					/*
-					Log.e(PreviewFragment.TAG, "Clicked preview");
-					((MainActivity) getActivity()).togglePreviewVideo(getSelectedPreview());
-					
-				}});
-		} else {
-			v.ivBtnPreview.setClickable(false);
-			v.ivBtnPreview.setOnClickListener(null);
-		}	
-	}
-	*/
-	
 	/**
 	 * Reset the heights of all list items dynamically
 	 * when the device is rotated
