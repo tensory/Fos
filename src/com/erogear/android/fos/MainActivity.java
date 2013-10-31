@@ -80,9 +80,9 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
 	
 	private BluetoothVideoService videoSvc;
 	private ServiceConnection svcConn;
-    private MultiheadController headController;
-    private FrameController<VideoProvider, MultiheadController> controller;
-    
+	private MultiheadController headController;
+	private FrameController<VideoProvider, MultiheadController> controller;
+
     // false = see data as sent to panel. true = see color data from video file.
     private static final boolean COLOR_PREVIEW = false;
 	
