@@ -4,11 +4,14 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.Set;
 
 import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -38,6 +41,7 @@ import com.erogear.android.bluetooth.comm.MultiheadSetupActivity;
 import com.erogear.android.bluetooth.video.FFMPEGVideoProvider;
 import com.erogear.android.bluetooth.video.FrameController;
 import com.erogear.android.bluetooth.video.MultiheadController;
+import com.erogear.android.bluetooth.video.TranslateVirtualFrame;
 import com.erogear.android.bluetooth.video.VideoProvider;
 import com.erogear.android.fos.fragments.PreviewFragment;
 
@@ -103,6 +107,17 @@ public class MainActivity extends SherlockFragmentActivity {
 			switch (msg.what) {
 			case BluetoothVideoService.MESSAGE_STATE_CHANGE:
 				switch (msg.arg1) {
+				case BluetoothChatService.STATE_CONNECTED:
+					Log.i("HANDLER", "CONNECTED");
+                    /*
+					conn = (DeviceConnection)msg.obj;
+
+                    controller.mapHead(conn, new TranslateVirtualFrame(conn.getInputWidth(), conn.getInputHeight(), 0, 0), true);
+                    lv.notifySetupChanged();
+
+                    setStatus("Connected to " + conn.getDeviceName());
+                    */
+                    break;
 				case BluetoothChatService.STATE_CONNECTION_LOST:
 					conn = (DeviceConnection) msg.obj;
 					Toast.makeText(MainActivity.this, "Lost connection to " + conn.getDeviceName(), Toast.LENGTH_SHORT).show();
@@ -457,10 +472,12 @@ public class MainActivity extends SherlockFragmentActivity {
     		if (newWidth != panelWidth || newHeight != panelHeight) {
     			setPanelDimensionsPreferences(newWidth, newHeight);
     		}
-    		
+
     		// Set controller address(es) in preferences for next time 
     		// a headController is constructed
-    		controllerPreferences.storeDeviceAddresses(headController.getHeads());
+    		
+    		BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
+    		controllerPreferences.storeDeviceAddresses(headController.getHeads(), mBtAdapter.getBondedDevices());
     		
     		Log.d(MainActivity.TAG, "setup activity completed");
     		break;
@@ -740,7 +757,7 @@ public class MainActivity extends SherlockFragmentActivity {
 	 */
 	private MultiheadController getHeadController(BluetoothVideoService svc) {
 		 MultiheadController controller = (MultiheadController) svc.getConfigInstance(MultiheadController.CONFIG_INSTANCE_KEY);
-
+		 
          if (controller == null) {
         	 controller = controllerPreferences.getSavedHeadController(svc); 
          }

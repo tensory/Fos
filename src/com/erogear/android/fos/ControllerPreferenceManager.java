@@ -1,14 +1,17 @@
 package com.erogear.android.fos;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.util.Log;
 
 import com.erogear.android.bluetooth.comm.BluetoothVideoService;
 import com.erogear.android.bluetooth.comm.FrameConsumer;
@@ -21,6 +24,7 @@ public class ControllerPreferenceManager {
 	protected static final String PREFS_WIDTH = "PANEL_WIDTH";
 	protected static final String PREFS_HEIGHT = "PANEL_HEIGHT";
 	protected String deviceIntentKey;
+	protected String[] knownDeviceAddresses;
 	protected int panelWidthDefault = 32;
 	protected int panelHeightDefault = 24;
 	protected SharedPreferences preferences;
@@ -46,6 +50,7 @@ public class ControllerPreferenceManager {
 	 * @return
 	 */
 	public MultiheadController getSavedHeadController(BluetoothVideoService svc) {
+	
 		int width = preferences.getInt(ControllerPreferenceManager.PREFS_WIDTH, panelWidthDefault);
 		int height = preferences.getInt(ControllerPreferenceManager.PREFS_HEIGHT, panelHeightDefault);
 		MultiheadController headController = new MultiheadController(width, height);
@@ -55,6 +60,7 @@ public class ControllerPreferenceManager {
 		Intent intent = new Intent();
 		for (int i = 0; i < addresses.length; i++) {
 			String address = addresses[i];
+			// Look up 
 			intent.putExtra(deviceIntentKey, address);
 			svc.connectDevice(intent, true);
 		}
@@ -79,18 +85,26 @@ public class ControllerPreferenceManager {
 	/**
 	 * Store Bluetooth device addresses of the heads of a current headController
 	 */
-	 public void storeDeviceAddresses(Map<FrameConsumer, Head> map) {
-		 String[] deviceAddresses = new String[map.size()];
-		 int i = 0;
+	 public void storeDeviceAddresses(Map<FrameConsumer, Head> map, Set<BluetoothDevice> bluetoothDevices) {
+		 ArrayList<String> deviceAddresses = new ArrayList<String>();
+		 List<BluetoothDevice> bondedDevices = new ArrayList<BluetoothDevice>(bluetoothDevices);
 		 
 		 for (Map.Entry<FrameConsumer, Head> entry : map.entrySet()) {
 			 FrameConsumer device = (FrameConsumer) entry.getKey();
-			 deviceAddresses[i] = device.getName();
-			 Log.e("CONTROLLERPREFS", device.getName());
+			 String deviceName = device.getName();
+			 for (BluetoothDevice d : bondedDevices) {
+				 if (deviceName.equals(d.getName())) {
+					 deviceAddresses.add(d.getAddress());
+				 }
+			 }
 		 }
 		 
 		 SharedPreferences.Editor editor = preferences.edit();
-		 editor.putStringSet(ControllerPreferenceManager.DEVICES_KEY, new HashSet<String>(Arrays.asList(deviceAddresses)));
+		 editor.putStringSet(ControllerPreferenceManager.DEVICES_KEY, new HashSet<String>(deviceAddresses));
 		 editor.commit();
+	}
+	 
+	public void setKnownDevices(String[] deviceAddresses) {
+		knownDeviceAddresses = deviceAddresses;
 	}
 }
