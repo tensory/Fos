@@ -12,6 +12,9 @@
     <string name="prefFrameRate">Frame rate</string>
     <string name="prefFrameRateDialogTitle">Select frames per second to display.</string>
     
+    <string name="txtPairingDevicesPlural">Reconnecting devices...</string>
+    <string name="txtPairingDevicesSingular">Reconnecting device...</string>
+    
     <string name="txtNoDevices">Connect device</string>
 	<string name="txtConnect">Connect</string>
 	<string name="txtExit">Exit</string>

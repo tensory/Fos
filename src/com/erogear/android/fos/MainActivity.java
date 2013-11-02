@@ -3,8 +3,6 @@ package com.erogear.android.fos;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.Observable;
-import java.util.Observer;
 import java.util.Queue;
 
 import android.app.AlertDialog;
@@ -26,6 +24,7 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.SparseArray;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
@@ -100,6 +99,8 @@ public class MainActivity extends SherlockFragmentActivity {
 	 * from BluetoothVideoService
 	 */
 	private class IncomingMessageCallback implements Handler.Callback {
+		
+		
 		@Override
 		public boolean handleMessage(Message msg) {
 			DeviceConnection conn;
@@ -115,9 +116,10 @@ public class MainActivity extends SherlockFragmentActivity {
 						
 						if (controllerBuilder.ready()) {
 							headController = controllerBuilder.getHeadController();
-							
+			
 							if (headController.getHeads().size() != controllerPreferences.getLastPairedAddresses().length) {
 								headController = null;
+								
 								
 								Toast.makeText(MainActivity.this, "Head controller is now ready", Toast.LENGTH_SHORT);
 								
@@ -729,6 +731,22 @@ public class MainActivity extends SherlockFragmentActivity {
     }
     
     private void initControllerPreferences() {
+    	TextView headControllerStatus = (TextView) findViewById(R.id.tvControllerStatusMessage);
+    	controllerPreferences = new ControllerPreferenceManager(MainActivity.this);
+    	switch (controllerPreferences.getLastPairedAddresses().length) {
+    	case 0:
+    		//headControllerStatus.setText("Fucked");
+    		break;
+    	case 1:
+    		headControllerStatus.setText(getString(R.string.txtPairingDevicesSingular));
+    		break;
+    	default:
+    		headControllerStatus.setText(getString(R.string.txtPairingDevicesPlural));
+    		break;
+    	}
+    	
+    	
+    	
     	// change this to use contorller preference manager
 		controllerPrefs = getSharedPreferences("controller", Context.MODE_PRIVATE);
 		SharedPreferences.Editor editor = controllerPrefs.edit();

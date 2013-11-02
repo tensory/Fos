@@ -17,6 +17,7 @@
     </FrameLayout>
     
     <RelativeLayout
+        style="@style/ControllerStatus"
         android:id="@+id/layoutControllerStatus"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
