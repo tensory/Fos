@@ -15,7 +15,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
@@ -35,14 +34,13 @@ import com.erogear.android.bluetooth.comm.BluetoothVideoService;
 import com.erogear.android.bluetooth.comm.DeviceConnection;
 import com.erogear.android.bluetooth.comm.FrameConsumer;
 import com.erogear.android.bluetooth.comm.MultiheadSetupActivity;
-import com.erogear.android.bluetooth.video.ByteBufferFrame;
 import com.erogear.android.bluetooth.video.FFMPEGVideoProvider;
 import com.erogear.android.bluetooth.video.FrameController;
 import com.erogear.android.bluetooth.video.MultiheadController;
 import com.erogear.android.bluetooth.video.VideoProvider;
 import com.erogear.android.fos.fragments.PreviewFragment;
 
-public class MainActivity extends SherlockFragmentActivity implements OnSharedPreferenceChangeListener {
+public class MainActivity extends SherlockFragmentActivity {
 	// Intent request codes
 	public static final int PREFERENCE_INTENT_RESULT = 1;
 	private static final int REQUEST_ENABLE_BT = 2;
@@ -50,10 +48,11 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
 	
 	// Preferences
 	private SharedPreferences controllerPrefs;
-	private String[] frameRates;
+	private int frameRate;
 	
 	// Tags
 	public static final String TAG = "MAIN";
+	public static final String VIDEO_PLAYING = "VIDEO_PLAYING";
 	public static final String PREVIEWS_DATA_TAG = "previews";
 	
 	// Video dimensions
@@ -63,6 +62,7 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
 	private int panelWidth = 32;
 	private int panelHeight = 24;
 	private boolean panelDimensionsChanged = false;
+	
 	
 	// Preview video queue
 	Queue<Preview> q = new LinkedList<Preview>();
@@ -113,6 +113,9 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
 				break;
 			case BluetoothVideoService.MESSAGE_WRITE:
 				// Get the current frame and video provider
+				if (activePreview == null) {
+					return false;
+				}
 				
 				if (activePreview.hasListIndex() && controller != null) {
 					try {
@@ -231,8 +234,19 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		
 		initControllerPreferences();
-		frameRates = getResources().getStringArray(R.array.valuesFrameRate);
+		
+		frameRate = -1;
+		String frameRateTag = getResources().getString(R.string.prefkeyFrameRate);
+		// Set frame rate from savedInstanceState first
+		if (savedInstanceState != null) {
+			frameRate = savedInstanceState.getInt(frameRateTag, frameRate);
+		}
+		// That didn't work, so try retrieving from prefs
+		if (frameRate == -1) {
+			frameRate = getFrameRateFromPreferences(frameRateTag);
+		}
 		
 		/*
 		 * Initialize previews
@@ -268,11 +282,31 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
 		super.onResume();
 
         Log.i(TAG, "--- ONRESUME ---");
-		
-        dumpPreferences();
         
 		// Resume state indicating that MainActivity is running.
 		mainActivityRunning = true;
+		
+		// Update frame rate
+		frameRate = getFrameRateFromPreferences(getResources().getString(R.string.prefkeyFrameRate));
+		toggleVideoPlaying(false, frameRate);
+		
+		/*
+		 * These state vars aren't useful here, not yet
+		 * Video reselection must be done after displayPreviews is finished
+		 
+		// Retrieve state from preferences
+		
+		boolean videoPlaying = controllerPrefs.getBoolean(MainActivity.VIDEO_PLAYING, false);
+		if (list != null && activePreview != null) {
+			int previewIndex = getPreviewIndexFromPreferences(PreviewLoader.PREVIEW_SELECTED_TAG);
+			
+			setSelectedPreview(previewIndex);
+			list.setSelectedItem(previewIndex);
+			list.activateItem(previewIndex);
+			Log.e("ON_RESUME", "Resuming with preview index " + previewIndex + " and frame rate " + frameRate);
+			
+		}
+		*/
 		
         startService(new Intent(this, BluetoothVideoService.class));
         svcConn = new ServiceConnection() {
@@ -383,6 +417,21 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
 	public void onPause() {
 		super.onPause();
 		mainActivityRunning = false;
+		
+		// Record activePreview index
+		if (activePreview != null) {
+			SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this); //.putInt(PreviewLoader.PREVIEW_SELECTED_TAG, 2);
+			SharedPreferences.Editor editor = sp.edit();
+			editor.putInt(PreviewLoader.PREVIEW_SELECTED_TAG, activePreview.getListIndex());
+			editor.commit();
+		}
+		
+		// Record whether controller is currently playing
+		if (controller != null) {
+			SharedPreferences.Editor controllerEditor = controllerPrefs.edit();
+			controllerEditor.putBoolean(MainActivity.VIDEO_PLAYING, controller.isAutoAdvancing());
+			controllerEditor.commit();
+		}
 	}
 	
     @Override
@@ -506,12 +555,12 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
     		
     		// Log.e("MAIN", "Deactivating any active preview");
     		int oldListIndex = activePreview.getListIndex();
-    		list.deactivateItem(oldListIndex);
-    		activePreview.setListIndex(PreviewFragment.PREVIEW_NOT_SET_INDEX);
-    		
-    		if (controller != null) {
-    			toggleVideoPlaying(false);
+    		if (oldListIndex != PreviewFragment.PREVIEW_NOT_SET_INDEX) {
+    			list.deactivateItem(oldListIndex);
+    			activePreview.setListIndex(PreviewFragment.PREVIEW_NOT_SET_INDEX);
     		}
+    		
+    		toggleVideoPlaying(false);
     		
     	} else {
     		
@@ -523,9 +572,7 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
     			if (oldListIndex != PreviewFragment.PREVIEW_NOT_SET_INDEX) {
     				list.deactivateItem(oldListIndex);
         			
-    				if (controller != null) {
-    					toggleVideoPlaying(false);
-    	    		}
+    				toggleVideoPlaying(false);
     			}
     				
     			activePreview.setListIndex(index);
@@ -568,13 +615,23 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
     		setSelectedPreview(index);
     		list.setSelectedItem(index);
 
+    		// Start new video
     		toggleVideoPlaying(true);
     	}	
     }
     
     private void toggleVideoPlaying(boolean shouldPlay) {
-    	controller.setAutoAdvance(shouldPlay);
-		activePreview.setPlaying(shouldPlay);
+    	if (controller != null) {
+	    	controller.setAutoAdvance(shouldPlay, MainActivity.getDelayFrameRate(frameRate), null);
+			activePreview.setPlaying(shouldPlay);
+    	}
+    }
+    
+    private void toggleVideoPlaying(boolean shouldPlay, int newFrameRate) {
+    	if (controller != null) {
+	    	controller.setAutoAdvance(shouldPlay, MainActivity.getDelayFrameRate(newFrameRate), null);
+			activePreview.setPlaying(shouldPlay);
+    	}
     }
     
     /**
@@ -629,44 +686,43 @@ public class MainActivity extends SherlockFragmentActivity implements OnSharedPr
     
     private void initControllerPreferences() {
 		controllerPrefs = getSharedPreferences("controller", Context.MODE_PRIVATE);
+		SharedPreferences.Editor editor = controllerPrefs.edit();
 		
 		if (controllerPrefs.getInt(MainActivity.PREFS_WIDTH, 0) == 0 
 				|| controllerPrefs.getInt(MainActivity.PREFS_HEIGHT, 0) == 0) {
-			setPanelDimensionsPreferences(panelWidth, panelHeight);
+			editor.putInt(MainActivity.PREFS_WIDTH, panelWidth);
+			editor.putInt(MainActivity.PREFS_HEIGHT, panelHeight);
+			editor.commit();
+			panelDimensionsChanged = true;
 		}
+
+		// Init with no controller playing
+		editor.putBoolean(MainActivity.VIDEO_PLAYING, false);
+		editor.commit();
 		
 		loadPanelDimensionsFromPreferences();
     }
-    
-    public void dumpPreferences() {
-    	Log.i("PREFERENCE", "prefFrameRate: " + PreferenceManager.getDefaultSharedPreferences(this).getInt(getString(R.string.prefkeyFrameRate), -1));
-    	Log.i("PREFERENCE", "prefHeight: " + controllerPrefs.getInt(MainActivity.PREFS_HEIGHT, 0));
-    	
-    }
-
-	@Override
-	public void onSharedPreferenceChanged(SharedPreferences sp, String key) {
-		// Alter the frame rate of the running animation if the frame rate preference was changed
-		if (key.equals(getString(R.string.prefkeyFrameRate))) {
-			if (controller == null) return;
-			
-			int newFrameRate = Integer.valueOf(frameRates[sp.getInt(getString(R.string.prefkeyFrameRate), 0)]);
-
-			boolean wasPlaying = controller.isAutoAdvancing();
-			Log.e("PREFERENCE_CHANGED", "was playing " + (wasPlaying ? "TRUE" : "FALSE"));
-			controller.setAutoAdvance(false, newFrameRate, null);
-			
-			if (wasPlaying) {
-				controller.setAutoAdvance(true);
-			}
-		}
-	}
 	
 	@Override
 	public void onSaveInstanceState(Bundle savedInstanceState) {
-	    Log.e(MainActivity.TAG, "SAVING INSTANCE STATE");
+		super.onSaveInstanceState(savedInstanceState);
+	    Log.e("INSTANCE_STATE", "SAVING INSTANCE STATE");
 	    
-	    // Always call the superclass so it can save the view hierarchy state
-	    super.onSaveInstanceState(savedInstanceState);
+	   savedInstanceState.putInt(getResources().getString(R.string.prefkeyFrameRate), frameRate);
+	}
+	
+	public int getFrameRateFromPreferences(String key) {
+		String[] frameRates = getResources().getStringArray(R.array.valuesFrameRate);
+		
+		int frameRateValueIndex = PreferenceManager.getDefaultSharedPreferences(this).getInt(key, 2); 
+		return Integer.valueOf(frameRates[frameRateValueIndex]);
+	}
+	
+	public static int getDelayFrameRate(int frameRate) {
+		return (int) Math.floor(1000.0 / frameRate);
+	}
+	
+	public int getPreviewIndexFromPreferences(String key) {
+		return PreferenceManager.getDefaultSharedPreferences(this).getInt(key, PreviewLoader.UNSET_INDEX);
 	}
 }
