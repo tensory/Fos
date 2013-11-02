@@ -60,6 +60,8 @@ public class MainActivity extends SherlockFragmentActivity {
 	public static final String VIDEO_PLAYING = "VIDEO_PLAYING";
 	public static final String PREVIEWS_DATA_TAG = "previews";
 	
+	public static final String BLUETOOTH_TAG = "BLUETOOTH_PAIRING";
+	
 	// Video dimensions
 	// These are persisted as preferences, but not set through common app settings.
 	private static final String PREFS_WIDTH = "panelWidth";
@@ -113,30 +115,25 @@ public class MainActivity extends SherlockFragmentActivity {
 					Log.i("HANDLER", "CONNECTED" + conn.getDeviceName());
 					if (controllerBuilder.waiting()) {
 						controllerBuilder.addHead(conn);
+						controllerBuilder.pushStatusFrame();
 						
 						if (controllerBuilder.ready()) {
+							
 							headController = controllerBuilder.getHeadController();
-			
-							if (headController.getHeads().size() != controllerPreferences.getLastPairedAddresses().length) {
-								headController = null;
-								
-								
-								Toast.makeText(MainActivity.this, "Head controller is now ready", Toast.LENGTH_SHORT);
-								
-								// Notify user
-								/*
-								 * if (headController.getHeads().size() == 0) {
+							Toast.makeText(MainActivity.this, "Head controller is now ready", Toast.LENGTH_SHORT);
+
+							// Notify user
+							/*
+							 * if (headController.getHeads().size() == 0) {
                 	AlertDialog alertDialog = getConfigurationAlertBuilder().create();
                 	alertDialog.show();
                 } else {
                 	Log.i(MainActivity.TAG, headController.getHeads().size() + " heads attached");
                 }*/
 
-							}
 						}
 					}
-					
-					
+
 					break;
 				case BluetoothChatService.STATE_CONNECTION_LOST:
 					conn = (DeviceConnection) msg.obj;
@@ -325,6 +322,7 @@ public class MainActivity extends SherlockFragmentActivity {
 		super.onResume();
 
         Log.i(TAG, "--- ONRESUME ---");
+        Log.i(MainActivity.BLUETOOTH_TAG, "RESUMED");
         
 		controllerPreferences = new ControllerPreferenceManager(MainActivity.this);
 		controllerBuilder = new HeadControllerManager(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
@@ -384,11 +382,26 @@ public class MainActivity extends SherlockFragmentActivity {
                     startActivityForResult(btOn, REQUEST_ENABLE_BT);
                 }
                 
-                headController = getHeadController(videoSvc);
+                Log.i(MainActivity.BLUETOOTH_TAG, "GET HEAD CONTROLLER");
                 
+                headController = (MultiheadController) videoSvc.getConfigInstance(MultiheadController.CONFIG_INSTANCE_KEY);
+                if (headController == null) {
+                	// start trying to re-pair head controller
+                	// This call starts up an asynchronous loop with the Handler. 
+                	// Device connections (including failed connections) will trigger UI status
+                    headController = controllerPreferences.getHeadController(controllerBuilder, videoSvc);
+                } 
+                
+                // Finish setting handler on headcontroller
                 videoSvc.setConfigInstance(MultiheadController.CONFIG_INSTANCE_KEY, headController);
                 videoSvc.addHandler(headController.getHandler());
-            
+                
+                // Do any tasks that need to be done at the end, like drawing shit
+                
+/* These cannot be called until the head controller is ready.                
+                videoSvc.setConfigInstance(MultiheadController.CONFIG_INSTANCE_KEY, headController);
+                videoSvc.addHandler(headController.getHandler());
+*/            
                 /* Bluetooth Service init finished */
                 
                 /*
@@ -745,7 +758,7 @@ public class MainActivity extends SherlockFragmentActivity {
     		break;
     	}
     	
-    	
+    	Log.i(MainActivity.BLUETOOTH_TAG, "Expecting headController to get set up");
     	
     	// change this to use contorller preference manager
 		controllerPrefs = getSharedPreferences("controller", Context.MODE_PRIVATE);
@@ -787,19 +800,5 @@ public class MainActivity extends SherlockFragmentActivity {
 	
 	public int getPreviewIndexFromPreferences(String key) {
 		return PreferenceManager.getDefaultSharedPreferences(this).getInt(key, PreviewLoader.UNSET_INDEX);
-	}
-	
-	/**
-	 * Returns the last used video controller. 
-	 * 
-	 * @return a video head controller with 0 or more heads
-	 */
-	private MultiheadController getHeadController(BluetoothVideoService svc) {
-		 MultiheadController controller = (MultiheadController) svc.getConfigInstance(MultiheadController.CONFIG_INSTANCE_KEY);
-		 
-         if (controller == null) {
-        	 controller = controllerPreferences.getSavedHeadController(controllerBuilder, svc); 
-         }
-         return controller;
 	}
 }

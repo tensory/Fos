@@ -39,29 +39,6 @@ public class ControllerPreferenceManager {
 		preferences = context.getSharedPreferences(ControllerPreferenceManager.FILE_KEY, Context.MODE_PRIVATE);
 	}
 	
-	/**
-	 * Reconstruct a MultiheadController using device addresses and dimensions 
-	 * from the last instance of a MultiheadController.
-	 * 
-	 * @param manager
-	 * @param svc 
-	 * @return
-	 */
-	public MultiheadController getSavedHeadController(HeadControllerManager manager, BluetoothVideoService svc) {
-	
-		int width = preferences.getInt(ControllerPreferenceManager.PREFS_WIDTH, panelWidthDefault);
-		int height = preferences.getInt(ControllerPreferenceManager.PREFS_HEIGHT, panelHeightDefault);
-		MultiheadController headController = manager.getNewHeadController(width, height);
-        
-		// Associate heads with this controller
-		manager.connectDevices(getLastPairedAddresses(), svc);
-		
-		// At the time that this controller is returned, the connections have NOT finished.
-		// These events are handled in the BluetoothVideoService's Handler.
-		return headController;
-	}
-	
-	
 	protected String[] getLastPairedAddresses() {
 		Object[] stored = preferences.getStringSet(ControllerPreferenceManager.DEVICES_KEY, Collections.<String>emptySet()).toArray();
 		String[] deviceAddresses = new String[stored.length];
@@ -93,5 +70,19 @@ public class ControllerPreferenceManager {
 		 SharedPreferences.Editor editor = preferences.edit();
 		 editor.putStringSet(ControllerPreferenceManager.DEVICES_KEY, new HashSet<String>(deviceAddresses));
 		 editor.commit();
+	}
+	 
+	public MultiheadController getHeadController(HeadControllerManager manager, BluetoothVideoService videoService) {
+		int width = preferences.getInt(ControllerPreferenceManager.PREFS_WIDTH, panelWidthDefault);
+		int height = preferences.getInt(ControllerPreferenceManager.PREFS_HEIGHT, panelHeightDefault);
+		
+		MultiheadController headController = manager.getNewHeadController(width, height);
+		manager.connectDevices(getLastPairedAddresses(), videoService);
+		Log.i(MainActivity.BLUETOOTH_TAG, "manager is waiting for devices to be paired? " + String.valueOf(manager.waiting()));
+		
+		// At the time that this controller is returned, the connections have NOT finished.
+		// These events are handled in the BluetoothVideoService's Handler.
+		return headController;
+		
 	}
 }
