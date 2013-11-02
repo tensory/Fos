@@ -309,12 +309,13 @@ public class MainActivity extends SherlockFragmentActivity {
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
-		
+		/*
 		// Use different aspect ratio depending on orientation
 		double aspectRatio = getPreviewAspectRatio(newConfig.orientation);
 		
 		// Redraw previews items to fill view at proportional height.
         scalePreviewItemHeights(aspectRatio);
+		*/
 	}
 	
 	@Override
