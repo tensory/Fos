@@ -702,12 +702,6 @@ public class MainActivity extends SherlockFragmentActivity {
 		
 		loadPanelDimensionsFromPreferences();
     }
-    
-    //TODO remove
-    public void dumpPreferences() {
-    	Log.i("PREFERENCE", "prefFrameRate: " + PreferenceManager.getDefaultSharedPreferences(this).getInt(getString(R.string.prefkeyFrameRate), -1));
-    	Log.i("PREFERENCE", "prefHeight: " + controllerPrefs.getInt(MainActivity.PREFS_HEIGHT, 0));
-    }
 	
 	@Override
 	public void onSaveInstanceState(Bundle savedInstanceState) {
