@@ -7,11 +7,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import com.erogear.android.bluetooth.comm.BluetoothVideoService;
 import com.erogear.android.bluetooth.comm.FrameConsumer;
@@ -60,13 +60,13 @@ public class ControllerPreferenceManager {
 		Intent intent = new Intent();
 		for (int i = 0; i < addresses.length; i++) {
 			String address = addresses[i];
-			// Look up 
 			intent.putExtra(deviceIntentKey, address);
+			
 			svc.connectDevice(intent, true);
 		}
 		
 		// At the time that this controller is returned, the connections have NOT finished.
-		// These events can be handled in the BluetoothVideoService's Handler.
+		// These events are handled in the BluetoothVideoService's Handler.
 		return headController;
 	}
 	
