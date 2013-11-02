@@ -41,10 +41,29 @@ public class ControllerPreferenceManager {
 	
 	protected String[] getLastPairedAddresses() {
 		Object[] stored = preferences.getStringSet(ControllerPreferenceManager.DEVICES_KEY, Collections.<String>emptySet()).toArray();
+		// Devices are stored in key-value form: DEVICE_NAME,DEVICE_ADDRESS
+		// Get only the addresses
+		
 		String[] deviceAddresses = new String[stored.length];
 		
 		for (int i = 0; i < stored.length; i++) {
-			deviceAddresses[i] = (String) stored[i];
+			String[] parts = ((String) stored[i]).split(",");
+			deviceAddresses[i] = parts[1];
+		}
+		
+		return deviceAddresses;
+	}
+	
+	protected String[] getLastPairedDeviceNames() {
+		Object[] stored = preferences.getStringSet(ControllerPreferenceManager.DEVICES_KEY, Collections.<String>emptySet()).toArray();
+		// Devices are stored in key-value form: DEVICE_NAME,DEVICE_ADDRESS
+		// Get only the addresses
+		
+		String[] deviceAddresses = new String[stored.length];
+		
+		for (int i = 0; i < stored.length; i++) {
+			String[] parts = ((String) stored[i]).split(",");
+			deviceAddresses[i] = parts[0];
 		}
 		
 		return deviceAddresses;
@@ -62,7 +81,8 @@ public class ControllerPreferenceManager {
 			 String deviceName = device.getName();
 			 for (BluetoothDevice d : bondedDevices) {
 				 if (deviceName.equals(d.getName())) {
-					 deviceAddresses.add(d.getAddress());
+					 String pair = String.format("%1$s,%2$s", d.getName(), d.getAddress());
+					 deviceAddresses.add(pair);
 				 }
 			 }
 		 }
@@ -72,17 +92,33 @@ public class ControllerPreferenceManager {
 		 editor.commit();
 	}
 	 
-	public MultiheadController getHeadController(HeadControllerManager manager, BluetoothVideoService videoService) {
+	public MultiheadController getHeadController(HeadControllerManager manager, BluetoothVideoService videoService) throws Exception {
 		int width = preferences.getInt(ControllerPreferenceManager.PREFS_WIDTH, panelWidthDefault);
 		int height = preferences.getInt(ControllerPreferenceManager.PREFS_HEIGHT, panelHeightDefault);
 		
 		MultiheadController headController = manager.getNewHeadController(width, height);
-		manager.connectDevices(getLastPairedAddresses(), videoService);
+		try {
+			manager.connectDevices(getLastPairedAddresses(), videoService);
+		} catch (Exception e) {
+			throw e; // Bubble up the exception
+		}
+		
 		Log.i(MainActivity.BLUETOOTH_TAG, "manager is waiting for devices to be paired? " + String.valueOf(manager.waiting()));
 		
 		// At the time that this controller is returned, the connections have NOT finished.
 		// These events are handled in the BluetoothVideoService's Handler.
-		return headController;
-		
+		return headController;	
+	}
+	
+	/**
+	 * Get the index where a saved device was stored
+	 */
+	public int getDeviceIndex(String deviceName) {
+		int idx = -1;
+		String[] knownDevices = getLastPairedDeviceNames();
+		for (int i = 0; i < knownDevices.length; i++) {
+			if (((String) knownDevices[i]).equals(deviceName)) idx = i;
+		}
+		return idx;
 	}
 }

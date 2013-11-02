@@ -114,37 +114,24 @@ public class MainActivity extends SherlockFragmentActivity {
 				switch (msg.arg1) {
 				case BluetoothChatService.STATE_CONNECTED:
 					conn = (DeviceConnection) msg.obj;
-					Log.i("HANDLER", "CONNECTED" + conn.getDeviceName());
+
 					if (controllerBuilder.waiting()) {
 						controllerBuilder.addHead(conn);
-						
-						// Find its index number
-						// TODO: change the StringSet of addresses to a JSON dict
 						
 						// Push a status frame to the newly paired device.
 						for (Entry<FrameConsumer, Head> entry : headController.getHeads().entrySet()) {
 							FrameConsumer lastPairedDevice = entry.getKey();
 							if (lastPairedDevice.getName() == conn.getDeviceName()) {
-								controllerBuilder.pushStatusFrame(entry.getValue(), 1);
+								int deviceIndex = controllerPreferences.getDeviceIndex(lastPairedDevice.getName());
+								controllerBuilder.pushStatusFrame(entry.getValue(), deviceIndex + 1);
 								break;
 							}
 						}
-												
-						if (controllerBuilder.ready()) {
-							
-							headController = controllerBuilder.getHeadController();
-							Toast.makeText(MainActivity.this, "Head controller is now ready", Toast.LENGTH_SHORT);
-
-							// Notify user
-							/*
-							 * if (headController.getHeads().size() == 0) {
-                	AlertDialog alertDialog = getConfigurationAlertBuilder().create();
-                	alertDialog.show();
-                } else {
-                	Log.i(MainActivity.TAG, headController.getHeads().size() + " heads attached");
-                }*/
-
-						}
+					}
+					
+					if (controllerBuilder.ready()) {						
+						headController = controllerBuilder.getHeadController();
+						setControllerLoadingBannerState(0);
 					}
 
 					break;
@@ -157,6 +144,11 @@ public class MainActivity extends SherlockFragmentActivity {
 					Log.i("HANDLER", "NOT CONNECTED" + conn.getDeviceName());
 					if (controllerBuilder.waiting()) {
 						controllerBuilder.finishConnection();
+					}
+					
+					if (controllerBuilder.ready()) {						
+						headController = controllerBuilder.getHeadController();
+						setControllerLoadingBannerState(1);
 					}
 					
 					Toast.makeText(MainActivity.this, "Could not connect to device " + conn.getDeviceName(), Toast.LENGTH_SHORT).show();
@@ -402,7 +394,12 @@ public class MainActivity extends SherlockFragmentActivity {
                 	// start trying to re-pair head controller
                 	// This call starts up an asynchronous loop with the Handler. 
                 	// Device connections (including failed connections) will trigger UI status
-                    headController = controllerPreferences.getHeadController(controllerBuilder, videoSvc);
+                	try {
+                		headController = controllerPreferences.getHeadController(controllerBuilder, videoSvc);
+                	} catch (Exception e) {
+                		Log.e(MainActivity.BLUETOOTH_TAG, e.getMessage());
+                		Toast.makeText(MainActivity.this, getString(R.string.txtBluetoothError), Toast.LENGTH_LONG).show();
+                	}
                 } 
                 
                 // Finish setting handler on headcontroller
@@ -814,4 +811,5 @@ public class MainActivity extends SherlockFragmentActivity {
 	public int getPreviewIndexFromPreferences(String key) {
 		return PreferenceManager.getDefaultSharedPreferences(this).getInt(key, PreviewLoader.UNSET_INDEX);
 	}
+	
 }

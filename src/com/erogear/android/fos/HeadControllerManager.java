@@ -29,7 +29,7 @@ public class HeadControllerManager {
 		return headController;
 	}
 	
-	public void connectDevices(String[] addresses, BluetoothVideoService svc) {
+	public void connectDevices(String[] addresses, BluetoothVideoService svc) throws Exception {
 		Intent intent = new Intent();
 		connectionsExpected = addresses.length;
 		connectionsCompleted = 0;
@@ -37,8 +37,12 @@ public class HeadControllerManager {
 		for (int i = 0; i < addresses.length; i++) {
 			String address = addresses[i];
 			intent.putExtra(DEVICE_INTENT_KEY, address);
-			
-			svc.connectDevice(intent, true);
+			try {
+				// This may fail if Bluetooth connection has timed out
+				svc.connectDevice(intent, true);
+			} catch (Exception e) {
+				throw new Exception("Bluetooth connection error");
+			}
 		}
 	}
 	
@@ -47,7 +51,7 @@ public class HeadControllerManager {
 	}
 	
 	public boolean ready() {
-		return waiting();
+		return (connectionsCompleted == connectionsExpected);
 	}
 	
 	public void addHead(DeviceConnection connection) {
