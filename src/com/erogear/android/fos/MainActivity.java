@@ -3,15 +3,15 @@ package com.erogear.android.fos;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Queue;
-import java.util.Set;
 
 import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -41,7 +41,6 @@ import com.erogear.android.bluetooth.comm.MultiheadSetupActivity;
 import com.erogear.android.bluetooth.video.FFMPEGVideoProvider;
 import com.erogear.android.bluetooth.video.FrameController;
 import com.erogear.android.bluetooth.video.MultiheadController;
-import com.erogear.android.bluetooth.video.TranslateVirtualFrame;
 import com.erogear.android.bluetooth.video.VideoProvider;
 import com.erogear.android.fos.fragments.PreviewFragment;
 
@@ -54,6 +53,7 @@ public class MainActivity extends SherlockFragmentActivity {
 	// Preferences
 	private SharedPreferences controllerPrefs; // DEPRECATE!
 	private ControllerPreferenceManager controllerPreferences;
+	private HeadControllerManager controllerBuilder;
 	private int frameRate;
 	
 	// Tags
@@ -108,22 +108,45 @@ public class MainActivity extends SherlockFragmentActivity {
 			case BluetoothVideoService.MESSAGE_STATE_CHANGE:
 				switch (msg.arg1) {
 				case BluetoothChatService.STATE_CONNECTED:
-					Log.i("HANDLER", "CONNECTED");
-                    /*
-					conn = (DeviceConnection)msg.obj;
+					conn = (DeviceConnection) msg.obj;
+					Log.i("HANDLER", "CONNECTED" + conn.getDeviceName());
+					if (controllerBuilder.waiting()) {
+						controllerBuilder.addHead(conn);
+						
+						if (controllerBuilder.ready()) {
+							headController = controllerBuilder.getHeadController();
+							
+							if (headController.getHeads().size() != controllerPreferences.getLastPairedAddresses().length) {
+								headController = null;
+								
+								Toast.makeText(MainActivity.this, "Head controller is now ready", Toast.LENGTH_SHORT);
+								
+								// Notify user
+								/*
+								 * if (headController.getHeads().size() == 0) {
+                	AlertDialog alertDialog = getConfigurationAlertBuilder().create();
+                	alertDialog.show();
+                } else {
+                	Log.i(MainActivity.TAG, headController.getHeads().size() + " heads attached");
+                }*/
 
-                    controller.mapHead(conn, new TranslateVirtualFrame(conn.getInputWidth(), conn.getInputHeight(), 0, 0), true);
-                    lv.notifySetupChanged();
-
-                    setStatus("Connected to " + conn.getDeviceName());
-                    */
-                    break;
+							}
+						}
+					}
+					
+					
+					break;
 				case BluetoothChatService.STATE_CONNECTION_LOST:
 					conn = (DeviceConnection) msg.obj;
 					Toast.makeText(MainActivity.this, "Lost connection to " + conn.getDeviceName(), Toast.LENGTH_SHORT).show();
 					break;
 				case BluetoothChatService.STATE_CONNECTION_FAIL:
 					conn = (DeviceConnection) msg.obj;
+					Log.i("HANDLER", "NOT CONNECTED" + conn.getDeviceName());
+					if (controllerBuilder.waiting()) {
+						controllerBuilder.finishConnection();
+					}
+					
 					Toast.makeText(MainActivity.this, "Could not connect to device " + conn.getDeviceName(), Toast.LENGTH_SHORT).show();
 					break;   	
 				}
@@ -195,7 +218,7 @@ public class MainActivity extends SherlockFragmentActivity {
 				break;
 			}
 			return true;
-		};
+		}
 	}
 	
 	/**
@@ -300,7 +323,8 @@ public class MainActivity extends SherlockFragmentActivity {
 
         Log.i(TAG, "--- ONRESUME ---");
         
-		controllerPreferences = new ControllerPreferenceManager(MainActivity.this, DeviceListActivity.EXTRA_DEVICE_ADDRESS);
+		controllerPreferences = new ControllerPreferenceManager(MainActivity.this);
+		controllerBuilder = new HeadControllerManager(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
 		
 		// Resume state indicating that MainActivity is running.
 		mainActivityRunning = true;
@@ -363,18 +387,12 @@ public class MainActivity extends SherlockFragmentActivity {
                 videoSvc.addHandler(headController.getHandler());
             
                 /* Bluetooth Service init finished */
-                // Prompt user to set up device controllers if none found
-                if (headController.getHeads().size() == 0) {
-                	AlertDialog alertDialog = getConfigurationAlertBuilder().create();
-                	alertDialog.show();
-                } else {
-                	Log.i(MainActivity.TAG, headController.getHeads().size() + " heads attached");
-                }
-
+                
                 /*
                  * Restart video loading with new dimensions 
                  * if panel dimensions have changed on this resume.
                  */
+                /*
                 if (panelDimensionsChanged == true) {
                 	// Prepare to reload videos
                 	qManager.reset();
@@ -383,6 +401,7 @@ public class MainActivity extends SherlockFragmentActivity {
                 }
                 
                 /* Load previews or redraw them if loaded */
+                /*
                 if (!qManager.hasStarted()) {
         			try {
         				activePreview = new PreviewLoader();
@@ -395,6 +414,7 @@ public class MainActivity extends SherlockFragmentActivity {
         		} else if (qManager.hasFinished()) {
                 	displayPreviews();
         		}
+                */
 			}
         	
         	@Override
@@ -759,7 +779,7 @@ public class MainActivity extends SherlockFragmentActivity {
 		 MultiheadController controller = (MultiheadController) svc.getConfigInstance(MultiheadController.CONFIG_INSTANCE_KEY);
 		 
          if (controller == null) {
-        	 controller = controllerPreferences.getSavedHeadController(svc); 
+        	 controller = controllerPreferences.getSavedHeadController(controllerBuilder, svc); 
          }
          return controller;
 	}

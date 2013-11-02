@@ -24,7 +24,6 @@ public class ControllerPreferenceManager {
 	protected static final String PREFS_WIDTH = "PANEL_WIDTH";
 	protected static final String PREFS_HEIGHT = "PANEL_HEIGHT";
 	protected String deviceIntentKey;
-	protected String[] knownDeviceAddresses;
 	protected int panelWidthDefault = 32;
 	protected int panelHeightDefault = 24;
 	protected SharedPreferences preferences;
@@ -35,35 +34,27 @@ public class ControllerPreferenceManager {
 	 * See documentation on BluetoothVideoService.connectDevice
 	 * 
 	 * @param context
-	 * @param key String, originating from DeviceListActivity.EXTRA_DEVICE_ADDRESS
 	 */
-	public ControllerPreferenceManager(Context context, final String key) {
+	public ControllerPreferenceManager(Context context) {
 		preferences = context.getSharedPreferences(ControllerPreferenceManager.FILE_KEY, Context.MODE_PRIVATE);
-		deviceIntentKey = key;
 	}
 	
 	/**
 	 * Reconstruct a MultiheadController using device addresses and dimensions 
 	 * from the last instance of a MultiheadController.
 	 * 
+	 * @param manager
 	 * @param svc 
 	 * @return
 	 */
-	public MultiheadController getSavedHeadController(BluetoothVideoService svc) {
+	public MultiheadController getSavedHeadController(HeadControllerManager manager, BluetoothVideoService svc) {
 	
 		int width = preferences.getInt(ControllerPreferenceManager.PREFS_WIDTH, panelWidthDefault);
 		int height = preferences.getInt(ControllerPreferenceManager.PREFS_HEIGHT, panelHeightDefault);
-		MultiheadController headController = new MultiheadController(width, height);
+		MultiheadController headController = manager.getNewHeadController(width, height);
         
 		// Associate heads with this controller
-		String[] addresses = getLastPairedAddresses();
-		Intent intent = new Intent();
-		for (int i = 0; i < addresses.length; i++) {
-			String address = addresses[i];
-			intent.putExtra(deviceIntentKey, address);
-			
-			svc.connectDevice(intent, true);
-		}
+		manager.connectDevices(getLastPairedAddresses(), svc);
 		
 		// At the time that this controller is returned, the connections have NOT finished.
 		// These events are handled in the BluetoothVideoService's Handler.
@@ -102,9 +93,5 @@ public class ControllerPreferenceManager {
 		 SharedPreferences.Editor editor = preferences.edit();
 		 editor.putStringSet(ControllerPreferenceManager.DEVICES_KEY, new HashSet<String>(deviceAddresses));
 		 editor.commit();
-	}
-	 
-	public void setKnownDevices(String[] deviceAddresses) {
-		knownDeviceAddresses = deviceAddresses;
 	}
 }
