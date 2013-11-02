@@ -338,12 +338,7 @@ public class MainActivity extends SherlockFragmentActivity {
                     startActivityForResult(btOn, REQUEST_ENABLE_BT);
                 }
                 
-                headController = (MultiheadController) videoSvc.getConfigInstance(MultiheadController.CONFIG_INSTANCE_KEY);
-                if (headController == null) {
-                    headController = new MultiheadController(panelWidth, panelHeight);
-                    videoSvc.setConfigInstance(MultiheadController.CONFIG_INSTANCE_KEY, headController);
-                    videoSvc.addHandler(headController.getHandler());
-                }
+                headController = getHeadController();
                 
                 /* Bluetooth Service init finished */
                 // Prompt user to set up device controllers if none found
@@ -685,6 +680,7 @@ public class MainActivity extends SherlockFragmentActivity {
     }
     
     private void initControllerPreferences() {
+    	// change this to use contorller preference manager
 		controllerPrefs = getSharedPreferences("controller", Context.MODE_PRIVATE);
 		SharedPreferences.Editor editor = controllerPrefs.edit();
 		
@@ -724,5 +720,21 @@ public class MainActivity extends SherlockFragmentActivity {
 	
 	public int getPreviewIndexFromPreferences(String key) {
 		return PreferenceManager.getDefaultSharedPreferences(this).getInt(key, PreviewLoader.UNSET_INDEX);
+	}
+	
+	/**
+	 * Returns the last used video controller. 
+	 * 
+	 * @return a video head controller with 0 or more heads
+	 */
+	private MultiheadController getHeadController() {
+		 MultiheadController ctrl = (MultiheadController) videoSvc.getConfigInstance(MultiheadController.CONFIG_INSTANCE_KEY);
+         if (headController == null) {
+             headController = new MultiheadController(panelWidth, panelHeight);
+             videoSvc.setConfigInstance(MultiheadController.CONFIG_INSTANCE_KEY, headController);
+             videoSvc.addHandler(headController.getHandler());
+         }
+         
+         return ctrl;
 	}
 }
