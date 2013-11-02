@@ -3,6 +3,7 @@ package com.erogear.android.fos;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.Map.Entry;
 import java.util.Queue;
 
 import android.app.AlertDialog;
@@ -40,6 +41,7 @@ import com.erogear.android.bluetooth.comm.MultiheadSetupActivity;
 import com.erogear.android.bluetooth.video.FFMPEGVideoProvider;
 import com.erogear.android.bluetooth.video.FrameController;
 import com.erogear.android.bluetooth.video.MultiheadController;
+import com.erogear.android.bluetooth.video.MultiheadController.Head;
 import com.erogear.android.bluetooth.video.VideoProvider;
 import com.erogear.android.fos.fragments.PreviewFragment;
 
@@ -115,8 +117,19 @@ public class MainActivity extends SherlockFragmentActivity {
 					Log.i("HANDLER", "CONNECTED" + conn.getDeviceName());
 					if (controllerBuilder.waiting()) {
 						controllerBuilder.addHead(conn);
-						controllerBuilder.pushStatusFrame();
 						
+						// Find its index number
+						// TODO: change the StringSet of addresses to a JSON dict
+						
+						// Push a status frame to the newly paired device.
+						for (Entry<FrameConsumer, Head> entry : headController.getHeads().entrySet()) {
+							FrameConsumer lastPairedDevice = entry.getKey();
+							if (lastPairedDevice.getName() == conn.getDeviceName()) {
+								controllerBuilder.pushStatusFrame(entry.getValue(), 1);
+								break;
+							}
+						}
+												
 						if (controllerBuilder.ready()) {
 							
 							headController = controllerBuilder.getHeadController();

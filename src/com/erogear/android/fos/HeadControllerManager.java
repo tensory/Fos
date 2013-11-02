@@ -59,8 +59,13 @@ public class HeadControllerManager {
 		connectionsCompleted += 1;
 	}
 	
-	public void pushStatusFrame() {
+	public void pushStatusFrame(MultiheadController.Head head, int index) {
 		Log.i(MainActivity.BLUETOOTH_TAG, "Pushing status frame to controller");
+		if (!head.enabled) {
+            head.consumer.sendFrame(DeviceConnection.BLACK_FRAME);
+        } else {
+            head.consumer.sendFrame(new NumberFrame(index));
+        }
 	}
 	
 	/*
