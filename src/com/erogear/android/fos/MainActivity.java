@@ -52,6 +52,7 @@ public class MainActivity extends SherlockFragmentActivity {
 	
 	// Tags
 	public static final String TAG = "MAIN";
+	public static final String VIDEO_PLAYING = "VIDEO_PLAYING";
 	public static final String PREVIEWS_DATA_TAG = "previews";
 	
 	// Video dimensions
@@ -285,18 +286,27 @@ public class MainActivity extends SherlockFragmentActivity {
 		// Resume state indicating that MainActivity is running.
 		mainActivityRunning = true;
 		
-		// Retrieve frameRate from preferences
+		// Update frame rate
 		frameRate = getFrameRateFromPreferences(getResources().getString(R.string.prefkeyFrameRate));
-
+		toggleVideoPlaying(false, frameRate);
+		
+		/*
+		 * These state vars aren't useful here, not yet
+		 * Video reselection must be done after displayPreviews is finished
+		 
+		// Retrieve state from preferences
+		
+		boolean videoPlaying = controllerPrefs.getBoolean(MainActivity.VIDEO_PLAYING, false);
 		if (list != null && activePreview != null) {
 			int previewIndex = getPreviewIndexFromPreferences(PreviewLoader.PREVIEW_SELECTED_TAG);
+			
 			setSelectedPreview(previewIndex);
+			list.setSelectedItem(previewIndex);
+			list.activateItem(previewIndex);
 			Log.e("ON_RESUME", "Resuming with preview index " + previewIndex + " and frame rate " + frameRate);
 			
-			if (controller != null) {
-				toggleVideoPlaying(controller.isAutoAdvancing(), frameRate);
-			}
 		}
+		*/
 		
         startService(new Intent(this, BluetoothVideoService.class));
         svcConn = new ServiceConnection() {
@@ -414,8 +424,13 @@ public class MainActivity extends SherlockFragmentActivity {
 			SharedPreferences.Editor editor = sp.edit();
 			editor.putInt(PreviewLoader.PREVIEW_SELECTED_TAG, activePreview.getListIndex());
 			editor.commit();
-			//TODO
-			Log.d("ON_PAUSE", "stored " + sp.getInt(PreviewLoader.PREVIEW_SELECTED_TAG, -9000));
+		}
+		
+		// Record whether controller is currently playing
+		if (controller != null) {
+			SharedPreferences.Editor controllerEditor = controllerPrefs.edit();
+			controllerEditor.putBoolean(MainActivity.VIDEO_PLAYING, controller.isAutoAdvancing());
+			controllerEditor.commit();
 		}
 	}
 	
@@ -540,8 +555,10 @@ public class MainActivity extends SherlockFragmentActivity {
     		
     		// Log.e("MAIN", "Deactivating any active preview");
     		int oldListIndex = activePreview.getListIndex();
-    		list.deactivateItem(oldListIndex);
-    		activePreview.setListIndex(PreviewFragment.PREVIEW_NOT_SET_INDEX);
+    		if (oldListIndex != PreviewFragment.PREVIEW_NOT_SET_INDEX) {
+    			list.deactivateItem(oldListIndex);
+    			activePreview.setListIndex(PreviewFragment.PREVIEW_NOT_SET_INDEX);
+    		}
     		
     		toggleVideoPlaying(false);
     		
@@ -669,11 +686,19 @@ public class MainActivity extends SherlockFragmentActivity {
     
     private void initControllerPreferences() {
 		controllerPrefs = getSharedPreferences("controller", Context.MODE_PRIVATE);
+		SharedPreferences.Editor editor = controllerPrefs.edit();
 		
 		if (controllerPrefs.getInt(MainActivity.PREFS_WIDTH, 0) == 0 
 				|| controllerPrefs.getInt(MainActivity.PREFS_HEIGHT, 0) == 0) {
-			setPanelDimensionsPreferences(panelWidth, panelHeight);
+			editor.putInt(MainActivity.PREFS_WIDTH, panelWidth);
+			editor.putInt(MainActivity.PREFS_HEIGHT, panelHeight);
+			editor.commit();
+			panelDimensionsChanged = true;
 		}
+
+		// Init with no controller playing
+		editor.putBoolean(MainActivity.VIDEO_PLAYING, false);
+		editor.commit();
 		
 		loadPanelDimensionsFromPreferences();
     }
