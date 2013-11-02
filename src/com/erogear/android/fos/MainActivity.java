@@ -32,6 +32,7 @@ import com.actionbarsherlock.view.MenuItem;
 import com.erogear.android.bluetooth.comm.BluetoothChatService;
 import com.erogear.android.bluetooth.comm.BluetoothVideoService;
 import com.erogear.android.bluetooth.comm.DeviceConnection;
+import com.erogear.android.bluetooth.comm.DeviceListActivity;
 import com.erogear.android.bluetooth.comm.FrameConsumer;
 import com.erogear.android.bluetooth.comm.MultiheadSetupActivity;
 import com.erogear.android.bluetooth.video.FFMPEGVideoProvider;
@@ -47,7 +48,8 @@ public class MainActivity extends SherlockFragmentActivity {
 	private static final int MULTIHEAD_SETUP_RESULT = 3;
 	
 	// Preferences
-	private SharedPreferences controllerPrefs;
+	private SharedPreferences controllerPrefs; // DEPRECATE!
+	private ControllerPreferenceManager controllerPreferences;
 	private int frameRate;
 	
 	// Tags
@@ -100,7 +102,7 @@ public class MainActivity extends SherlockFragmentActivity {
 
 			switch (msg.what) {
 			case BluetoothVideoService.MESSAGE_STATE_CHANGE:
-				switch(msg.arg1) {
+				switch (msg.arg1) {
 				case BluetoothChatService.STATE_CONNECTION_LOST:
 					conn = (DeviceConnection) msg.obj;
 					Toast.makeText(MainActivity.this, "Lost connection to " + conn.getDeviceName(), Toast.LENGTH_SHORT).show();
@@ -234,7 +236,7 @@ public class MainActivity extends SherlockFragmentActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		
+
 		initControllerPreferences();
 		
 		frameRate = -1;
@@ -283,6 +285,8 @@ public class MainActivity extends SherlockFragmentActivity {
 
         Log.i(TAG, "--- ONRESUME ---");
         
+		controllerPreferences = new ControllerPreferenceManager(MainActivity.this, DeviceListActivity.EXTRA_DEVICE_ADDRESS);
+		
 		// Resume state indicating that MainActivity is running.
 		mainActivityRunning = true;
 		
@@ -338,8 +342,11 @@ public class MainActivity extends SherlockFragmentActivity {
                     startActivityForResult(btOn, REQUEST_ENABLE_BT);
                 }
                 
-                headController = getHeadController();
+                headController = getHeadController(videoSvc);
                 
+                videoSvc.setConfigInstance(MultiheadController.CONFIG_INSTANCE_KEY, headController);
+                videoSvc.addHandler(headController.getHandler());
+            
                 /* Bluetooth Service init finished */
                 // Prompt user to set up device controllers if none found
                 if (headController.getHeads().size() == 0) {
@@ -450,6 +457,10 @@ public class MainActivity extends SherlockFragmentActivity {
     		if (newWidth != panelWidth || newHeight != panelHeight) {
     			setPanelDimensionsPreferences(newWidth, newHeight);
     		}
+    		
+    		// Set controller address(es) in preferences for next time 
+    		// a headController is constructed
+    		controllerPreferences.storeDeviceAddresses(headController.getHeads());
     		
     		Log.d(MainActivity.TAG, "setup activity completed");
     		break;
@@ -727,14 +738,12 @@ public class MainActivity extends SherlockFragmentActivity {
 	 * 
 	 * @return a video head controller with 0 or more heads
 	 */
-	private MultiheadController getHeadController() {
-		 MultiheadController ctrl = (MultiheadController) videoSvc.getConfigInstance(MultiheadController.CONFIG_INSTANCE_KEY);
-         if (headController == null) {
-             headController = new MultiheadController(panelWidth, panelHeight);
-             videoSvc.setConfigInstance(MultiheadController.CONFIG_INSTANCE_KEY, headController);
-             videoSvc.addHandler(headController.getHandler());
+	private MultiheadController getHeadController(BluetoothVideoService svc) {
+		 MultiheadController controller = (MultiheadController) svc.getConfigInstance(MultiheadController.CONFIG_INSTANCE_KEY);
+
+         if (controller == null) {
+        	 controller = controllerPreferences.getSavedHeadController(svc); 
          }
-         
-         return ctrl;
+         return controller;
 	}
 }
