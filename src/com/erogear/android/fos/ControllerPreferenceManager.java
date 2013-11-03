@@ -126,4 +126,8 @@ public class ControllerPreferenceManager {
 		}
 		return idx;
 	}
+	
+	public SharedPreferences getPreferences() {
+		return preferences;
+	}
 }

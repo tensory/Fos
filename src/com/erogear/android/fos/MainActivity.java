@@ -54,8 +54,10 @@ public class MainActivity extends SherlockFragmentActivity {
 	private static final int MULTIHEAD_SETUP_RESULT = 3;
 
 	// Preferences
+	/*
 	private SharedPreferences controllerPrefs; // DEPRECATE!
-	private TextView headControllerStatus; 
+	*/ 
+	private TextView headControllerStatus;
 	private ControllerPreferenceManager controllerPreferences;
 	private HeadControllerManager controllerBuilder;
 	private int frameRate;
@@ -479,7 +481,7 @@ public class MainActivity extends SherlockFragmentActivity {
 
 		// Record whether controller is currently playing
 		if (controller != null) {
-			SharedPreferences.Editor controllerEditor = controllerPrefs.edit();
+			SharedPreferences.Editor controllerEditor = controllerPreferences.getPreferences().edit();
 			controllerEditor.putBoolean(MainActivity.VIDEO_PLAYING, controller.isAutoAdvancing());
 			controllerEditor.commit();
 		}
@@ -734,13 +736,13 @@ public class MainActivity extends SherlockFragmentActivity {
 	}
 
 	private void loadPanelDimensionsFromPreferences() {
-		panelWidth = controllerPrefs.getInt(MainActivity.PREFS_WIDTH, panelWidth);
-		panelHeight = controllerPrefs.getInt(MainActivity.PREFS_HEIGHT, panelHeight);
+		panelWidth = controllerPreferences.getPreferences().getInt(MainActivity.PREFS_WIDTH, panelWidth);
+		panelHeight = controllerPreferences.getPreferences().getInt(MainActivity.PREFS_HEIGHT, panelHeight);
 		panelDimensionsChanged = false;
 	}
 
 	private void setPanelDimensionsPreferences(int w, int h) {
-		SharedPreferences.Editor editor = controllerPrefs.edit();
+		SharedPreferences.Editor editor = controllerPreferences.getPreferences().edit();
 		editor.putInt(MainActivity.PREFS_WIDTH, w);
 		editor.putInt(MainActivity.PREFS_HEIGHT, h);
 		editor.commit();
@@ -755,12 +757,9 @@ public class MainActivity extends SherlockFragmentActivity {
 		headControllerStatus = (TextView) findViewById(R.id.tvControllerStatusMessage);
 		controllerPreferences = new ControllerPreferenceManager(MainActivity.this);
 
-		// change this to use contorller preference manager
-		controllerPrefs = getSharedPreferences("controller", Context.MODE_PRIVATE);
-		SharedPreferences.Editor editor = controllerPrefs.edit();
-
-		if (controllerPrefs.getInt(MainActivity.PREFS_WIDTH, 0) == 0 
-				|| controllerPrefs.getInt(MainActivity.PREFS_HEIGHT, 0) == 0) {
+		SharedPreferences.Editor editor = controllerPreferences.getPreferences().edit();
+		if (controllerPreferences.getPreferences().getInt(MainActivity.PREFS_WIDTH, 0) == 0 
+				|| controllerPreferences.getPreferences().getInt(MainActivity.PREFS_HEIGHT, 0) == 0) {
 			editor.putInt(MainActivity.PREFS_WIDTH, panelWidth);
 			editor.putInt(MainActivity.PREFS_HEIGHT, panelHeight);
 			editor.commit();
