@@ -92,7 +92,7 @@ public class ControllerPreferenceManager {
 		 editor.commit();
 	}
 	 
-	public MultiheadController getHeadController(HeadControllerManager manager, BluetoothVideoService videoService) throws Exception {
+	public MultiheadController getHeadController(HeadControllerManager manager, BluetoothVideoService videoService) {
 		int width = preferences.getInt(ControllerPreferenceManager.PREFS_WIDTH, panelWidthDefault);
 		int height = preferences.getInt(ControllerPreferenceManager.PREFS_HEIGHT, panelHeightDefault);
 		
@@ -105,7 +105,7 @@ public class ControllerPreferenceManager {
 		try {
 			manager.connectDevices(lastPairedAddresses, videoService);
 		} catch (Exception e) {
-			throw e; // Bubble up Bluetooth exception
+			Log.e("BLUETOOTH", e.getStackTrace().toString());
 		}
 				
 		// At the time that this controller is returned, the connections have NOT finished.

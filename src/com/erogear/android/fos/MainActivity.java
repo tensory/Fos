@@ -392,19 +392,16 @@ public class MainActivity extends SherlockFragmentActivity {
                 Log.i(MainActivity.BLUETOOTH_TAG, "GET HEAD CONTROLLER");
                 
                 headController = (MultiheadController) videoSvc.getConfigInstance(MultiheadController.CONFIG_INSTANCE_KEY);
-/*
+
                 if (headController == null) {
                 	// This call starts up an asynchronous loop with the Handler. 
                 	// Device connections (including failed connections) will trigger UI status changes
-                	try {
-                		headController = controllerPreferences.getHeadController(controllerBuilder, videoSvc);
-                		videoSvc.addHandler(headController.getHandler());
-                	} catch (Exception e) {
-                		Log.e(MainActivity.BLUETOOTH_TAG, e.getMessage());
-                		Toast.makeText(MainActivity.this, getString(R.string.txtBluetoothError), Toast.LENGTH_LONG).show();
+                	headController = controllerPreferences.getHeadController(controllerBuilder, videoSvc);
+                	if (headController != null) {
+                    	videoSvc.addHandler(headController.getHandler());                		
                 	}
                 } 
-*/                
+
                 if (headController == null) { 
                 	// If headController is still null, the controller could not be reconstituted from preferences
             		// Require the user to do manual setup
@@ -414,7 +411,6 @@ public class MainActivity extends SherlockFragmentActivity {
                     
             		alertNoControllerPaired();
             	} 
-                
                 
                 // Do any tasks that need to be done at the end, like drawing shit
                 
