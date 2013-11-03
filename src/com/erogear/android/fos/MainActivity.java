@@ -12,7 +12,6 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -23,6 +22,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.preference.PreferenceManager;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
@@ -403,16 +404,19 @@ public class MainActivity extends SherlockFragmentActivity {
 					alertNoControllerPaired();
 				} 
 				Log.e(MainActivity.TAG, "END ONRESUME CALLBACK");
+				/*FragmentManager fragmentManager = getSupportFragmentManager();
+						
+						.beginTransaction().replace(R.id.frameLayout, list, PreviewFragment.FRAGMENT_TAG).commit();
+*/
+				
 				/* Bluetooth Service init finished */
 
 				/*
 				 * Restart video loading with new dimensions 
 				 * if panel dimensions have changed on this resume.
 				 */
-				/*
 				
-
-				// Load previews or redraw them if loaded
+				
 				if (!qManager.hasStarted()) {
 					try {
 						activePreview = new PreviewLoader();
@@ -424,8 +428,14 @@ public class MainActivity extends SherlockFragmentActivity {
 					}
 				} else if (qManager.hasFinished()) {
 					displayPreviews();
+					/*
+					FragmentManager fragmentManager = getSupportFragmentManager();
+					PreviewFragment pf = (PreviewFragment) fragmentManager.findFragmentByTag(PreviewFragment.FRAGMENT_TAG);
+					FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+					fragmentTransaction.show(pf);
+				    fragmentTransaction.commit();
+				    */
 				}
-				*/
 			}
 
 			@Override
@@ -582,11 +592,12 @@ public class MainActivity extends SherlockFragmentActivity {
 		list.setArguments(fragmentData);
 
 		if (mainActivityRunning == true) {
-			getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, list).commit();
-			
+			getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, list, PreviewFragment.FRAGMENT_TAG).commit();
+			/*
 			if (selectedPreviewIndex != PreviewFragment.PREVIEW_NOT_SET_INDEX) {
 				setSelectedPreview(selectedPreviewIndex);
 			}
+			*/
 		}
 	}
 
