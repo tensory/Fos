@@ -25,6 +25,7 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -53,6 +54,7 @@ public class MainActivity extends SherlockFragmentActivity {
 	
 	// Preferences
 	private SharedPreferences controllerPrefs; // DEPRECATE!
+	private TextView headControllerStatus; 
 	private ControllerPreferenceManager controllerPreferences;
 	private HeadControllerManager controllerBuilder;
 	private int frameRate;
@@ -131,7 +133,7 @@ public class MainActivity extends SherlockFragmentActivity {
 					
 					if (controllerBuilder.ready()) {						
 						headController = controllerBuilder.getHeadController();
-						setControllerLoadingBannerState(0);
+						// Do any more work that needs to be done here... like idk displaying shit
 					}
 
 					break;
@@ -147,11 +149,10 @@ public class MainActivity extends SherlockFragmentActivity {
 					}
 					
 					if (controllerBuilder.ready()) {						
-						headController = controllerBuilder.getHeadController();
-						setControllerLoadingBannerState(1);
+						// Loop has finished but headController is not usable; at least one head failed to attach
+						// Require the user to do a new setup
+						alertNoControllerPaired();
 					}
-					
-					Toast.makeText(MainActivity.this, "Could not connect to device " + conn.getDeviceName(), Toast.LENGTH_SHORT).show();
 					break;   	
 				}
 				break;
@@ -279,8 +280,6 @@ public class MainActivity extends SherlockFragmentActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		initControllerPreferences();
-		
 		frameRate = -1;
 		String frameRateTag = getResources().getString(R.string.prefkeyFrameRate);
 		// Set frame rate from savedInstanceState first
@@ -329,7 +328,7 @@ public class MainActivity extends SherlockFragmentActivity {
         Log.i(TAG, "--- ONRESUME ---");
         Log.i(MainActivity.BLUETOOTH_TAG, "RESUMED");
         
-		controllerPreferences = new ControllerPreferenceManager(MainActivity.this);
+        initControllerPreferences();
 		controllerBuilder = new HeadControllerManager(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
 		
 		// Resume state indicating that MainActivity is running.
@@ -390,10 +389,10 @@ public class MainActivity extends SherlockFragmentActivity {
                 Log.i(MainActivity.BLUETOOTH_TAG, "GET HEAD CONTROLLER");
                 
                 headController = (MultiheadController) videoSvc.getConfigInstance(MultiheadController.CONFIG_INSTANCE_KEY);
+
                 if (headController == null) {
-                	// start trying to re-pair head controller
                 	// This call starts up an asynchronous loop with the Handler. 
-                	// Device connections (including failed connections) will trigger UI status
+                	// Device connections (including failed connections) will trigger UI status changes
                 	try {
                 		headController = controllerPreferences.getHeadController(controllerBuilder, videoSvc);
                 	} catch (Exception e) {
@@ -402,9 +401,15 @@ public class MainActivity extends SherlockFragmentActivity {
                 	}
                 } 
                 
-                // Finish setting handler on headcontroller
-                videoSvc.setConfigInstance(MultiheadController.CONFIG_INSTANCE_KEY, headController);
-                videoSvc.addHandler(headController.getHandler());
+                if (headController == null) { 
+                	// If headController is still null, the controller could not be reconstituted from preferences
+            		// Require the user to do manual setup
+            		alertNoControllerPaired();
+            	} else {
+                    // Finish setting handler on headController
+                    videoSvc.setConfigInstance(MultiheadController.CONFIG_INSTANCE_KEY, headController);
+                    videoSvc.addHandler(headController.getHandler());
+            	}
                 
                 // Do any tasks that need to be done at the end, like drawing shit
                 
@@ -754,21 +759,8 @@ public class MainActivity extends SherlockFragmentActivity {
     }
     
     private void initControllerPreferences() {
-    	TextView headControllerStatus = (TextView) findViewById(R.id.tvControllerStatusMessage);
+    	headControllerStatus = (TextView) findViewById(R.id.tvControllerStatusMessage);
     	controllerPreferences = new ControllerPreferenceManager(MainActivity.this);
-    	switch (controllerPreferences.getLastPairedAddresses().length) {
-    	case 0:
-    		//headControllerStatus.setText("Fucked");
-    		break;
-    	case 1:
-    		headControllerStatus.setText(getString(R.string.txtPairingDevicesSingular));
-    		break;
-    	default:
-    		headControllerStatus.setText(getString(R.string.txtPairingDevicesPlural));
-    		break;
-    	}
-    	
-    	Log.i(MainActivity.BLUETOOTH_TAG, "Expecting headController to get set up");
     	
     	// change this to use contorller preference manager
 		controllerPrefs = getSharedPreferences("controller", Context.MODE_PRIVATE);
@@ -788,7 +780,15 @@ public class MainActivity extends SherlockFragmentActivity {
 		
 		loadPanelDimensionsFromPreferences();
     }
-	
+
+    /**
+     * Fire an alert dialog to prompt the user to set up the controller.
+     */
+    private void alertNoControllerPaired() {
+    	AlertDialog alertDialog = getConfigurationAlertBuilder().create();
+        alertDialog.show();	
+    }
+    
 	@Override
 	public void onSaveInstanceState(Bundle savedInstanceState) {
 		super.onSaveInstanceState(savedInstanceState);

@@ -12,13 +12,11 @@
     <string name="prefFrameRate">Frame rate</string>
     <string name="prefFrameRateDialogTitle">Select frames per second to display.</string>
     
-    <string name="txtPairingDevicesPlural">Reconnecting devices&#8230;</string>
-    <string name="txtPairingDevicesSingular">Reconnecting device&#8230;</string>
-    
+    <string name="txtNoController">No devices have been paired.</string>
     <string name="txtNoDevices">Connect device</string>
 	<string name="txtConnect">Connect</string>
-	<string name="txtExit">Exit</string>
-	<string name="txtExplainNoDevices">No EroGear devices have been paired. Please pair a device now.</string>
+	<string name="txtExit">Cancel</string>
+	<string name="txtExplainNoDevices">No EroGear devices found. Please pair a device now.</string>
 	<string name="txtBluetoothError">Connection error. Please restart Bluetooth.</string>
 	
     <string-array name="valuesFrameRate">

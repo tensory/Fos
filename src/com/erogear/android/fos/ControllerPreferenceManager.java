@@ -96,15 +96,18 @@ public class ControllerPreferenceManager {
 		int width = preferences.getInt(ControllerPreferenceManager.PREFS_WIDTH, panelWidthDefault);
 		int height = preferences.getInt(ControllerPreferenceManager.PREFS_HEIGHT, panelHeightDefault);
 		
-		MultiheadController headController = manager.getNewHeadController(width, height);
-		try {
-			manager.connectDevices(getLastPairedAddresses(), videoService);
-		} catch (Exception e) {
-			throw e; // Bubble up the exception
+		String[] lastPairedAddresses = getLastPairedAddresses();
+		if (lastPairedAddresses.length == 0) {
+			return null; // The caller should prompt the user for action if no addresses were stored.
 		}
 		
-		Log.i(MainActivity.BLUETOOTH_TAG, "manager is waiting for devices to be paired? " + String.valueOf(manager.waiting()));
-		
+		MultiheadController headController = manager.getNewHeadController(width, height);
+		try {
+			manager.connectDevices(lastPairedAddresses, videoService);
+		} catch (Exception e) {
+			throw e; // Bubble up Bluetooth exception
+		}
+				
 		// At the time that this controller is returned, the connections have NOT finished.
 		// These events are handled in the BluetoothVideoService's Handler.
 		return headController;	
