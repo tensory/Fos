@@ -582,12 +582,6 @@ public class MainActivity extends SherlockFragmentActivity {
 		
 
 		if (mainActivityRunning == true) {
-			/*
-			
-			
-		    fragmentTransaction.commit();
-		    */
-			
 			FragmentManager fragmentManager = getSupportFragmentManager();
 			PreviewFragment pf = (PreviewFragment) fragmentManager.findFragmentByTag(PreviewFragment.FRAGMENT_TAG);
 			
@@ -601,15 +595,14 @@ public class MainActivity extends SherlockFragmentActivity {
 				fragmentTransaction.replace(R.id.frameLayout, list, PreviewFragment.FRAGMENT_TAG);
 				fragmentTransaction.commit();
 			} else {
+				// Tell the PreviewFragment which item was last selected (index stored in preferences)
+				// It will re-select it on the fragment's onResume event
+				list.setSelectedItem(selectedPreviewIndex);
+				
 				FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 				fragmentTransaction.show(pf);
 				fragmentTransaction.commit();
 			}
-			/*
-			if (selectedPreviewIndex != PreviewFragment.PREVIEW_NOT_SET_INDEX) {
-				setSelectedPreview(selectedPreviewIndex);
-			}
-			*/
 		}
 	}
 
