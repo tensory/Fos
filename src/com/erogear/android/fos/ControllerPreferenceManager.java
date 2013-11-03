@@ -20,9 +20,9 @@ import com.erogear.android.bluetooth.video.MultiheadController.Head;
 
 public class ControllerPreferenceManager {
 	public static final String FILE_KEY = "CONTROLLER";
-	protected static final String DEVICES_KEY = "PAIRED_DEVICES";
-	protected static final String PREFS_WIDTH = "PANEL_WIDTH";
-	protected static final String PREFS_HEIGHT = "PANEL_HEIGHT";
+	public static final String DEVICES_KEY = "PAIRED_DEVICES";
+	public static final String PREFS_WIDTH = "PANEL_WIDTH";
+	public static final String PREFS_HEIGHT = "PANEL_HEIGHT";
 	protected String deviceIntentKey;
 	protected int panelWidthDefault = 32;
 	protected int panelHeightDefault = 24;

@@ -61,19 +61,15 @@ public class MainActivity extends SherlockFragmentActivity {
 	private ControllerPreferenceManager controllerPreferences;
 	private HeadControllerManager controllerBuilder;
 	private int frameRate;
+	private int panelWidth = 32;
+	private int panelHeight = 24;
+	private boolean panelDimensionsChanged = false;
 
 	// Tags
 	public static final String TAG = "MAIN";
 	public static final String VIDEO_PLAYING = "VIDEO_PLAYING";
 	public static final String PREVIEWS_DATA_TAG = "previews";
 
-	// Video dimensions
-	// These are persisted as preferences, but not set through common app settings.
-	private static final String PREFS_WIDTH = "panelWidth";
-	private static final String PREFS_HEIGHT = "panelHeight";
-	private int panelWidth = 32;
-	private int panelHeight = 24;
-	private boolean panelDimensionsChanged = false;
 
 
 	// Preview video queue
@@ -736,15 +732,15 @@ public class MainActivity extends SherlockFragmentActivity {
 	}
 
 	private void loadPanelDimensionsFromPreferences() {
-		panelWidth = controllerPreferences.getPreferences().getInt(MainActivity.PREFS_WIDTH, panelWidth);
-		panelHeight = controllerPreferences.getPreferences().getInt(MainActivity.PREFS_HEIGHT, panelHeight);
+		panelWidth = controllerPreferences.getPreferences().getInt(ControllerPreferenceManager.PREFS_WIDTH, panelWidth);
+		panelHeight = controllerPreferences.getPreferences().getInt(ControllerPreferenceManager.PREFS_HEIGHT, panelHeight);
 		panelDimensionsChanged = false;
 	}
 
 	private void setPanelDimensionsPreferences(int w, int h) {
 		SharedPreferences.Editor editor = controllerPreferences.getPreferences().edit();
-		editor.putInt(MainActivity.PREFS_WIDTH, w);
-		editor.putInt(MainActivity.PREFS_HEIGHT, h);
+		editor.putInt(ControllerPreferenceManager.PREFS_WIDTH, w);
+		editor.putInt(ControllerPreferenceManager.PREFS_HEIGHT, h);
 		editor.commit();
 		panelDimensionsChanged = true;
 	}
@@ -758,10 +754,10 @@ public class MainActivity extends SherlockFragmentActivity {
 		controllerPreferences = new ControllerPreferenceManager(MainActivity.this);
 
 		SharedPreferences.Editor editor = controllerPreferences.getPreferences().edit();
-		if (controllerPreferences.getPreferences().getInt(MainActivity.PREFS_WIDTH, 0) == 0 
-				|| controllerPreferences.getPreferences().getInt(MainActivity.PREFS_HEIGHT, 0) == 0) {
-			editor.putInt(MainActivity.PREFS_WIDTH, panelWidth);
-			editor.putInt(MainActivity.PREFS_HEIGHT, panelHeight);
+		if (controllerPreferences.getPreferences().getInt(ControllerPreferenceManager.PREFS_WIDTH, 0) == 0 
+				|| controllerPreferences.getPreferences().getInt(ControllerPreferenceManager.PREFS_HEIGHT, 0) == 0) {
+			editor.putInt(ControllerPreferenceManager.PREFS_WIDTH, panelWidth);
+			editor.putInt(ControllerPreferenceManager.PREFS_HEIGHT, panelHeight);
 			editor.commit();
 			panelDimensionsChanged = true;
 		}
