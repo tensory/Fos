@@ -40,6 +40,9 @@
         <item name="android:paddingBottom">@dimen/activity_vertical_margin</item>
     </style>
     
+    <style name="ControllerStatusText">
+        <item name="android:textSize">16sp</item>
+    </style>
     <style name="PreviewContainer">
         <item name="android:background">@drawable/background_repeat</item>
     </style>

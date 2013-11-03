@@ -25,13 +25,13 @@
         android:visibility="gone">
 
         <TextView
+           	style="@style/ControllerStatusText"
             android:id="@+id/tvControllerStatusMessage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
-            android:text="@string/txtNoController"
-            android:textSize="16sp" />
+            android:text="@string/txtNoController" />
     </RelativeLayout>
 
 </RelativeLayout>
