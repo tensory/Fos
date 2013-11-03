@@ -63,6 +63,7 @@ public class MainActivity extends SherlockFragmentActivity {
 	private int frameRate;
 	private int panelWidth = 32;
 	private int panelHeight = 24;
+	private boolean panelDimensionsChanged = false;
 
 	// Tags
 	public static final String TAG = "MAIN";
@@ -178,7 +179,8 @@ public class MainActivity extends SherlockFragmentActivity {
 				break;
 			case BluetoothVideoService.MESSAGE_VIDEO_LOADED:
 				Toast.makeText(getApplicationContext(), "Video loaded!", Toast.LENGTH_SHORT).show();
-				
+				addConversationLine((String) msg.obj);
+
 				// Use the just-loaded video to extract a thumbnail
 				previewVideoProviderCache.put(activePreview.getPreview().hashCode(), activePreview.getVideoProvider());
 				activePreview.getPreview().confirmPreviewBitmapReady(MainActivity.this, getApplicationContext().getFilesDir());
@@ -190,7 +192,7 @@ public class MainActivity extends SherlockFragmentActivity {
 				} else {
 					// Finished loading preview videos
 					activePreview = null;
-					controllerPreferences.setPanelDimensionsChangedFlag(false);
+					panelDimensionsChanged = false;
 					qManager.setFinished();
 				}
 
@@ -273,8 +275,7 @@ public class MainActivity extends SherlockFragmentActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		initControllerPreferences();
-		
+
 		frameRate = -1;
 		String frameRateTag = getResources().getString(R.string.prefkeyFrameRate);
 		// Set frame rate from savedInstanceState first
@@ -322,7 +323,7 @@ public class MainActivity extends SherlockFragmentActivity {
 
 		Log.i(TAG, "--- ONRESUME ---");
 
-		
+		initControllerPreferences();
 		controllerBuilder = new HeadControllerManager(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
 
 		// Resume state indicating that MainActivity is running.
@@ -407,7 +408,7 @@ public class MainActivity extends SherlockFragmentActivity {
 				 * if panel dimensions have changed on this resume.
 				 */
 
-				if (controllerPreferences.getPanelDimensionsChanged() == true) {
+				if (panelDimensionsChanged == true) {
 					// Prepare to reload videos
 					qManager.reset();
 					previewVideoProviderCache = new SparseArray<VideoProvider>(previews.size());
@@ -733,7 +734,7 @@ public class MainActivity extends SherlockFragmentActivity {
 	private void loadPanelDimensionsFromPreferences() {
 		panelWidth = controllerPreferences.getPreferences().getInt(ControllerPreferenceManager.PREFS_WIDTH, panelWidth);
 		panelHeight = controllerPreferences.getPreferences().getInt(ControllerPreferenceManager.PREFS_HEIGHT, panelHeight);
-		controllerPreferences.setPanelDimensionsChangedFlag(false);
+		panelDimensionsChanged = false;
 	}
 
 	private void setPanelDimensionsPreferences(int w, int h) {
@@ -741,7 +742,11 @@ public class MainActivity extends SherlockFragmentActivity {
 		editor.putInt(ControllerPreferenceManager.PREFS_WIDTH, w);
 		editor.putInt(ControllerPreferenceManager.PREFS_HEIGHT, h);
 		editor.commit();
-		controllerPreferences.setPanelDimensionsChangedFlag(true);
+		panelDimensionsChanged = true;
+	}
+
+	public boolean getPanelDimensionsChanged() {
+		return panelDimensionsChanged;
 	}
 
 	private void initControllerPreferences() {
@@ -754,8 +759,8 @@ public class MainActivity extends SherlockFragmentActivity {
 			editor.putInt(ControllerPreferenceManager.PREFS_WIDTH, panelWidth);
 			editor.putInt(ControllerPreferenceManager.PREFS_HEIGHT, panelHeight);
 			editor.commit();
+			panelDimensionsChanged = true;
 		}
-		controllerPreferences.setPanelDimensionsChangedFlag(true);
 
 		// Init with no controller playing
 		editor.putBoolean(MainActivity.VIDEO_PLAYING, false);
@@ -793,9 +798,5 @@ public class MainActivity extends SherlockFragmentActivity {
 
 	public int getPreviewIndexFromPreferences(String key) {
 		return PreferenceManager.getDefaultSharedPreferences(this).getInt(key, PreviewLoader.UNSET_INDEX);
-	}
-	
-	public boolean getPanelDimensionsChanged() {
-		return controllerPreferences.getPanelDimensionsChanged();
 	}
 }
