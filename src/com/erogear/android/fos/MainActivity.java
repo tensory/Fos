@@ -604,8 +604,17 @@ public class MainActivity extends SherlockFragmentActivity {
 	}
 
 	public void setSelectedPreview(int index) {
-		if (index == PreviewFragment.PREVIEW_NOT_SET_INDEX) {
+		Runnable videoBlankProcess = new Runnable() {
+			@Override
+			public void run() {
+				if (controller != null) {
+					controller.getFrameConsumer().sendFrame(DeviceConnection.BLACK_FRAME);					
+				}
+			}
+		};
 
+		if (index == PreviewFragment.PREVIEW_NOT_SET_INDEX) {
+			
 			// Log.e("MAIN", "Deactivating any active preview");
 			int oldListIndex = activePreview.getListIndex();
 			if (oldListIndex != PreviewFragment.PREVIEW_NOT_SET_INDEX) {
@@ -614,10 +623,11 @@ public class MainActivity extends SherlockFragmentActivity {
 			}
 
 			toggleVideoPlaying(false);
+			runOnUiThread(videoBlankProcess);
 
 		} else {
 
-			//Log.e("MAIN", "Testing to see if any preview must be deselected");
+			// Log.e("MAIN", "Testing to see if any preview must be deselected");
 			if (activePreview == null) {
 				activePreview = new PreviewLoader(index);
 			} else {
@@ -626,6 +636,7 @@ public class MainActivity extends SherlockFragmentActivity {
 					list.deactivateItem(oldListIndex);
 
 					toggleVideoPlaying(false);
+					runOnUiThread(videoBlankProcess);
 				}
 
 				activePreview.setListIndex(index);
