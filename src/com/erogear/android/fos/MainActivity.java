@@ -117,7 +117,7 @@ public class MainActivity extends SherlockFragmentActivity {
 				case BluetoothChatService.STATE_CONNECTED:
 					conn = (DeviceConnection) msg.obj;
 
-					if (controllerBuilder.waiting()) {
+					if (controllerBuilder.getHeadController() != null && controllerBuilder.waiting()) {
 						controllerBuilder.addHead(conn);
 						
 						// Push a status frame to the newly paired device.
@@ -131,8 +131,10 @@ public class MainActivity extends SherlockFragmentActivity {
 						}
 					}
 					
-					if (controllerBuilder.ready()) {						
-						headController = controllerBuilder.getHeadController();
+					if (controllerBuilder.getHeadController() != null && controllerBuilder.ready()) {						
+						// Link it to the VideoService
+						videoSvc.setConfigInstance(MultiheadController.CONFIG_INSTANCE_KEY, controllerBuilder.getHeadController());
+		                
 						// Do any more work that needs to be done here... like idk displaying shit
 					}
 
@@ -151,7 +153,8 @@ public class MainActivity extends SherlockFragmentActivity {
 					if (controllerBuilder.ready()) {						
 						// Loop has finished but headController is not usable; at least one head failed to attach
 						// Require the user to do a new setup
-						alertNoControllerPaired();
+						//alertNoControllerPaired();
+						Toast.makeText(getApplicationContext(), "fucked", Toast.LENGTH_LONG).show();
 					}
 					break;   	
 				}
@@ -389,27 +392,29 @@ public class MainActivity extends SherlockFragmentActivity {
                 Log.i(MainActivity.BLUETOOTH_TAG, "GET HEAD CONTROLLER");
                 
                 headController = (MultiheadController) videoSvc.getConfigInstance(MultiheadController.CONFIG_INSTANCE_KEY);
-
+/*
                 if (headController == null) {
                 	// This call starts up an asynchronous loop with the Handler. 
                 	// Device connections (including failed connections) will trigger UI status changes
                 	try {
                 		headController = controllerPreferences.getHeadController(controllerBuilder, videoSvc);
+                		videoSvc.addHandler(headController.getHandler());
                 	} catch (Exception e) {
                 		Log.e(MainActivity.BLUETOOTH_TAG, e.getMessage());
                 		Toast.makeText(MainActivity.this, getString(R.string.txtBluetoothError), Toast.LENGTH_LONG).show();
                 	}
                 } 
-                
+*/                
                 if (headController == null) { 
                 	// If headController is still null, the controller could not be reconstituted from preferences
             		// Require the user to do manual setup
+                	headController = new MultiheadController(panelWidth, panelHeight);
+                	videoSvc.setConfigInstance(MultiheadController.CONFIG_INSTANCE_KEY, headController);
+                	videoSvc.addHandler(headController.getHandler());
+                    
             		alertNoControllerPaired();
-            	} else {
-                    // Finish setting handler on headController
-                    videoSvc.setConfigInstance(MultiheadController.CONFIG_INSTANCE_KEY, headController);
-                    videoSvc.addHandler(headController.getHandler());
-            	}
+            	} 
+                
                 
                 // Do any tasks that need to be done at the end, like drawing shit
                 
@@ -524,11 +529,8 @@ public class MainActivity extends SherlockFragmentActivity {
     			setPanelDimensionsPreferences(newWidth, newHeight);
     		}
 
-    		// Set controller address(es) in preferences for next time 
-    		// a headController is constructed
-    		
-    		BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
-    		controllerPreferences.storeDeviceAddresses(headController.getHeads(), mBtAdapter.getBondedDevices());
+    		// Set controller address(es) in preferences for next time a headController is constructed
+    		controllerPreferences.storeDeviceAddresses(headController.getHeads(), BluetoothAdapter.getDefaultAdapter().getBondedDevices());
     		
     		Log.d(MainActivity.TAG, "setup activity completed");
     		break;
