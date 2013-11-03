@@ -104,7 +104,7 @@ public class ControllerPreferenceManager {
 		try {
 			manager.connectDevices(lastPairedAddresses, videoService);
 		} catch (Exception e) {
-			Log.e("BLUETOOTH", e.getStackTrace().toString());
+			Log.e("CONTROLLER_PREFERENCES", e.getStackTrace().toString());
 		}
 				
 		/* At the time that this controller is returned, 

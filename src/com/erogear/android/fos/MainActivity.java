@@ -65,8 +65,6 @@ public class MainActivity extends SherlockFragmentActivity {
 	public static final String VIDEO_PLAYING = "VIDEO_PLAYING";
 	public static final String PREVIEWS_DATA_TAG = "previews";
 	
-	public static final String BLUETOOTH_TAG = "BLUETOOTH_PAIRING";
-	
 	// Video dimensions
 	// These are persisted as preferences, but not set through common app settings.
 	private static final String PREFS_WIDTH = "panelWidth";
@@ -330,7 +328,6 @@ public class MainActivity extends SherlockFragmentActivity {
 		super.onResume();
 
         Log.i(TAG, "--- ONRESUME ---");
-        Log.i(MainActivity.BLUETOOTH_TAG, "RESUMED");
         
         initControllerPreferences();
 		controllerBuilder = new HeadControllerManager(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
@@ -389,11 +386,8 @@ public class MainActivity extends SherlockFragmentActivity {
                 if (btOn != null) {
                     startActivityForResult(btOn, REQUEST_ENABLE_BT);
                 }
-                
-                Log.i(MainActivity.BLUETOOTH_TAG, "GET HEAD CONTROLLER");
-                
+                                
                 headController = (MultiheadController) videoSvc.getConfigInstance(MultiheadController.CONFIG_INSTANCE_KEY);
-
                 if (headController == null) {
                 	// This call starts up an asynchronous loop with the Handler. 
                 	// Device connections (including failed connections) will trigger UI status changes
