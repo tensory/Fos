@@ -26,6 +26,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -516,6 +517,13 @@ public class MainActivity extends SherlockFragmentActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
     	switch(requestCode) {
     	case MULTIHEAD_SETUP_RESULT:
+    		RelativeLayout controllerStatusBar = (RelativeLayout) findViewById(R.id.layoutControllerStatus);
+    		if (headController.getHeads().size() > 0) {
+    			controllerStatusBar.setVisibility(View.GONE);
+    		} else {
+    			controllerStatusBar.setVisibility(View.VISIBLE);
+    		}
+
     		int newWidth, newHeight;
     		newWidth = headController.getVirtualWidth();
     		newHeight = headController.getVirtualHeight();
@@ -719,7 +727,14 @@ public class MainActivity extends SherlockFragmentActivity {
     	alertDialogBuilder.setTitle(getResources().getString(R.string.txtNoDevices));
     	alertDialogBuilder
 	    	.setMessage(getResources().getString(R.string.txtExplainNoDevices))
-	    	.setCancelable(false)
+	    	.setCancelable(true)
+	    	.setOnCancelListener(new DialogInterface.OnCancelListener() {
+				@Override
+				public void onCancel(DialogInterface dialog) {
+					RelativeLayout controllerStatusBar = (RelativeLayout) MainActivity.this.findViewById(R.id.layoutControllerStatus);
+					controllerStatusBar.setVisibility(View.VISIBLE);
+				}
+			})
 	    	.setPositiveButton(R.string.txtConnect, new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
@@ -728,10 +743,9 @@ public class MainActivity extends SherlockFragmentActivity {
 				}
 			})
 			.setNegativeButton(R.string.txtExit, new DialogInterface.OnClickListener() {
-				
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
-					finish();
+					dialog.cancel();
 				}
 			});
 	
