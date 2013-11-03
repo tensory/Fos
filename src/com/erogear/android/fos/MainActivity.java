@@ -144,7 +144,6 @@ public class MainActivity extends SherlockFragmentActivity {
 					break;
 				case BluetoothChatService.STATE_CONNECTION_FAIL:
 					conn = (DeviceConnection) msg.obj;
-					Log.i("HANDLER", "NOT CONNECTED" + conn.getDeviceName());
 					if (controllerBuilder.waiting()) {
 						controllerBuilder.finishConnection();
 					}
@@ -152,8 +151,7 @@ public class MainActivity extends SherlockFragmentActivity {
 					if (controllerBuilder.ready()) {						
 						// Loop has finished but headController is not usable; at least one head failed to attach
 						// Require the user to do a new setup
-						//alertNoControllerPaired();
-						Toast.makeText(getApplicationContext(), "fucked", Toast.LENGTH_LONG).show();
+						alertNoControllerPaired();
 					}
 					break;   	
 				}
