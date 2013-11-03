@@ -58,6 +58,7 @@ public class MainActivity extends SherlockFragmentActivity {
 	private ControllerPreferenceManager controllerPreferences;
 	private HeadControllerManager controllerBuilder;
 	private int frameRate;
+	private int selectedPreviewIndex;
 	private int panelWidth = 32;
 	private int panelHeight = 24;
 
@@ -330,6 +331,9 @@ public class MainActivity extends SherlockFragmentActivity {
 		// Update frame rate
 		frameRate = getFrameRateFromPreferences(getResources().getString(R.string.prefkeyFrameRate));
 		toggleVideoPlaying(false, frameRate);
+		
+		// Restore preview highlighted state
+		selectedPreviewIndex = getPreviewIndexFromPreferences(PreviewLoader.PREVIEW_SELECTED_TAG);
 
 		/*
 		 * These state vars aren't useful here, not yet
@@ -398,21 +402,17 @@ public class MainActivity extends SherlockFragmentActivity {
 
 					alertNoControllerPaired();
 				} 
-
+				Log.e(MainActivity.TAG, "END ONRESUME CALLBACK");
 				/* Bluetooth Service init finished */
 
 				/*
 				 * Restart video loading with new dimensions 
 				 * if panel dimensions have changed on this resume.
 				 */
+				/*
+				
 
-				if (controllerPreferences.getPanelDimensionsChanged() == true) {
-					// Prepare to reload videos
-					qManager.reset();
-					previewVideoProviderCache = new SparseArray<VideoProvider>(previews.size());
-				}
-
-				/* Load previews or redraw them if loaded */
+				// Load previews or redraw them if loaded
 				if (!qManager.hasStarted()) {
 					try {
 						activePreview = new PreviewLoader();
@@ -425,6 +425,7 @@ public class MainActivity extends SherlockFragmentActivity {
 				} else if (qManager.hasFinished()) {
 					displayPreviews();
 				}
+				*/
 			}
 
 			@Override
@@ -435,6 +436,13 @@ public class MainActivity extends SherlockFragmentActivity {
 
 		bindService(new Intent(MainActivity.this, BluetoothVideoService.class), svcConn, Service.START_STICKY);
 		Log.d(MainActivity.TAG, "Bluetooth started");
+		Log.e(MainActivity.TAG, "END ONRESUME");
+	}
+	
+	@Override
+	public void onPostResume() {
+		super.onPostResume();
+		Log.e(MainActivity.TAG, "ON POST RESUME");
 	}
 
 	@Override
@@ -500,7 +508,7 @@ public class MainActivity extends SherlockFragmentActivity {
 			} else {
 				controllerStatusBar.setVisibility(View.VISIBLE);
 			}
-
+			
 			int newWidth, newHeight;
 			newWidth = headController.getVirtualWidth();
 			newHeight = headController.getVirtualHeight();
@@ -508,6 +516,14 @@ public class MainActivity extends SherlockFragmentActivity {
 			loadPanelDimensionsFromPreferences();
 			if (newWidth != panelWidth || newHeight != panelHeight) {
 				setPanelDimensionsPreferences(newWidth, newHeight);
+				
+				// Prepare video queue manager to reload videos if panel dimensions have changed.
+				// TODO double check
+				// this was in the callback for video service being created, but it may not be a dependency
+				if (controllerPreferences.getPanelDimensionsChanged() == true) {
+					qManager.reset();
+					previewVideoProviderCache = new SparseArray<VideoProvider>(previews.size());
+				}
 			}
 
 			// Set controller address(es) in preferences for next time a headController is constructed
@@ -567,6 +583,10 @@ public class MainActivity extends SherlockFragmentActivity {
 
 		if (mainActivityRunning == true) {
 			getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, list).commit();
+			
+			if (selectedPreviewIndex != PreviewFragment.PREVIEW_NOT_SET_INDEX) {
+				setSelectedPreview(selectedPreviewIndex);
+			}
 		}
 	}
 
