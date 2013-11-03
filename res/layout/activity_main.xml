@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="0dp"
+    style="@style/PreviewContainer"
     tools:context=".MainActivity" >
     <!-- @dimen/activity_horizontal_margin -->
     
@@ -10,7 +11,8 @@
         android:id="@+id/frameLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent" 
-        android:layout_above="@+id/layoutControllerStatus">
+        android:layout_above="@+id/layoutControllerStatus" >
+        
     </FrameLayout>
     
     <RelativeLayout
