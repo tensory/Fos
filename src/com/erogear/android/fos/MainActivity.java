@@ -66,8 +66,6 @@ public class MainActivity extends SherlockFragmentActivity {
 	public static final String VIDEO_PLAYING = "VIDEO_PLAYING";
 	public static final String PREVIEWS_DATA_TAG = "previews";
 
-
-
 	// Preview video queue
 	Queue<Preview> q = new LinkedList<Preview>();
 	PreviewLoadStateManager qManager = PreviewLoadStateManager.getInstance();
