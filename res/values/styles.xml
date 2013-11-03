@@ -30,15 +30,17 @@
         <item name="android:paddingTop">4dp</item>
         <item name="android:paddingBottom">4dp</item>
     </style>
+    
+    <style name="ControllerStatus">
+        <item name="android:background">@color/bright_holo_blue</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:paddingLeft">@dimen/activity_horizontal_margin</item>
+        <item name="android:paddingRight">@dimen/activity_horizontal_margin</item>
+		<item name="android:paddingTop">@dimen/activity_vertical_margin</item>
+        <item name="android:paddingBottom">@dimen/activity_vertical_margin</item>
+    </style>
 
     <style name="UnselectedPreview">
         <item name="android:textColor">@color/unselected_grey</item>;
-    </style>
-    
-    <style name="RandomButton">
-        <item name="android:layout_height">20dp</item>
-        <item name="android:padding">4dp</item>
-        <item name="android:background">#FFFF0000</item>
-        <item name="android:textSize">14sp</item>
     </style>
 </resources>
