@@ -54,9 +54,6 @@ public class MainActivity extends SherlockFragmentActivity {
 	private static final int MULTIHEAD_SETUP_RESULT = 3;
 
 	// Preferences
-	/*
-	private SharedPreferences controllerPrefs; // DEPRECATE!
-	*/ 
 	private TextView headControllerStatus;
 	private ControllerPreferenceManager controllerPreferences;
 	private HeadControllerManager controllerBuilder;
