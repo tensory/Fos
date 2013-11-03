@@ -141,6 +141,10 @@ public class MainActivity extends SherlockFragmentActivity {
 					if (controllerBuilder.ready()) {						
 						// Loop has finished but headController is not usable; at least one head failed to attach
 						// Require the user to do a new setup
+
+						headController = new MultiheadController(panelWidth, panelHeight);
+						videoSvc.setConfigInstance(MultiheadController.CONFIG_INSTANCE_KEY, headController);
+						videoSvc.addHandler(headController.getHandler());
 						alertNoControllerPaired();
 					}
 					break;   	
