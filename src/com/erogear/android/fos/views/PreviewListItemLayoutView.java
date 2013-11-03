@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.erogear.android.bluetooth.video.ByteBufferFrame;
 import com.erogear.android.bluetooth.video.VideoProvider;
@@ -16,6 +17,7 @@ import com.erogear.android.fos.R;
 
 public class PreviewListItemLayoutView extends RelativeLayout {
 	public ImageView ivBtnPreview, ivBtnAccept;
+	public TextView tvAnimTitle;
 	private int listIndex;
 	private Context context;
 	private boolean isActive;
@@ -42,6 +44,7 @@ public class PreviewListItemLayoutView extends RelativeLayout {
 		isActive = false;
 		ivBtnPreview = (ImageView) findViewById(R.id.ivBtnPreview);
 		ivBtnAccept = (ImageView) findViewById(R.id.ivBtnAccept);
+		tvAnimTitle = (TextView) findViewById(R.id.tvAnimTitle);
 		
 		// Set up click handlers
 		ivBtnPreview.setOnClickListener(new OnClickListener() {
@@ -69,9 +72,11 @@ public class PreviewListItemLayoutView extends RelativeLayout {
 			//TODO: replace this pair of calls with a pair of Drawables with highlight state
 			ivBtnPreview.setImageResource(R.drawable.ic_active_preview);
 			ivBtnAccept.setImageResource(R.drawable.ic_active_send);
+			tvAnimTitle.setTextColor(this.context.getResources().getColor(R.color.highlight_text_blue));
 		} else {
 			ivBtnPreview.setImageResource(R.drawable.ic_inactive_preview);
 			ivBtnAccept.setImageResource(R.drawable.ic_inactive_send);
+			tvAnimTitle.setTextColor(this.context.getResources().getColor(R.color.unselected_grey));
 		}	
 	};
 	
