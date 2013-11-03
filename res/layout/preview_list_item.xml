@@ -20,12 +20,13 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
-            android:textColor="#FFFFFFFF" />
+            android:textColor="@color/unselected_grey"
+            android:textSize="18sp" />
             
             <ImageView
             android:id="@+id/ivBtnAccept"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="18dp"
             android:layout_centerVertical="true" 
             android:layout_alignParentRight="true"
             android:src="@drawable/ic_inactive_send"
@@ -35,7 +36,7 @@
             <ImageView
             android:id="@+id/ivBtnPreview"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="18dp"
             android:layout_centerVertical="true" 
             android:layout_toLeftOf="@id/ivBtnAccept"
             android:src="@drawable/ic_inactive_preview"

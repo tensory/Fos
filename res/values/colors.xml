@@ -2,6 +2,6 @@
 <resources>
     <color name="white">#FFFFFFFF</color>
 	<color name="transparent_black">#CC000000</color>
-	<color name="unselected_grey">#454545</color>
-	<color name="bright_holo_blue">#AA139ADF</color>
+	<color name="unselected_grey">#FFA5A5A5</color>
+	<color name="bright_holo_blue">#FF128ECD</color>
 </resources>
