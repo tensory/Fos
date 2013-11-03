@@ -86,7 +86,7 @@ public class ControllerPreferenceManager {
 			 }
 		 }
 		 
-		 SharedPreferences.Editor editor = getEditor();
+		 SharedPreferences.Editor editor = preferences.edit();
 		 editor.putStringSet(ControllerPreferenceManager.DEVICES_KEY, new HashSet<String>(deviceAddresses));
 		 editor.commit();
 	}
@@ -108,10 +108,9 @@ public class ControllerPreferenceManager {
 		}
 				
 		/* At the time that this controller is returned, 
-		 * connections to physical devices have NOT been completed
+		 * connections to physical devices have NOT been completed.
 		 * headController.getHeads().size == 0
-		 * Connection events for the controller are handled 
-		 * in the BluetoothVideoService's Handler.
+		 * These events are handled in the BluetoothVideoService's Handler.
 		 */
 		return headController;	
 	}
@@ -126,21 +125,5 @@ public class ControllerPreferenceManager {
 			if (((String) knownDevices[i]).equals(deviceName)) idx = i;
 		}
 		return idx;
-	}
-	
-	/**
-	 * Get the preferences object.
-	 * @return reference to the head controller preferences
-	 */
-	public SharedPreferences getPreferences() {
-		return preferences;
-	}
-	
-	/**
-	 * Get an editor handle for the preferences.
-	 * @return preference editor
-	 */
-	public SharedPreferences.Editor getEditor() {
-		return preferences.edit();
 	}
 }
