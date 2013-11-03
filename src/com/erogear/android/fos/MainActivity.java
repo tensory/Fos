@@ -779,7 +779,7 @@ public class MainActivity extends SherlockFragmentActivity {
      */
     private void alertNoControllerPaired() {
     	AlertDialog alertDialog = getConfigurationAlertBuilder().create();
-        alertDialog.show();	
+    	alertDialog.show();	
     }
     
 	@Override
@@ -804,5 +804,4 @@ public class MainActivity extends SherlockFragmentActivity {
 	public int getPreviewIndexFromPreferences(String key) {
 		return PreferenceManager.getDefaultSharedPreferences(this).getInt(key, PreviewLoader.UNSET_INDEX);
 	}
-	
 }
