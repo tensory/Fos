@@ -57,8 +57,7 @@ public class ControllerPreferenceManager {
 	protected String[] getLastPairedDeviceNames() {
 		Object[] stored = preferences.getStringSet(ControllerPreferenceManager.DEVICES_KEY, Collections.<String>emptySet()).toArray();
 		// Devices are stored in key-value form: DEVICE_NAME,DEVICE_ADDRESS
-		// Get only the addresses
-		
+		// Get the device names
 		String[] deviceAddresses = new String[stored.length];
 		
 		for (int i = 0; i < stored.length; i++) {
@@ -98,7 +97,7 @@ public class ControllerPreferenceManager {
 		
 		String[] lastPairedAddresses = getLastPairedAddresses();
 		if (lastPairedAddresses.length == 0) {
-			return null; // The caller should prompt the user for action if no addresses were stored.
+			return null; // The caller should prompt the user for action if no addresses were stored
 		}
 		
 		MultiheadController headController = manager.getNewHeadController(width, height);
@@ -108,8 +107,11 @@ public class ControllerPreferenceManager {
 			Log.e("BLUETOOTH", e.getStackTrace().toString());
 		}
 				
-		// At the time that this controller is returned, the connections have NOT finished.
-		// These events are handled in the BluetoothVideoService's Handler.
+		/* At the time that this controller is returned, 
+		 * connections to physical devices have NOT been completed.
+		 * headController.getHeads().size == 0
+		 * These events are handled in the BluetoothVideoService's Handler.
+		 */
 		return headController;	
 	}
 	
