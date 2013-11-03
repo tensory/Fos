@@ -32,7 +32,7 @@
     </style>
     
     <style name="ControllerStatus">
-        <item name="android:background">#139ADF</item>
+        <item name="android:background">@color/bright_holo_blue</item>
         <item name="android:textColor">@color/white</item>
     </style>
 
