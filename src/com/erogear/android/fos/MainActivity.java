@@ -428,13 +428,6 @@ public class MainActivity extends SherlockFragmentActivity {
 					}
 				} else if (qManager.hasFinished()) {
 					displayPreviews();
-					/*
-					FragmentManager fragmentManager = getSupportFragmentManager();
-					PreviewFragment pf = (PreviewFragment) fragmentManager.findFragmentByTag(PreviewFragment.FRAGMENT_TAG);
-					FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-					fragmentTransaction.show(pf);
-				    fragmentTransaction.commit();
-				    */
 				}
 			}
 
@@ -586,13 +579,32 @@ public class MainActivity extends SherlockFragmentActivity {
 		Log.e(MainActivity.TAG, "Running displayPreviews");
 
 		// TODO prevent double flash
-		list = new PreviewFragment();
-		Bundle fragmentData = new Bundle();
-		fragmentData.putParcelableArrayList(MainActivity.PREVIEWS_DATA_TAG, previews);
-		list.setArguments(fragmentData);
+		
 
 		if (mainActivityRunning == true) {
-			getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, list, PreviewFragment.FRAGMENT_TAG).commit();
+			/*
+			
+			
+		    fragmentTransaction.commit();
+		    */
+			
+			FragmentManager fragmentManager = getSupportFragmentManager();
+			PreviewFragment pf = (PreviewFragment) fragmentManager.findFragmentByTag(PreviewFragment.FRAGMENT_TAG);
+			
+			if (pf == null) {
+				list = new PreviewFragment();
+				Bundle fragmentData = new Bundle();
+				fragmentData.putParcelableArrayList(MainActivity.PREVIEWS_DATA_TAG, previews);
+				list.setArguments(fragmentData);
+				
+				FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+				fragmentTransaction.replace(R.id.frameLayout, list, PreviewFragment.FRAGMENT_TAG);
+				fragmentTransaction.commit();
+			} else {
+				FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+				fragmentTransaction.show(pf);
+				fragmentTransaction.commit();
+			}
 			/*
 			if (selectedPreviewIndex != PreviewFragment.PREVIEW_NOT_SET_INDEX) {
 				setSelectedPreview(selectedPreviewIndex);
