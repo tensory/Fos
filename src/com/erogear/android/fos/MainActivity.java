@@ -133,8 +133,6 @@ public class MainActivity extends SherlockFragmentActivity {
 					if (controllerBuilder.getHeadController() != null && controllerBuilder.ready()) {						
 						// Link it to the VideoService
 						videoSvc.setConfigInstance(MultiheadController.CONFIG_INSTANCE_KEY, controllerBuilder.getHeadController());
-		                
-						// Do any more work that needs to be done here... like idk displaying shit
 					}
 
 					break;
@@ -404,29 +402,21 @@ public class MainActivity extends SherlockFragmentActivity {
                     
             		alertNoControllerPaired();
             	} 
-                
-                // Do any tasks that need to be done at the end, like drawing shit
-                
-/* These cannot be called until the head controller is ready.                
-                videoSvc.setConfigInstance(MultiheadController.CONFIG_INSTANCE_KEY, headController);
-                videoSvc.addHandler(headController.getHandler());
-*/            
+                            
                 /* Bluetooth Service init finished */
                 
                 /*
                  * Restart video loading with new dimensions 
                  * if panel dimensions have changed on this resume.
                  */
-                /*
+                
                 if (panelDimensionsChanged == true) {
                 	// Prepare to reload videos
                 	qManager.reset();
                 	previewVideoProviderCache = new SparseArray<VideoProvider>(previews.size());
-                	
                 }
                 
                 /* Load previews or redraw them if loaded */
-                /*
                 if (!qManager.hasStarted()) {
         			try {
         				activePreview = new PreviewLoader();
@@ -439,7 +429,6 @@ public class MainActivity extends SherlockFragmentActivity {
         		} else if (qManager.hasFinished()) {
                 	displayPreviews();
         		}
-                */
 			}
         	
         	@Override
