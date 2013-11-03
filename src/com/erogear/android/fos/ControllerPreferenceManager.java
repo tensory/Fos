@@ -27,6 +27,7 @@ public class ControllerPreferenceManager {
 	protected int panelWidthDefault = 32;
 	protected int panelHeightDefault = 24;
 	protected SharedPreferences preferences;
+	protected boolean panelDimensionsChanged = false;
 
 	/**
 	 * Create a ControllerPreferenceManager containing a key 
@@ -125,6 +126,14 @@ public class ControllerPreferenceManager {
 			if (((String) knownDevices[i]).equals(deviceName)) idx = i;
 		}
 		return idx;
+	}
+	
+	public void setPanelDimensionsChangedFlag(boolean state) {
+		panelDimensionsChanged = state;
+	}
+	
+	public boolean getPanelDimensionsChanged() {
+		return panelDimensionsChanged;
 	}
 	
 	public SharedPreferences getPreferences() {
