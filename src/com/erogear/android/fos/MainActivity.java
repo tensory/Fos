@@ -576,11 +576,6 @@ public class MainActivity extends SherlockFragmentActivity {
 	}
 
 	public void displayPreviews() {
-		Log.e(MainActivity.TAG, "Running displayPreviews");
-
-		// TODO prevent double flash
-		
-
 		if (mainActivityRunning == true) {
 			FragmentManager fragmentManager = getSupportFragmentManager();
 			PreviewFragment pf = (PreviewFragment) fragmentManager.findFragmentByTag(PreviewFragment.FRAGMENT_TAG);
