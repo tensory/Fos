@@ -1,12 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <previews>
 	<!-- Filename is case sensitive and will also be used to locate related resources. -->
-	<preview name="@string/txtAnimName_Heartbeat">
+	<preview name="Heartbeat">
 		<filename>heartbeat.avi</filename>
 	</preview>
 
-	<preview name="@string/txtAnimName_Safety1">
+	<preview name="Safety">
 		<filename>Safety1.avi</filename>
+	</preview>
+	
+	<preview name="Circle Wave">
+		<filename>clutch1.avi</filename>
+	</preview>
+	
+	<preview name="Freedom">
+		<filename>beltLightwave_slice_a.avi</filename>
 	</preview>
 
 </previews>

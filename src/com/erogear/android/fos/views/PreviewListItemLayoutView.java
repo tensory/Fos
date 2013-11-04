@@ -110,7 +110,8 @@ public class PreviewListItemLayoutView extends RelativeLayout {
 	
 	public void initBitmapDrawable(BitmapDrawable bitmapDrawable) {
 		bmd = bitmapDrawable;
-		bmd.setDither(false);
-        bmd.setFilterBitmap(false);
+		// TODO figure out why animations always play dithered
+		// bmd.setDither(false);
+        // bmd.setFilterBitmap(false);
 	}
 }
