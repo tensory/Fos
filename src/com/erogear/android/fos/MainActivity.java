@@ -178,6 +178,9 @@ public class MainActivity extends SherlockFragmentActivity {
 				// New frame loaded
 				break;
 			case BluetoothVideoService.MESSAGE_VIDEO_LOADED:
+				if (qManager.hasFinished()) {
+					return true;
+				}
 				Toast.makeText(getApplicationContext(), "Video loaded!", Toast.LENGTH_SHORT).show();
 				
 				// Use the just-loaded video to extract a thumbnail
@@ -191,7 +194,7 @@ public class MainActivity extends SherlockFragmentActivity {
 				} else {
 					// Finished loading preview videos
 					activePreview = null;
-					controllerPreferences.setPanelDimensionsChangedFlag(false);
+					//controllerPreferences.setPanelDimensionsChangedFlag(false);
 					qManager.setFinished();
 				}
 
