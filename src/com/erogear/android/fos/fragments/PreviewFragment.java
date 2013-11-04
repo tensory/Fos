@@ -16,6 +16,7 @@ import com.erogear.android.fos.PreviewAdapter;
 import com.erogear.android.fos.views.PreviewListItemLayoutView;
 
 public class PreviewFragment extends SherlockListFragment {
+	public static String FRAGMENT_TAG = "PREVIEWS";
 	public static int PREVIEW_NOT_SET_INDEX = -1;
 	private ArrayList<Preview> previews;
 	private int selectedPreviewIndex;
@@ -28,6 +29,15 @@ public class PreviewFragment extends SherlockListFragment {
 		selectedPreviewIndex = PreviewFragment.PREVIEW_NOT_SET_INDEX;
 		previews = getArguments().getParcelableArrayList(MainActivity.PREVIEWS_DATA_TAG);
 		setListAdapter(new PreviewAdapter(getActivity(), previews));
+	}
+	
+	@Override
+	public void onResume() {
+		super.onResume();
+
+		if (selectedPreviewIndex != PreviewFragment.PREVIEW_NOT_SET_INDEX) {
+			((MainActivity) getActivity()).setSelectedPreview(selectedPreviewIndex);
+		}
 	}
 
 	@Override

@@ -12,7 +12,6 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -23,6 +22,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.preference.PreferenceManager;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
@@ -58,6 +59,7 @@ public class MainActivity extends SherlockFragmentActivity {
 	private ControllerPreferenceManager controllerPreferences;
 	private HeadControllerManager controllerBuilder;
 	private int frameRate;
+	private int selectedPreviewIndex;
 	private int panelWidth = 32;
 	private int panelHeight = 24;
 
@@ -141,6 +143,10 @@ public class MainActivity extends SherlockFragmentActivity {
 					if (controllerBuilder.ready()) {						
 						// Loop has finished but headController is not usable; at least one head failed to attach
 						// Require the user to do a new setup
+
+						headController = new MultiheadController(panelWidth, panelHeight);
+						videoSvc.setConfigInstance(MultiheadController.CONFIG_INSTANCE_KEY, headController);
+						videoSvc.addHandler(headController.getHandler());
 						alertNoControllerPaired();
 					}
 					break;   	
@@ -172,6 +178,9 @@ public class MainActivity extends SherlockFragmentActivity {
 				// New frame loaded
 				break;
 			case BluetoothVideoService.MESSAGE_VIDEO_LOADED:
+				if (qManager.hasFinished()) {
+					return true;
+				}
 				Toast.makeText(getApplicationContext(), "Video loaded!", Toast.LENGTH_SHORT).show();
 				
 				// Use the just-loaded video to extract a thumbnail
@@ -185,7 +194,6 @@ public class MainActivity extends SherlockFragmentActivity {
 				} else {
 					// Finished loading preview videos
 					activePreview = null;
-					controllerPreferences.setPanelDimensionsChangedFlag(false);
 					qManager.setFinished();
 				}
 
@@ -326,6 +334,9 @@ public class MainActivity extends SherlockFragmentActivity {
 		// Update frame rate
 		frameRate = getFrameRateFromPreferences(getResources().getString(R.string.prefkeyFrameRate));
 		toggleVideoPlaying(false, frameRate);
+		
+		// Restore preview highlighted state
+		selectedPreviewIndex = getPreviewIndexFromPreferences(PreviewLoader.PREVIEW_SELECTED_TAG);
 
 		/*
 		 * These state vars aren't useful here, not yet
@@ -394,21 +405,13 @@ public class MainActivity extends SherlockFragmentActivity {
 
 					alertNoControllerPaired();
 				} 
-
+							
 				/* Bluetooth Service init finished */
 
 				/*
 				 * Restart video loading with new dimensions 
 				 * if panel dimensions have changed on this resume.
 				 */
-
-				if (controllerPreferences.getPanelDimensionsChanged() == true) {
-					// Prepare to reload videos
-					qManager.reset();
-					previewVideoProviderCache = new SparseArray<VideoProvider>(previews.size());
-				}
-
-				/* Load previews or redraw them if loaded */
 				if (!qManager.hasStarted()) {
 					try {
 						activePreview = new PreviewLoader();
@@ -431,6 +434,7 @@ public class MainActivity extends SherlockFragmentActivity {
 
 		bindService(new Intent(MainActivity.this, BluetoothVideoService.class), svcConn, Service.START_STICKY);
 		Log.d(MainActivity.TAG, "Bluetooth started");
+		Log.e(MainActivity.TAG, "END ONRESUME");
 	}
 
 	@Override
@@ -496,7 +500,7 @@ public class MainActivity extends SherlockFragmentActivity {
 			} else {
 				controllerStatusBar.setVisibility(View.VISIBLE);
 			}
-
+			
 			int newWidth, newHeight;
 			newWidth = headController.getVirtualWidth();
 			newHeight = headController.getVirtualHeight();
@@ -504,12 +508,19 @@ public class MainActivity extends SherlockFragmentActivity {
 			loadPanelDimensionsFromPreferences();
 			if (newWidth != panelWidth || newHeight != panelHeight) {
 				setPanelDimensionsPreferences(newWidth, newHeight);
+				
+				// Prepare video queue manager to reload videos if panel dimensions have changed.
+				// TODO double check
+				// this was in the callback for video service being created, but it may not be a dependency
+				if (controllerPreferences.getPanelDimensionsChanged() == true) {
+					qManager.reset();
+					previewVideoProviderCache = new SparseArray<VideoProvider>(previews.size());
+				}
 			}
 
 			// Set controller address(es) in preferences for next time a headController is constructed
 			controllerPreferences.storeDeviceAddresses(headController.getHeads(), BluetoothAdapter.getDefaultAdapter().getBondedDevices());
 
-			Log.d(MainActivity.TAG, "setup activity completed");
 			break;
 		default:
 			break;
@@ -553,16 +564,28 @@ public class MainActivity extends SherlockFragmentActivity {
 	}
 
 	public void displayPreviews() {
-		Log.e(MainActivity.TAG, "Running displayPreviews");
-
-		// TODO prevent double flash
-		list = new PreviewFragment();
-		Bundle fragmentData = new Bundle();
-		fragmentData.putParcelableArrayList(MainActivity.PREVIEWS_DATA_TAG, previews);
-		list.setArguments(fragmentData);
-
 		if (mainActivityRunning == true) {
-			getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, list).commit();
+			FragmentManager fragmentManager = getSupportFragmentManager();
+			PreviewFragment pf = (PreviewFragment) fragmentManager.findFragmentByTag(PreviewFragment.FRAGMENT_TAG);
+			
+			if (pf == null) {
+				list = new PreviewFragment();
+				Bundle fragmentData = new Bundle();
+				fragmentData.putParcelableArrayList(MainActivity.PREVIEWS_DATA_TAG, previews);
+				list.setArguments(fragmentData);
+				
+				FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+				fragmentTransaction.replace(R.id.frameLayout, list, PreviewFragment.FRAGMENT_TAG);
+				fragmentTransaction.commit();
+			} else {
+				// Tell the PreviewFragment which item was last selected (index stored in preferences)
+				// It will re-select it on the fragment's onResume event
+				list.setSelectedItem(selectedPreviewIndex);
+				
+				FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+				fragmentTransaction.show(pf);
+				fragmentTransaction.commit();
+			}
 		}
 	}
 
