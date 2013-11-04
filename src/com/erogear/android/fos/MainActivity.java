@@ -484,6 +484,12 @@ public class MainActivity extends SherlockFragmentActivity {
 	@Override
 	public void onStop() {
 		super.onStop();
+		
+		toggleVideoPlaying(false);
+		if (controller != null) {
+			controller.getFrameConsumer().sendFrame(DeviceConnection.BLACK_FRAME);					
+		}
+		
 		Log.i(TAG, "--- ONSTOP ---");
 		if (svcConn != null) {
 			unbindService(svcConn);
