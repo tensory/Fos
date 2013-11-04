@@ -185,7 +185,7 @@ public class MainActivity extends SherlockFragmentActivity {
 				if (qManager.hasFinished()) {
 					return true;
 				}
-				Toast.makeText(getApplicationContext(), "Video loaded!", Toast.LENGTH_SHORT).show();
+				// Toast.makeText(getApplicationContext(), "Video loaded!", Toast.LENGTH_SHORT).show();
 				
 				// Use the just-loaded video to extract a thumbnail
 				previewVideoProviderCache.put(activePreview.getPreview().hashCode(), activePreview.getVideoProvider());
@@ -330,16 +330,18 @@ public class MainActivity extends SherlockFragmentActivity {
 		Log.i(TAG, "--- ONRESUME ---");
 
 		// Load the loading fragment if the preview fragment isn't already set
+		loadingStatus = new LoadingFragment();
+		
 		FragmentManager fragmentManager = getSupportFragmentManager();
 		PreviewFragment pf = (PreviewFragment) fragmentManager.findFragmentByTag(PreviewFragment.FRAGMENT_TAG);
 
-		if (pf == null) { // TODO
-			loadingStatus = new LoadingFragment();
+		if (pf == null) {
 			FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
 			fragmentTransaction.replace(R.id.frameLayout, loadingStatus, LoadingFragment.FRAGMENT_TAG);
 			fragmentTransaction.commit();
 		}
 		
+		// Initialize video head controller setup
 		controllerBuilder = new HeadControllerManager(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
 
 		// Resume state indicating that MainActivity is running.
@@ -428,6 +430,13 @@ public class MainActivity extends SherlockFragmentActivity {
 				 */
 				if (!qManager.hasStarted()) {
 					try {
+						LoadingFragment loader = (LoadingFragment) getSupportFragmentManager().findFragmentByTag(LoadingFragment.FRAGMENT_TAG);
+						if (loader == null) {
+							FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+							fragmentTransaction.replace(R.id.frameLayout, new LoadingFragment(), LoadingFragment.FRAGMENT_TAG);
+							fragmentTransaction.commit();							
+						}
+						
 						activePreview = new PreviewLoader();
 						initializePreviews();
 						qManager.setStarted();
@@ -530,8 +539,6 @@ public class MainActivity extends SherlockFragmentActivity {
 				setPanelDimensionsPreferences(newWidth, newHeight);
 				
 				// Prepare video queue manager to reload videos if panel dimensions have changed.
-				// TODO double check
-				// this was in the callback for video service being created, but it may not be a dependency
 				if (controllerPreferences.getPanelDimensionsChanged() == true) {
 					qManager.reset();
 					previewVideoProviderCache = new SparseArray<VideoProvider>(previews.size());
@@ -588,7 +595,7 @@ public class MainActivity extends SherlockFragmentActivity {
 			FragmentManager fragmentManager = getSupportFragmentManager();
 			PreviewFragment pf = (PreviewFragment) fragmentManager.findFragmentByTag(PreviewFragment.FRAGMENT_TAG);
 			
-			if (pf == null) { // TODO
+			if (pf == null || controllerPreferences.getPanelDimensionsChanged()) {
 				list = new PreviewFragment();
 				Bundle fragmentData = new Bundle();
 				fragmentData.putParcelableArrayList(MainActivity.PREVIEWS_DATA_TAG, previews);
