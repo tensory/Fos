@@ -13,6 +13,7 @@ import com.erogear.android.bluetooth.video.ByteBufferFrame;
 import com.erogear.android.fos.MainActivity;
 import com.erogear.android.fos.Preview;
 import com.erogear.android.fos.PreviewAdapter;
+import com.erogear.android.fos.PreviewLoader;
 import com.erogear.android.fos.views.PreviewListItemLayoutView;
 
 public class PreviewFragment extends SherlockListFragment {
@@ -26,7 +27,7 @@ public class PreviewFragment extends SherlockListFragment {
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 
-		selectedPreviewIndex = PreviewFragment.PREVIEW_NOT_SET_INDEX;
+		selectedPreviewIndex = getArguments().getInt(PreviewLoader.PREVIEW_SELECTED_TAG);
 		previews = getArguments().getParcelableArrayList(MainActivity.PREVIEWS_DATA_TAG);
 		setListAdapter(new PreviewAdapter(getActivity(), previews));
 	}
@@ -35,9 +36,13 @@ public class PreviewFragment extends SherlockListFragment {
 	public void onResume() {
 		super.onResume();
 
-		if (selectedPreviewIndex != PreviewFragment.PREVIEW_NOT_SET_INDEX) {
-			((MainActivity) getActivity()).setSelectedPreview(selectedPreviewIndex);
-		}
+		getView().post(new Runnable() {
+			@Override
+			public void run() {
+				// code you want to run when view is visible for the first time
+				((MainActivity) getActivity()).setSelectedPreview(selectedPreviewIndex);
+			}
+		});
 	}
 
 	@Override

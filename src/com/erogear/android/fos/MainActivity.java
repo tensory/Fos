@@ -572,6 +572,7 @@ public class MainActivity extends SherlockFragmentActivity {
 				list = new PreviewFragment();
 				Bundle fragmentData = new Bundle();
 				fragmentData.putParcelableArrayList(MainActivity.PREVIEWS_DATA_TAG, previews);
+				fragmentData.putInt(PreviewLoader.PREVIEW_SELECTED_TAG, getPreviewIndexFromPreferences(PreviewLoader.PREVIEW_SELECTED_TAG));
 				list.setArguments(fragmentData);
 				
 				FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -637,7 +638,9 @@ public class MainActivity extends SherlockFragmentActivity {
 		};
 
 		if (index == PreviewFragment.PREVIEW_NOT_SET_INDEX) {
-			
+			if (activePreview == null) {
+				activePreview = new PreviewLoader();
+			}
 			// Log.e("MAIN", "Deactivating any active preview");
 			int oldListIndex = activePreview.getListIndex();
 			if (oldListIndex != PreviewFragment.PREVIEW_NOT_SET_INDEX) {
