@@ -14,6 +14,7 @@
 	<string name="txtNoDevices">Connect device</string>
 	<string name="txtConnect">Connect</string>
 	<string name="txtExit">Cancel</string>
+	<string name="txtLoadingStatus">Loading&#8230;</string>
 	<string name="txtExplainNoDevices">No EroGear devices found. Please pair a device now.
 	</string>
 	<string name="txtBluetoothError">Connection error. Please restart Bluetooth.
