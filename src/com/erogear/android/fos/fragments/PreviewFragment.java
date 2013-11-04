@@ -34,8 +34,7 @@ public class PreviewFragment extends SherlockListFragment {
 	@Override
 	public void onResume() {
 		super.onResume();
-		Log.e(MainActivity.TAG, "PreviewFragment is being resumed!!!!");
-		Log.e(MainActivity.TAG, "preview lize size " + previews.size());
+
 		if (selectedPreviewIndex != PreviewFragment.PREVIEW_NOT_SET_INDEX) {
 			((MainActivity) getActivity()).setSelectedPreview(selectedPreviewIndex);
 		}

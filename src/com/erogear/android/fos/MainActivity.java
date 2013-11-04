@@ -194,7 +194,6 @@ public class MainActivity extends SherlockFragmentActivity {
 				} else {
 					// Finished loading preview videos
 					activePreview = null;
-					//controllerPreferences.setPanelDimensionsChangedFlag(false);
 					qManager.setFinished();
 				}
 
@@ -406,20 +405,13 @@ public class MainActivity extends SherlockFragmentActivity {
 
 					alertNoControllerPaired();
 				} 
-				Log.e(MainActivity.TAG, "END ONRESUME CALLBACK");
-				/*FragmentManager fragmentManager = getSupportFragmentManager();
-						
-						.beginTransaction().replace(R.id.frameLayout, list, PreviewFragment.FRAGMENT_TAG).commit();
-*/
-				
+							
 				/* Bluetooth Service init finished */
 
 				/*
 				 * Restart video loading with new dimensions 
 				 * if panel dimensions have changed on this resume.
 				 */
-				
-				
 				if (!qManager.hasStarted()) {
 					try {
 						activePreview = new PreviewLoader();
@@ -443,12 +435,6 @@ public class MainActivity extends SherlockFragmentActivity {
 		bindService(new Intent(MainActivity.this, BluetoothVideoService.class), svcConn, Service.START_STICKY);
 		Log.d(MainActivity.TAG, "Bluetooth started");
 		Log.e(MainActivity.TAG, "END ONRESUME");
-	}
-	
-	@Override
-	public void onPostResume() {
-		super.onPostResume();
-		Log.e(MainActivity.TAG, "ON POST RESUME");
 	}
 
 	@Override
@@ -535,7 +521,6 @@ public class MainActivity extends SherlockFragmentActivity {
 			// Set controller address(es) in preferences for next time a headController is constructed
 			controllerPreferences.storeDeviceAddresses(headController.getHeads(), BluetoothAdapter.getDefaultAdapter().getBondedDevices());
 
-			Log.d(MainActivity.TAG, "setup activity completed");
 			break;
 		default:
 			break;
