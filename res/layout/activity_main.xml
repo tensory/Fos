@@ -25,7 +25,7 @@
         android:visibility="gone">
 
         <TextView
-           	style="@style/ControllerStatusText"
+           	style="@style/StatusText"
             android:id="@+id/tvControllerStatusMessage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

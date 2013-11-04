@@ -16,14 +16,13 @@
 			android:layout_centerHorizontal="true"
 			android:layout_alignParentTop="true" />
 
-		<TextView android:id="@+id/tvLoadingStatus" 
+		<TextView android:id="@+id/tvLoadingStatus"
+		    style="@style/StatusText" 
 		    android:layout_width="wrap_content"
 			android:layout_height="wrap_content" 
 			android:layout_below="@id/pbLoadingSpinner"
 			android:layout_centerHorizontal="true" 
-			android:text="@string/txtLoadingStatus" />
+			android:text="@string/txtLoadingStatus"
+			android:textColor="@color/unselected_grey" />
 	</RelativeLayout>
-
-
-
 </RelativeLayout>
