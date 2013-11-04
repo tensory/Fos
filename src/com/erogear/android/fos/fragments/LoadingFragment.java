@@ -9,7 +9,7 @@ import com.actionbarsherlock.app.SherlockFragment;
 import com.erogear.android.fos.R;
 
 public class LoadingFragment extends SherlockFragment {
-
+	public static final String FRAGMENT_TAG = "LOADING_FRAGMENT";
 	public LoadingFragment() {
 		// TODO Auto-generated constructor stub
 	}

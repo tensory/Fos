@@ -46,6 +46,7 @@ import com.erogear.android.bluetooth.video.FrameController;
 import com.erogear.android.bluetooth.video.MultiheadController;
 import com.erogear.android.bluetooth.video.MultiheadController.Head;
 import com.erogear.android.bluetooth.video.VideoProvider;
+import com.erogear.android.fos.fragments.LoadingFragment;
 import com.erogear.android.fos.fragments.PreviewFragment;
 
 public class MainActivity extends SherlockFragmentActivity {
@@ -76,6 +77,9 @@ public class MainActivity extends SherlockFragmentActivity {
 	// Video controller pool
 	private SparseArray<VideoProvider> previewVideoProviderCache;
 
+	// Loading state fragment
+	LoadingFragment loadingStatus;
+	
 	// Previews sent to the display fragment
 	PreviewFragment list;
 	ArrayList<Preview> previews = new ArrayList<Preview>();
@@ -325,6 +329,16 @@ public class MainActivity extends SherlockFragmentActivity {
 
 		Log.i(TAG, "--- ONRESUME ---");
 
+		// Load the loading fragment if the preview fragment isn't already set
+		FragmentManager fragmentManager = getSupportFragmentManager();
+		PreviewFragment pf = (PreviewFragment) fragmentManager.findFragmentByTag(PreviewFragment.FRAGMENT_TAG);
+
+		if (pf == null) { // TODO
+			loadingStatus = new LoadingFragment();
+			FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+			fragmentTransaction.replace(R.id.frameLayout, loadingStatus, LoadingFragment.FRAGMENT_TAG);
+			fragmentTransaction.commit();
+		}
 		
 		controllerBuilder = new HeadControllerManager(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
 
@@ -574,7 +588,7 @@ public class MainActivity extends SherlockFragmentActivity {
 			FragmentManager fragmentManager = getSupportFragmentManager();
 			PreviewFragment pf = (PreviewFragment) fragmentManager.findFragmentByTag(PreviewFragment.FRAGMENT_TAG);
 			
-			if (pf == null) {
+			if (pf == null) { // TODO
 				list = new PreviewFragment();
 				Bundle fragmentData = new Bundle();
 				fragmentData.putParcelableArrayList(MainActivity.PREVIEWS_DATA_TAG, previews);
