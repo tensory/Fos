@@ -62,7 +62,7 @@ public class MainActivity extends SherlockFragmentActivity {
 	private int frameRate;
 	private int selectedPreviewIndex;
 	private int panelWidth = 32;
-	private int panelHeight = 24;
+	private int panelHeight = 8;
 
 	// Tags
 	public static final String TAG = "MAIN";

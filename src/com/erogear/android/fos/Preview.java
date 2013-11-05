@@ -86,7 +86,7 @@ public class Preview implements Parcelable {
 	 */
 	public void confirmPreviewBitmapReady(Context context, File filePath) {
 		// TODO make dynamic based on video file
-		int midpoint = 30;
+		int midpoint = 50;
 		
 		String imageFilename = this.getResourceName() + Preview.IMAGE_EXTENSION;
 		File f = new File(filePath, imageFilename);

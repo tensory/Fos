@@ -9,12 +9,12 @@
 		<filename>Safety1.avi</filename>
 	</preview>
 	
-	<preview name="Circle Wave">
-		<filename>clutch1.avi</filename>
-	</preview>
-	
 	<preview name="Freedom">
 		<filename>beltLightwave_slice_a.avi</filename>
+	</preview>
+	
+	<preview name="Circle Wave">
+		<filename>clutch1.avi</filename>
 	</preview>
 
 </previews>
