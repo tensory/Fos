@@ -45,7 +45,6 @@ public class Preview implements Parcelable {
 	}
 	
 	public Preview() { }
-	// TODO: add CREATOR field
 
 	public void setName(String name) {
 		this.name = name;
@@ -86,6 +85,9 @@ public class Preview implements Parcelable {
 	 * @throws Exception 
 	 */
 	public void confirmPreviewBitmapReady(Context context, File filePath) {
+		// TODO make dynamic based on video file
+		int midpoint = 30;
+		
 		String imageFilename = this.getResourceName() + Preview.IMAGE_EXTENSION;
 		File f = new File(filePath, imageFilename);
 		if (!f.exists() || ((MainActivity) context).getPanelDimensionsChanged() == true) {
@@ -93,7 +95,8 @@ public class Preview implements Parcelable {
 			// Has the video file been loaded?
 			if (((MainActivity) context).getVideoProviderCache().get(this.hashCode()) != null) {
 				// If video has been loaded, extract a frame and save it
-				Bitmap bmp = FrameExtractor.getFrameBitmap(((MainActivity) context).getVideoProviderCache().get(this.hashCode()), 0);
+				
+				Bitmap bmp = FrameExtractor.getFrameBitmap(((MainActivity) context).getVideoProviderCache().get(this.hashCode()), midpoint);
 				try {
 					saveThumbnail(f, bmp); 					
 				} catch (Exception e) {
@@ -137,7 +140,7 @@ public class Preview implements Parcelable {
 
 	@Override
 	public int describeContents() {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		return 0;
 	}
 
