@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.erogear.android.fos.views.PreviewListItemLayoutView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/rlPreviewItem"
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content" >
     
     	<ImageView
             android:id="@+id/ivPreview"
             android:layout_width="match_parent"
-            android:layout_height="80dp"
+            android:layout_height="220dp"
             android:layout_centerHorizontal="true" />
-
+			<!-- 200 dp looks good for 10" tablet, 100 is good for 4" phone -->
         <RelativeLayout
             android:id="@+id/layoutPreviewControl"
             style="@style/PreviewControlBar">
@@ -21,22 +21,22 @@
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
             android:textColor="@color/unselected_grey"
-            android:textSize="20sp" />
+            android:textSize="24sp" />
             
             <ImageView
             android:id="@+id/ivBtnAccept"
             android:layout_width="wrap_content"
-            android:layout_height="18dp"
+            android:layout_height="24dp" 
             android:layout_centerVertical="true" 
             android:layout_alignParentRight="true"
             android:src="@drawable/ic_inactive_send"
             android:layout_marginLeft="4dp"
             />
-            
+            <!-- was 18 for phone -->
             <ImageView
             android:id="@+id/ivBtnPreview"
             android:layout_width="wrap_content"
-            android:layout_height="18dp"
+            android:layout_height="24dp"
             android:layout_centerVertical="true" 
             android:layout_toLeftOf="@id/ivBtnAccept"
             android:src="@drawable/ic_inactive_preview"
