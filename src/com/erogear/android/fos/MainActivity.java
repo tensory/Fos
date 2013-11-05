@@ -208,7 +208,8 @@ public class MainActivity extends SherlockFragmentActivity {
 				}
 				break;
 			case BluetoothVideoService.MESSAGE_VIDEO_LOAD_FAIL:
-				Toast.makeText(getApplicationContext(), "Error while loading video; you may have some valid frames.", Toast.LENGTH_SHORT).show();
+				// TODO
+				// Toast.makeText(getApplicationContext(), "Error while loading video; you may have some valid frames.", Toast.LENGTH_SHORT).show();
 				addConversationLine((String) msg.obj);
 				break;
 			case BluetoothVideoService.MESSAGE_FATAL_ERROR:
